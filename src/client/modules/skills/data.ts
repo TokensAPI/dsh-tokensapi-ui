@@ -216,6 +216,61 @@ export function useBundledSkills(): readonly BundledSkill[] {
   return skills;
 }
 
+/**
+ * Prefill the DSH composer with `/name ` and focus it. Uses the native value
+ * setter + an input event so the controlled React input adopts the value and the
+ * slash pipeline arms (a plain `.value =` would not notify React).
+ */
+export function insertSkillCommand(name: string): boolean {
+  const area = document.querySelector<HTMLTextAreaElement>("[data-composer-card] textarea") ??
+    document.querySelector<HTMLTextAreaElement>("textarea");
+  if (area === null) return false;
+  const text = `/${name} `;
+  const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+  if (setter !== undefined) setter.call(area, text);
+  else area.value = text;
+  area.dispatchEvent(new Event("input", { bubbles: true }));
+  area.focus();
+  try {
+    area.setSelectionRange(text.length, text.length);
+  } catch {
+    // Some browsers reject setSelectionRange on certain states; harmless.
+  }
+  return true;
+}
+
+/**
+ * Transient bottom-centre coaching toast. Rendered straight to <body> so it
+ * survives the capability overlay closing (the composer lives behind it).
+ */
+export function showSkillCoach(message: string): void {
+  const id = "tokens-skill-coach";
+  document.getElementById(id)?.remove();
+  const tip = document.createElement("div");
+  tip.id = id;
+  tip.dataset.theme = "electrox";
+  tip.textContent = message;
+  tip.style.cssText = [
+    "position:fixed",
+    "left:50%",
+    "bottom:104px",
+    "transform:translateX(-50%)",
+    "z-index:70",
+    "max-width:560px",
+    "padding:12px 18px",
+    "background:var(--theme-bg-surface-raised)",
+    "color:var(--theme-fg-primary)",
+    "border:1px solid var(--theme-border-strong)",
+    "border-left:3px solid var(--theme-accent-primary)",
+    "font-size:13px",
+    "line-height:20px",
+    "box-shadow:0 16px 48px -14px rgba(0,0,0,0.65)",
+    "pointer-events:none",
+  ].join(";");
+  document.body.appendChild(tip);
+  window.setTimeout(() => tip.remove(), 5600);
+}
+
 async function copyCommandImpl(name: string): Promise<boolean> {
   const text = `/${name} `;
   try {

@@ -1,0 +1,125 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--theme-bg-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--theme-shadow-card-hover, 0 24px 80px -24px rgb(0 0 0 / 70%));
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--theme-accent-primary);
+  color: var(--theme-fg-on-accent);
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 0 24px var(--theme-accent-glow);
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--theme-fg-primary);
+}
+
+.lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--theme-fg-secondary);
+}
+
+.cmd {
+  font-family: var(--theme-font-mono);
+  font-size: 14px;
+  color: var(--theme-accent-primary);
+}
+
+.steps {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--theme-fg-secondary);
+}
+
+.stepNum {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: var(--theme-border-width) solid color-mix(in srgb, var(--theme-accent-primary) 45%, transparent);
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  color: var(--theme-accent-primary);
+}
+
+.inline {
+  font-family: var(--theme-font-mono);
+  font-size: 12px;
+  color: var(--theme-accent-primary);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.secondary {
+  padding: 9px 16px;
+  border: var(--theme-border-width) solid var(--theme-border-default);
+  background: transparent;
+  color: var(--theme-fg-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color var(--theme-duration-control) var(--theme-ease-standard),
+    border-color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.secondary:hover,
+.secondary:focus-visible {
+  color: var(--theme-fg-primary);
+  border-color: var(--theme-border-strong);
+  outline: none;
+}
+
+.primary {
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}

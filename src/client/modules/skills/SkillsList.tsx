@@ -6,12 +6,16 @@ import clsx from "clsx";
 import {
   copySkillCommand,
   installBundled,
+  insertSkillCommand,
+  showSkillCoach,
   uploadSkillFile,
   useBundledSkills,
   useCurrentSessionId,
   useSkillCatalog,
   type SkillEntry,
 } from "./data.ts";
+import { workspace } from "../../shell/workspace-store.ts";
+import { InstallSuccessDialog } from "./InstallSuccessDialog.tsx";
 import styles from "./SkillsList.module.css";
 
 type Category = "all" | "model" | "user" | "bundled";
@@ -55,6 +59,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [installed, setInstalled] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const allSkills = state.phase === "ready" ? state.skills : [];
@@ -85,8 +90,10 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   const doUpload = async (file: File, overwrite: boolean): Promise<void> => {
     setNotice({ kind: "info", text: `正在安装 ${file.name}…` });
     const result = await uploadSkillFile(file, overwrite);
-    if (result.ok) setNotice({ kind: "success", text: `已安装 /${result.name}` });
-    else if (result.code === "exists") setNotice({ kind: "confirm", text: `已存在同名技能，覆盖安装？`, file });
+    if (result.ok) {
+      setNotice(null);
+      setInstalled(result.name);
+    } else if (result.code === "exists") setNotice({ kind: "confirm", text: `已存在同名技能，覆盖安装？`, file });
     else setNotice({ kind: "error", text: errorText(result.code) });
   };
 
@@ -99,9 +106,29 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   const onInstallBundled = async (name: string): Promise<void> => {
     setNotice({ kind: "info", text: `正在安装 ${name}…` });
     const result = await installBundled(name);
-    if (result.ok) setNotice({ kind: "success", text: `已安装 /${result.name}` });
-    else setNotice({ kind: "error", text: errorText(result.code) });
+    if (result.ok) {
+      setNotice(null);
+      setInstalled(result.name);
+    } else setNotice({ kind: "error", text: errorText(result.code) });
   };
+
+  // Return to the current conversation (or the new-chat surface) with the skill
+  // command prefilled, then a coaching toast — the "去对话里直接用" path.
+  const goUse = (): void => {
+    const target = installed;
+    setInstalled(null);
+    workspace.close();
+    window.setTimeout(() => {
+      if (target === null) return;
+      insertSkillCommand(target);
+      showSkillCoach(`已为你填入 /${target}，补充需求后按回车即可调用`);
+    }, 150);
+  };
+
+  const dialog =
+    installed === null ? null : (
+      <InstallSuccessDialog name={installed} onClose={() => setInstalled(null)} onGoUse={goUse} />
+    );
 
   const header = (
     <header className={styles.head}>
@@ -178,6 +205,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   if (category === "bundled") {
     return (
       <div className={styles.layout}>
+        {dialog}
         {rail}
         <section className={styles.main}>
           {header}
@@ -229,6 +257,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   if (state.phase !== "ready") {
     return (
       <div className={styles.layout}>
+        {dialog}
         {rail}
         <section className={styles.main}>
           {header}
@@ -263,6 +292,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
 
   return (
     <div className={styles.layout}>
+      {dialog}
       {rail}
       <section className={styles.main}>
         {header}
