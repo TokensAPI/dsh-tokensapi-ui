@@ -28,6 +28,15 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-state-success-primary: var(--theme-success) !important;
   --dsw-alias-state-warn-primary: var(--theme-warning) !important;
 
+  /* DeepSeek-blue "static" scale → tenant accent. These are raw palette steps
+   * (no semantic alias), pinned directly by a few in-progress indicators: the
+   * running "Deep diving…" shimmer (500 base + 200 highlight) and the ongoing
+   * StateDot (450). Remap the shades in use so every running/loading cue reads
+   * on-brand green instead of DeepSeek blue. */
+  --dsw-static-deepseek-200: var(--theme-accent-primary) !important;
+  --dsw-static-deepseek-450: var(--theme-accent-primary) !important;
+  --dsw-static-deepseek-500: color-mix(in srgb, var(--theme-accent-primary) 55%, var(--theme-fg-secondary)) !important;
+
   /* Surfaces */
   --dsw-alias-bg-base: var(--theme-bg-canvas) !important;
   --dsw-alias-bg-layer-1: var(--theme-bg-shell) !important;
