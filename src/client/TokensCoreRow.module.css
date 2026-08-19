@@ -1,0 +1,34 @@
+/* tokens-core sidebar row — idiomatic DSH styling: CSS Modules + --dsw-* design
+ * tokens (see desktop/deepseek-harness/docs/web-styling.md). No literal colors,
+ * no Tailwind; semantic aliases make the row follow the host light/dark theme. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font: var(--dsw-font-xs-13);
+  font-weight: 600;
+  color: var(--dsw-alias-brand-text);
+  user-select: none;
+}
+
+.wide {
+  justify-content: flex-start;
+}
+
+.collapsed {
+  padding: 8px 0;
+  justify-content: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-size: 12px;
+}

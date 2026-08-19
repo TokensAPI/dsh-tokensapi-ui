@@ -1,0 +1,7 @@
+# tokens-core bundle layer: applied automatically when the package is installed
+# into a profile (package.json declares dsh.bundle.patch). A profile that runs
+# `dsh plugin add <this package>` gets this wiring without editing its own
+# cordis.patch.yml. Later layers (profile patch, --patch overlays) override by id.
+- insert:
+    - id: tokens-core
+      name: tokens-core
