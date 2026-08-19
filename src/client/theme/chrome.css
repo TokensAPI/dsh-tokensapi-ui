@@ -69,3 +69,14 @@ button[aria-label="发送消息"] svg :is(path, polygon, polyline) {
 button[aria-label="发送消息"]:disabled {
   opacity: 0.85 !important;
 }
+
+/* Desktop "advanced" frame: the native shell makes the sidebar surface
+ * transparent (`--dsw-specific-sidebar-fill: transparent`) for macOS vibrancy —
+ * but with no vibrancy on Windows that just reveals the transparent window
+ * backing, clashing with our flat dark theme. Repaint it with the tenant shell
+ * colour (and restore the local sidebar-fill var the surface zeroed). This only
+ * matches inside the desktop advanced shell; on web the selectors are inert. */
+body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
+  --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;
+  background: var(--theme-bg-shell) !important;
+}
