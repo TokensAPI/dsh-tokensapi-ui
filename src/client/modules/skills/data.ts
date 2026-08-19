@@ -54,6 +54,7 @@ export function useSkillCatalog(sessionId: SessionId | null): {
     sessionId === null ? { phase: "no-session" } : { phase: "loading" },
   );
   const [nonce, setNonce] = useState(0);
+  const revision = useSkillsRevision();
 
   useEffect(() => {
     if (sessionId === null) {
@@ -84,7 +85,7 @@ export function useSkillCatalog(sessionId: SessionId | null): {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, nonce]);
+  }, [sessionId, nonce, revision]);
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
   return { state, reload };
@@ -96,6 +97,126 @@ export function useSkillCatalog(sessionId: SessionId | null): {
  * a typed line (host-side `dsh-tool-skill`), same as the reference plugin.
  */
 export async function copySkillCommand(name: string): Promise<boolean> {
+  return copyCommandImpl(name);
+}
+
+// ── Write plane: the '/tokens-skills' host channel (install/delete over the
+// user skill root + curated bundled skills). Mutations bump a shared revision
+// so the catalog / owned / bundled hooks all refetch. ──────────────────────
+
+/** One curated skill shipped with the plugin. */
+export interface BundledSkill {
+  name: string;
+  description: string;
+  installed: boolean;
+}
+
+/** Structured install/upload outcome (code carries the host's semantic reason). */
+export type WriteResult = { ok: true; name: string } | { ok: false; code: string };
+
+let revision = 0;
+const revListeners = new Set<() => void>();
+
+/** Bump after any successful write so all skills hooks refetch. */
+export function bumpSkillsRevision(): void {
+  revision += 1;
+  for (const listener of revListeners) listener();
+}
+
+function useSkillsRevision(): number {
+  return useSyncExternalStore(
+    (onChange) => {
+      revListeners.add(onChange);
+      return () => revListeners.delete(onChange);
+    },
+    () => revision,
+    () => 0,
+  );
+}
+
+/** Call one '/tokens-skills' endpoint, returning the raw RpcResult. */
+async function channel(
+  endpoint: string,
+  payload: unknown,
+): Promise<{ ok: true; value: unknown } | { ok: false; message: string }> {
+  const connection = runtime?.connection ?? null;
+  if (connection === null) return { ok: false, message: "connection-unavailable" };
+  const result = await connection.rpc.call("/tokens-skills", endpoint, payload);
+  return result.ok ? { ok: true, value: result.value } : { ok: false, message: result.error.message };
+}
+
+/** Read a picked file as base64 (upload wire form; chunked for large files). */
+async function fileToBase64(file: File): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary);
+}
+
+/** Install a shared SKILL.md or zip bundle into the user skill root. */
+export async function uploadSkillFile(file: File, overwrite = false): Promise<WriteResult> {
+  const data = await fileToBase64(file);
+  const result = await channel("skills/upload", { fileName: file.name, data, overwrite });
+  if (!result.ok) return { ok: false, code: result.message };
+  bumpSkillsRevision();
+  return { ok: true, name: (result.value as { name: string }).name };
+}
+
+/** Install one plugin-bundled curated skill into the user skill root. */
+export async function installBundled(name: string, overwrite = false): Promise<WriteResult> {
+  const result = await channel("bundled/install", { name, overwrite });
+  if (!result.ok) return { ok: false, code: result.message };
+  bumpSkillsRevision();
+  return { ok: true, name };
+}
+
+/** Delete one user-root skill directory. */
+export async function deleteSkill(name: string): Promise<WriteResult> {
+  const result = await channel("skills/delete", { name });
+  if (!result.ok) return { ok: false, code: result.message };
+  bumpSkillsRevision();
+  return { ok: true, name };
+}
+
+/** Names of skills living in the user root — the ones this plugin may delete. */
+export function useOwnedSkills(): ReadonlySet<string> {
+  const rev = useSkillsRevision();
+  const [owned, setOwned] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    channel("skills/inventory", {}).then((result) => {
+      if (cancelled || !result.ok) return;
+      const names = (result.value as { skills: { name: string }[] }).skills.map((s) => s.name);
+      setOwned(new Set(names));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [rev]);
+  return owned;
+}
+
+/** The plugin's curated skills with their installed state. */
+export function useBundledSkills(): readonly BundledSkill[] {
+  const rev = useSkillsRevision();
+  const [skills, setSkills] = useState<readonly BundledSkill[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    channel("bundled/list", {}).then((result) => {
+      if (cancelled || !result.ok) return;
+      setSkills((result.value as { skills: BundledSkill[] }).skills);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [rev]);
+  return skills;
+}
+
+async function copyCommandImpl(name: string): Promise<boolean> {
   const text = `/${name} `;
   try {
     await navigator.clipboard.writeText(text);

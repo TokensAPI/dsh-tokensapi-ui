@@ -344,6 +344,75 @@
   100% { left: 100%; }
 }
 
+/* Upload / install feedback banner */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: var(--theme-border-width) solid var(--theme-border-default);
+  border-left-width: 3px;
+  background: var(--theme-bg-surface);
+  font-size: 13px;
+  color: var(--theme-fg-secondary);
+}
+
+.notice_info {
+  border-left-color: var(--theme-fg-muted);
+}
+
+.notice_success {
+  border-left-color: var(--theme-accent-primary);
+  color: var(--theme-fg-primary);
+}
+
+.notice_error {
+  border-left-color: var(--theme-danger);
+  color: var(--theme-fg-primary);
+}
+
+.notice_confirm {
+  border-left-color: var(--theme-warning);
+  color: var(--theme-fg-primary);
+}
+
+.noticeActions {
+  display: flex;
+  gap: 8px;
+}
+
+.noticeBtn {
+  padding: 4px 12px;
+  border: var(--theme-border-width) solid var(--theme-border-default);
+  background: transparent;
+  color: var(--theme-fg-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color var(--theme-duration-control) var(--theme-ease-standard),
+    border-color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.noticeBtn:hover,
+.noticeBtn:focus-visible {
+  border-color: var(--theme-accent-primary);
+  color: var(--theme-accent-primary);
+  outline: none;
+}
+
+.noticeClose {
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--theme-fg-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.noticeClose:hover {
+  color: var(--theme-fg-primary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .railItem {
     transition: none;

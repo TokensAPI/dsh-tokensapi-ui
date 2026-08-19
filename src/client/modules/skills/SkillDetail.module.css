@@ -122,3 +122,55 @@
   color: var(--theme-fg-muted);
   opacity: 0.7;
 }
+
+.danger .blockLabel {
+  color: color-mix(in srgb, var(--theme-danger) 70%, var(--theme-fg-muted));
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+}
+
+.deleteBtn {
+  padding: 8px 16px;
+  border: var(--theme-border-width) solid color-mix(in srgb, var(--theme-danger) 55%, transparent);
+  background: transparent;
+  color: var(--theme-danger);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.deleteBtn:hover:not(:disabled),
+.deleteBtn:focus-visible {
+  background: color-mix(in srgb, var(--theme-danger) 14%, transparent);
+  outline: none;
+}
+
+.deleteBtn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  border: var(--theme-border-width) solid var(--theme-border-default);
+  background: transparent;
+  color: var(--theme-fg-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  color: var(--theme-fg-primary);
+  border-color: var(--theme-border-strong);
+}
+
+.delError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--theme-danger);
+}

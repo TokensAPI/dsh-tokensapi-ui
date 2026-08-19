@@ -5,17 +5,31 @@
 // channel (deferred) — a placeholder marks where it will slot in.
 import { useState } from "react";
 import clsx from "clsx";
-import { copySkillCommand, type SkillEntry } from "./data.ts";
+import { copySkillCommand, deleteSkill, useOwnedSkills, type SkillEntry } from "./data.ts";
 import styles from "./SkillDetail.module.css";
 
 export function SkillDetail({ skill, onBack }: { skill: SkillEntry; onBack: () => void }): React.JSX.Element {
   const [copied, setCopied] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [delError, setDelError] = useState<string | null>(null);
+  const owned = useOwnedSkills();
+  const isOwned = owned.has(skill.name);
 
   const onCopy = async (): Promise<void> => {
     const ok = await copySkillCommand(skill.name);
     if (!ok) return;
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
+  };
+
+  const onDelete = async (): Promise<void> => {
+    setDeleting(true);
+    setDelError(null);
+    const result = await deleteSkill(skill.name);
+    setDeleting(false);
+    if (result.ok) onBack();
+    else setDelError(result.code);
   };
 
   return (
@@ -61,8 +75,35 @@ export function SkillDetail({ skill, onBack }: { skill: SkillEntry; onBack: () =
         <p className={styles.hint}>粘贴到输入框并发送即可调用（走 slash 管线）。</p>
       </section>
 
+      {isOwned ? (
+        <section className={clsx("theme-card", styles.block, styles.danger)}>
+          <div className={styles.blockLabel}>// 用户技能根</div>
+          {!confirming ? (
+            <div className={styles.commandRow}>
+              <p className={styles.hint}>这是安装在本机技能根的技能，可以删除。</p>
+              <button type="button" className={styles.deleteBtn} onClick={() => setConfirming(true)}>
+                删除技能
+              </button>
+            </div>
+          ) : (
+            <div className={styles.commandRow}>
+              <p className={styles.hint}>确认删除 /{skill.name}？此操作不可撤销。</p>
+              <span className={styles.confirmActions}>
+                <button type="button" className={styles.deleteBtn} disabled={deleting} onClick={() => void onDelete()}>
+                  {deleting ? "删除中…" : "确认删除"}
+                </button>
+                <button type="button" className={styles.cancelBtn} disabled={deleting} onClick={() => setConfirming(false)}>
+                  取消
+                </button>
+              </span>
+            </div>
+          )}
+          {delError !== null ? <p className={styles.delError}>删除失败：{delError}</p> : null}
+        </section>
+      ) : null}
+
       <p className={styles.deferred}>
-        // SKILL.md 正文预览：需接入 skill-plaza 通道，后续版本提供。
+        // SKILL.md 正文预览：后续版本提供。
       </p>
     </div>
   );
