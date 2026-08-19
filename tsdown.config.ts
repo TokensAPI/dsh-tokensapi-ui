@@ -29,6 +29,7 @@ const CLIENT_EXTERNALS: readonly string[] = [
   '@deepseek-ai/dsh-client-ui-attachment',
   '@deepseek-ai/dsh-client-schema-form',
   '@deepseek-ai/dsh-client-runtime/client',
+  '@deepseek-ai/dsh-api-remotes/client',
 ]
 
 // Compile `*.module.css` to a hashed class map and inject its CSS as a scoped

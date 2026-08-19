@@ -1,0 +1,124 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 820px;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--theme-fg-secondary);
+}
+
+.back {
+  padding: 4px 10px;
+  border: var(--theme-border-width) solid var(--theme-border-default);
+  border-radius: var(--theme-radius-control);
+  background: transparent;
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--theme-fg-secondary);
+  cursor: pointer;
+  transition: color var(--theme-duration-control) var(--theme-ease-standard),
+    border-color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--theme-accent-primary);
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 45%, transparent);
+  outline: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--theme-accent-primary);
+  box-shadow: 0 0 8px var(--theme-accent-glow);
+}
+
+.slash {
+  color: var(--theme-accent-primary);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  color: var(--theme-fg-primary);
+  word-break: break-word;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+}
+
+.blockLabel {
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--theme-fg-muted);
+}
+
+.body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--theme-fg-secondary);
+  white-space: pre-wrap;
+}
+
+.commandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.command {
+  font-family: var(--theme-font-mono);
+  font-size: 15px;
+  color: var(--theme-accent-primary);
+}
+
+.copy {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--theme-fg-muted);
+}
+
+.deferred {
+  margin: 0;
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--theme-fg-muted);
+  opacity: 0.7;
+}

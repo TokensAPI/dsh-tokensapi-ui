@@ -1,39 +1,132 @@
-// 技能库 list — styled to the ELECTRO X visual language (electrox.cloud):
-// breadcrumb + oversized display title + mono TOTAL counter, and cards with a
-// LIVE chip, `v… · USED …×` meta, tag chips, a divider, a `/path · 详情 →` row,
-// and a cut-corner green CTA. Recipe classes (.theme-card / .theme-chip /
-// .theme-button-primary / .theme-cut-corner / .theme-display) come from the
-// design system; --theme-* tokens drive the palette.
+// 技能库 list — the real session skill catalog (official skill.list RPC) in the
+// ELECTRO X visual language. Cards carry an invocability chip, the skill name +
+// routing description, a `/name` command row, and a copy-command CTA (pasting +
+// sending runs it through the slash pipeline). Category rail filters by
+// model-invocability; the four request phases render dedicated placeholders.
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import { SKILL_CATEGORIES, SKILLS, type SkillCategoryId } from "./mock.ts";
+import {
+  copySkillCommand,
+  useCurrentSessionId,
+  useSkillCatalog,
+  type SkillEntry,
+} from "./data.ts";
 import styles from "./SkillsList.module.css";
 
-export function SkillsList(): React.JSX.Element {
-  const [category, setCategory] = useState<SkillCategoryId>("all");
+type Category = "all" | "model" | "user";
+
+const CATEGORIES: readonly { id: Category; label: string }[] = [
+  { id: "all", label: "全部" },
+  { id: "model", label: "可被模型调用" },
+  { id: "user", label: "仅用户可用" },
+];
+
+const inCategory = (skill: SkillEntry, category: Category): boolean =>
+  category === "all" ||
+  (category === "model" ? skill.modelInvocable : !skill.modelInvocable);
+
+export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }): React.JSX.Element {
+  const sessionId = useCurrentSessionId();
+  const { state, reload } = useSkillCatalog(sessionId);
+  const [category, setCategory] = useState<Category>("all");
   const [query, setQuery] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const allSkills = state.phase === "ready" ? state.skills : [];
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return SKILLS.filter((skill) => {
-      const inCategory = category === "all" || skill.category === category;
-      const inQuery =
-        q === "" ||
+    return allSkills.filter((skill) => {
+      if (!inCategory(skill, category)) return false;
+      if (q === "") return true;
+      return (
         skill.name.toLowerCase().includes(q) ||
-        skill.summary.toLowerCase().includes(q) ||
-        skill.tags.some((tag) => tag.toLowerCase().includes(q));
-      return inCategory && inQuery;
+        skill.description.toLowerCase().includes(q) ||
+        (skill.whenToUse?.toLowerCase().includes(q) ?? false)
+      );
     });
-  }, [category, query]);
+  }, [allSkills, category, query]);
 
-  const addedCount = SKILLS.filter((skill) => skill.added).length;
-  const countFor = (id: SkillCategoryId): number =>
-    id === "all" ? SKILLS.length : SKILLS.filter((skill) => skill.category === id).length;
+  const countFor = (id: Category): number =>
+    allSkills.filter((skill) => inCategory(skill, id)).length;
+
+  const onCopy = async (name: string): Promise<void> => {
+    const ok = await copySkillCommand(name);
+    if (!ok) return;
+    setCopied(name);
+    window.setTimeout(() => setCopied((current) => (current === name ? null : current)), 1500);
+  };
+
+  const header = (
+    <header className={styles.head}>
+      <div className={styles.headLeft}>
+        <div className={styles.crumb}>
+          <span className={styles.dot} aria-hidden="true" /> SKILLS <span className={styles.slash}>//</span> 技能库
+        </div>
+        <h2 className={clsx("theme-display", styles.title)}>技能库</h2>
+        <p className={styles.subtitle}>会话当前可用的技能；复制 /命令 粘贴发送即可调用。</p>
+      </div>
+      <div className={styles.actions}>
+        <input
+          className={styles.search}
+          type="search"
+          placeholder="搜索技能名称 / 描述"
+          aria-label="搜索技能"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          disabled={state.phase !== "ready"}
+        />
+        <button
+          type="button"
+          className={clsx("theme-button-secondary", styles.add)}
+          disabled
+          title="上传自有技能（即将支持，需 skill-plaza 通道）"
+        >
+          新增技能
+        </button>
+      </div>
+    </header>
+  );
+
+  // Non-ready phases: a single centered placeholder under the header.
+  if (state.phase !== "ready") {
+    return (
+      <div className={styles.layout}>
+        <aside className={styles.rail} aria-hidden="true" />
+        <section className={styles.main}>
+          {header}
+          <div className={styles.state} role="status">
+            {state.phase === "no-session" && (
+              <>
+                <p className={styles.stateTitle}>未连接会话</p>
+                <p className={styles.stateHint}>先在左侧开启或选择一个会话，这里会列出它可用的技能。</p>
+              </>
+            )}
+            {state.phase === "loading" && (
+              <>
+                <div className={styles.loadingBar} aria-hidden="true" />
+                <p className={styles.stateHint}>正在读取技能目录…</p>
+              </>
+            )}
+            {state.phase === "error" && (
+              <>
+                <p className={styles.stateTitle}>读取失败</p>
+                <p className={styles.stateHint}>{state.message}</p>
+                <button type="button" className={clsx("theme-button-primary", "theme-cut-corner", styles.retry)} onClick={reload}>
+                  重试
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layout}>
       <aside className={styles.rail} aria-label="技能分类">
-        {SKILL_CATEGORIES.map((item) => (
+        {CATEGORIES.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -49,31 +142,7 @@ export function SkillsList(): React.JSX.Element {
       </aside>
 
       <section className={styles.main}>
-        <header className={styles.head}>
-          <div className={styles.headLeft}>
-            <div className={styles.crumb}>
-              <span className={styles.dot} aria-hidden="true" /> SKILLS <span className={styles.slash}>//</span> 技能库
-            </div>
-            <h2 className={clsx("theme-display", styles.title)}>技能库</h2>
-            <p className={styles.subtitle}>将技能添加到 Agent，赋能业务流程，提升执行能力。</p>
-          </div>
-          <div className={styles.actions}>
-            <input
-              className={styles.search}
-              type="search"
-              placeholder="搜索技能名称 / 描述 / 标签"
-              aria-label="搜索技能"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            <span className={styles.added} title="已添加技能数量">
-              已添加 <span className={styles.addedNum}>{addedCount}</span>
-            </span>
-            <button type="button" className={clsx("theme-button-primary", "theme-cut-corner", styles.add)}>
-              新增技能
-            </button>
-          </div>
-        </header>
+        {header}
 
         <div className={styles.total}>
           <span className={styles.slash}>//</span> TOTAL <span className={styles.totalNum}>{visible.length}</span>
@@ -84,48 +153,35 @@ export function SkillsList(): React.JSX.Element {
         ) : (
           <div className={styles.grid}>
             {visible.map((skill) => (
-              <article key={skill.id} className={clsx("theme-card", "theme-corners", styles.card)}>
+              <article key={skill.name} className={clsx("theme-card", "theme-corners", styles.card)}>
                 <i aria-hidden="true" />
                 <div className={styles.cardTop}>
                   <div className={styles.chips}>
-                    <span className="theme-chip" data-active={skill.status === "live" || undefined}>
-                      {skill.status === "live" ? "LIVE" : "BETA"}
+                    <span className="theme-chip" data-active={skill.modelInvocable || undefined}>
+                      {skill.modelInvocable ? "MODEL" : "USER-ONLY"}
                     </span>
                     <span className="theme-chip">SKILL</span>
                   </div>
-                  <span className={styles.meta}>
-                    v{skill.version} · USED {skill.usage.toLocaleString()}×
-                  </span>
                 </div>
 
                 <h3 className={styles.cardTitle}>{skill.name}</h3>
-                <p className={styles.cardSummary}>{skill.summary}</p>
-
-                <div className={styles.tags}>
-                  {skill.tags.map((tag) => (
-                    <span key={tag} className="theme-chip">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <p className={styles.cardSummary}>{skill.description}</p>
 
                 <div className={styles.divider} />
 
                 <div className={styles.cardMeta}>
-                  <span className={styles.path}>/{skill.id}</span>
-                  <span className={styles.detail}>详情 →</span>
+                  <span className={styles.path}>/{skill.name}</span>
+                  <button type="button" className={styles.detailLink} onClick={() => onOpen(skill)}>
+                    详情 →
+                  </button>
                 </div>
 
                 <button
                   type="button"
-                  className={clsx(
-                    skill.added ? "theme-button-secondary" : "theme-button-primary",
-                    skill.added ? undefined : "theme-cut-corner",
-                    styles.cardAction,
-                  )}
-                  disabled={skill.added}
+                  className={clsx("theme-button-primary", "theme-cut-corner", styles.cardAction)}
+                  onClick={() => onCopy(skill.name)}
                 >
-                  {skill.added ? "✓ 已添加" : "添加到 Agent →"}
+                  {copied === skill.name ? "✓ 已复制" : `复制命令 /${skill.name}`}
                 </button>
               </article>
             ))}

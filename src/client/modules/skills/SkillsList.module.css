@@ -255,10 +255,21 @@
   color: var(--theme-fg-muted);
 }
 
-.detail {
+.detailLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-family: var(--theme-font-mono);
   font-size: 11px;
   color: var(--theme-fg-secondary);
+  cursor: pointer;
+  transition: color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.detailLink:hover,
+.detailLink:focus-visible {
+  color: var(--theme-accent-primary);
+  outline: none;
 }
 
 .cardAction {
@@ -274,8 +285,71 @@
   opacity: 0.7;
 }
 
+/* Request-phase placeholders (no-session / loading / error) */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 72px 0;
+  text-align: center;
+}
+
+.stateTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--theme-fg-primary);
+}
+
+.stateHint {
+  margin: 0;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--theme-fg-muted);
+}
+
+.retry {
+  margin-top: 4px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Indeterminate accent scan while the catalog loads. */
+.loadingBar {
+  position: relative;
+  width: 200px;
+  height: 3px;
+  overflow: hidden;
+  background: var(--theme-border-default);
+}
+
+.loadingBar::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  content: "";
+  background: var(--theme-accent-primary);
+  box-shadow: 0 0 10px var(--theme-accent-glow);
+  animation: skills-load-scan 1.1s var(--theme-ease-standard) infinite;
+}
+
+@keyframes skills-load-scan {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .railItem {
     transition: none;
+  }
+
+  .loadingBar::after {
+    animation: none;
   }
 }

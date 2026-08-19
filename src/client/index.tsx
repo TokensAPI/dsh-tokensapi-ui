@@ -5,16 +5,20 @@
 //   - adds a persistent top capability nav + full-page capability views via the
 //     `shell.overlay` slot (DSH exposes no frame-level nav slot; the nav band
 //     rides a reserved top strip, the pages cover the main content area)
-import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type { ClientContext, ISessions } from "@deepseek-ai/dsh-client-runtime/client";
+import type { ConnectionHandle } from "@deepseek-ai/dsh-api-remotes/client";
 // Type-only slot-map merge for shell.overlay.
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import { injectTheme } from "./theme/inject.ts";
 import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
+import { setSkillsRuntime } from "./modules/skills/data.ts";
 
 export const name = "tokens-core";
-export const inject = ["slots"];
+// 'connection' + 'sessions' back the skills module's real catalog (skill.list
+// RPC addressed by the current session); 'slots' backs the overlay + nav.
+export const inject = ["slots", "connection", "sessions"];
 
 /** Public capability API exposed to other plugins as `ctx.tokensWorkspace`. */
 export interface TokensWorkspaceApi {
@@ -25,6 +29,14 @@ export interface TokensWorkspaceApi {
 export function apply(ctx: ClientContext): void {
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
+
+  // Hand the skills module its data plane: the root-context connection (for the
+  // official skill.list RPC) + the sessions feed (current session id). Captured
+  // once here so module components never read services off a per-call argument.
+  setSkillsRuntime({
+    connection: ctx.get("connection") as ConnectionHandle,
+    sessions: ctx.get("sessions") as ISessions,
+  });
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.
