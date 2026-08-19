@@ -92,7 +92,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
 
   return (
     <>
-      <header ref={setBarNode} className={styles.topbar} data-theme="electrox">
+      <header ref={setBarNode} className={styles.topbar}>
         <div
           className={styles.brandSeat}
           data-collapsed={!wide || undefined}
@@ -136,7 +136,6 @@ export function CapabilityWorkspace(): React.JSX.Element {
       <button
         type="button"
         className={styles.collapseBar}
-        data-theme="electrox"
         data-collapsed={!wide || undefined}
         aria-label="切换侧栏"
         title="收起 / 展开侧栏"
@@ -153,7 +152,6 @@ export function CapabilityWorkspace(): React.JSX.Element {
       {activeCap !== null ? (
         <div
           className={clsx(styles.page, "theme-canvas")}
-          data-theme="electrox"
           style={{ left: `${sidebarWidth}px` }}
           role="region"
           aria-label={activeCap.label}

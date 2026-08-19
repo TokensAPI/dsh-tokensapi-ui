@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { unzipSync } from 'fflate'
 import type { Context } from '@deepseek-ai/cordis'
 
-export const name = 'tokens-core'
+export const name = 'dsh-tokensapi-ui'
 export const inject = ['connection']
 
 /** RpcResult shape the Connection transport expects (subset we produce). */
@@ -357,7 +357,7 @@ async function dispatch(endpoint: string, payload: unknown): Promise<RpcResult> 
 }
 
 export function apply(ctx: Context): void {
-  ctx.logger.info("[tokens-core] host loaded")
+  ctx.logger.info("[dsh-tokensapi-ui] host loaded")
   // Mount the channel only when the Connection service is present (headless
   // compositions load the plugin but expose no transport).
   ctx.inject(["connection"], (scoped) => {

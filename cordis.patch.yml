@@ -3,5 +3,5 @@
 # `dsh plugin add <this package>` gets this wiring without editing its own
 # cordis.patch.yml. Later layers (profile patch, --patch overlays) override by id.
 - insert:
-    - id: tokens-core
-      name: tokens-core
+    - id: dsh-tokensapi-ui
+      name: dsh-tokensapi-ui

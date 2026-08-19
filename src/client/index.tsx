@@ -15,7 +15,7 @@ import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
 import { restorePendingSkillOnBoot, setSkillsRuntime } from "./modules/skills/data.ts";
 
-export const name = "tokens-core";
+export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
 // RPC addressed by the current session); 'slots' backs the overlay + nav.
 export const inject = ["slots", "connection", "sessions"];

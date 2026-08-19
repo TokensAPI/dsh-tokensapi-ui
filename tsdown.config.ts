@@ -57,13 +57,13 @@ const cssModulesPlugin = {
     })
     const classMap: Record<string, string> = {}
     for (const [local, exp] of Object.entries(cssExports ?? {})) classMap[local] = exp.name
-    const tagId = `tokens-core/${basename(file)}`
+    const tagId = `dsh-tokensapi-ui/${basename(file)}`
     return [
       `const css = ${JSON.stringify(code.toString())};`,
       `const tagId = ${JSON.stringify(tagId)};`,
       `if (typeof document !== 'undefined' && document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') === null) {`,
       `  const tag = document.createElement('style');`,
-      `  tag.dataset.plugin = 'tokens-core';`,
+      `  tag.dataset.plugin = 'dsh-tokensapi-ui';`,
       `  tag.dataset.pluginCss = tagId;`,
       `  tag.textContent = css;`,
       `  document.head.appendChild(tag);`,
@@ -129,7 +129,7 @@ const client: UserConfig = {
   plugins: [cssModulesPlugin, rawCssPlugin],
   outputOptions: {
     entryFileNames: 'client.js',
-    banner: 'window.__ModuleLoader__.load({ id: "tokens-core", factory: (require) => {',
+    banner: 'window.__ModuleLoader__.load({ id: "dsh-tokensapi-ui", factory: (require) => {',
     footer: 'return module.exports; } });',
     intro: 'var module = { exports: {} }; var exports = module.exports;',
   },
