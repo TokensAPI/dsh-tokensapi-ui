@@ -1,0 +1,96 @@
+/* ELECTRO X / 粒刻 tenant theme, extracted from electrox.cloud on 2026-08-19. */
+[data-theme="electrox"] {
+  color-scheme: dark;
+
+  --theme-font-sans: Inter, system-ui, sans-serif;
+  --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+  --theme-font-display: "Archivo Black", "Helvetica Neue", "Arial Black", system-ui, sans-serif;
+  --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --theme-bg-canvas: #070707;
+  --theme-bg-shell: #0a0a0a;
+  --theme-bg-surface: #0f0f0f;
+  --theme-bg-surface-raised: #181818;
+  --theme-bg-overlay: rgb(7 7 7 / 80%);
+
+  --theme-fg-primary: #ffffff;
+  --theme-fg-secondary: #a8a8a8;
+  --theme-fg-muted: #8a8a8a;
+  --theme-fg-on-accent: #0a0a0a;
+
+  --theme-border-subtle: #1d1d1d;
+  --theme-border-default: #262626;
+  --theme-border-strong: #444444;
+  --theme-border-focus: #d4ff3a;
+
+  --theme-accent-primary: #d4ff3a;
+  --theme-accent-primary-hover: #ddff63;
+  --theme-accent-secondary: #ffffff;
+  --theme-accent-soft: rgb(212 255 58 / 10%);
+  --theme-accent-glow: rgb(212 255 58 / 25%);
+
+  --theme-success: #d4ff3a;
+  --theme-warning: #fbbf24;
+  --theme-danger: #fb2c36;
+  --theme-info: #60a5fa;
+
+  --theme-radius-control: 0px;
+  --theme-radius-card: 0px;
+  --theme-radius-panel: 0px;
+
+  --theme-shadow-card-hover: 0 16px 60px -20px rgb(212 255 58 / 25%);
+  --theme-shadow-button-hover: 0 0 26px rgb(212 255 58 / 35%);
+  --theme-grid-color: rgb(212 255 58 / 4%);
+}
+
+/* Optional client-specific cut-corner geometry. */
+[data-theme="electrox"] .theme-cut-corner {
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+/* Optional corner acquisition marks used on interactive cards. */
+[data-theme="electrox"] .theme-corners::after,
+[data-theme="electrox"] .theme-corners > i::after,
+[data-theme="electrox"] .theme-corners > i::before {
+  position: absolute;
+  width: var(--theme-corner-mark-size);
+  height: var(--theme-corner-mark-size);
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  border-color: var(--theme-accent-primary);
+  transition: opacity var(--theme-duration-card) var(--theme-ease-standard);
+}
+
+[data-theme="electrox"] .theme-corners::after {
+  top: -1px;
+  right: -1px;
+  border-top: 1px solid;
+  border-right: 1px solid;
+}
+
+[data-theme="electrox"] .theme-corners > i::before {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 1px solid;
+  border-left: 1px solid;
+}
+
+[data-theme="electrox"] .theme-corners > i::after {
+  right: -1px;
+  bottom: -1px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+
+[data-theme="electrox"] .theme-corners:hover::after,
+[data-theme="electrox"] .theme-corners:hover > i::before,
+[data-theme="electrox"] .theme-corners:hover > i::after { opacity: 1; }
+

@@ -9,7 +9,7 @@
 // independent of the read-only submodule: platform modules are `external`
 // (resolved from the loader's runtime require table) and `*.module.css` is
 // compiled with lightningcss into a class map + an auto-injected <style> tag.
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { basename, dirname, resolve as resolvePath } from 'node:path'
 import { transform } from 'lightningcss'
 import type { UserConfig } from 'tsdown'
@@ -72,6 +72,28 @@ const cssModulesPlugin = {
   },
 }
 
+// Inline a plain (non-module) `.css` file as its raw text (default-exported
+// string) — used for the global design-system theme sheets, which must keep
+// their literal class names (`.theme-card`, …) rather than be hashed. Same
+// `.mjs`-suffixed virtual id trick to dodge tsdown's css-guard.
+const RAW_CSS_PREFIX = '\0raw-css:'
+const RAW_CSS_SUFFIX = '.mjs'
+const rawCssPlugin = {
+  name: 'tokens-core-raw-css',
+  resolveId(source: string, importer: string | undefined): string | null {
+    if (!source.endsWith('.css') || source.endsWith('.module.css')) return null
+    const abs = importer !== undefined ? resolvePath(dirname(importer), source) : source
+    return RAW_CSS_PREFIX + abs + RAW_CSS_SUFFIX
+  },
+  load(this: { addWatchFile: (id: string) => void }, id: string): string | null {
+    if (!id.startsWith(RAW_CSS_PREFIX)) return null
+    const file = id.slice(RAW_CSS_PREFIX.length, -RAW_CSS_SUFFIX.length)
+    this.addWatchFile(file)
+    const css = existsSync(file) ? readFileSync(file, 'utf8') : ''
+    return `export default ${JSON.stringify(css)}`
+  },
+}
+
 const mode = process.env.NODE_ENV ?? 'production'
 
 const host: UserConfig = {
@@ -103,7 +125,7 @@ const client: UserConfig = {
     'import.meta.env.MODE': JSON.stringify(mode),
     'import.meta.env': JSON.stringify({ MODE: mode }),
   },
-  plugins: [cssModulesPlugin],
+  plugins: [cssModulesPlugin, rawCssPlugin],
   outputOptions: {
     entryFileNames: 'client.js',
     banner: 'window.__ModuleLoader__.load({ id: "tokens-core", factory: (require) => {',

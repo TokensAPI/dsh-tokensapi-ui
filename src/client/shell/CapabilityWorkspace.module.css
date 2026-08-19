@@ -1,0 +1,230 @@
+/* Persistent brand + capability nav band. Sits in the strip reserved by the
+ * injected frame padding-top (theme/reskin.css). Height MUST match it (72px). */
+.topbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  align-items: stretch;
+  height: 72px;
+  background: var(--theme-bg-shell);
+  border-bottom: var(--theme-border-width) solid var(--theme-border-default);
+}
+
+/* Brand seat tracks the live sidebar column width; its right border lines up with
+ * the sidebar/content boundary so the band reads as one piece expanded or
+ * collapsed. */
+.brandSeat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  box-sizing: border-box;
+  padding: 0 16px;
+  overflow: hidden;
+  border-right: var(--theme-border-width) solid var(--theme-border-default);
+}
+
+.mark {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  object-fit: cover;
+  /* Frame the third-party logo so it sits in the electrox chrome: soft dark
+   * inset ring + a faint accent halo tying it to the theme. */
+  border: 1px solid rgb(255 255 255 / 8%);
+  box-shadow: 0 0 0 1px var(--theme-bg-shell), 0 0 10px -2px var(--theme-accent-glow);
+}
+
+.brandSeat[data-collapsed] {
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.brandTitle {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--theme-fg-primary);
+  white-space: nowrap;
+}
+
+.brandSlash {
+  margin: 0 2px;
+  color: var(--theme-accent-primary);
+}
+
+.brandSub {
+  font-family: var(--theme-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--theme-fg-muted);
+  white-space: nowrap;
+}
+
+.poweredBy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--theme-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--theme-fg-muted);
+  white-space: nowrap;
+}
+
+.poweredLogo {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.poweredName {
+  color: var(--theme-fg-secondary);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Capability nav */
+.nav {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding-left: 12px;
+}
+
+.navItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  padding: 0 18px;
+  border: 0;
+  background: transparent;
+  color: var(--theme-fg-secondary);
+  cursor: pointer;
+  transition: color var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.navItem:hover,
+.navItem:focus-visible {
+  color: var(--theme-fg-primary);
+  outline: none;
+}
+
+.navItem[data-active] {
+  color: var(--theme-accent-primary);
+}
+
+.navItem::after {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 2px;
+  content: "";
+  background: var(--theme-accent-primary);
+  opacity: 0;
+  transition: opacity var(--theme-duration-control) var(--theme-ease-standard);
+}
+
+.navItem[data-active]::after {
+  opacity: 1;
+}
+
+.navLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.navTag {
+  font-family: var(--theme-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--theme-fg-muted);
+}
+
+.status {
+  align-self: center;
+  margin-left: auto;
+  padding: 0 20px;
+  font-family: var(--theme-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--theme-accent-primary);
+}
+
+/* Collapse control: a sidebar-foot row that MIRRORS DSH's native settings row
+ * (right below it) so the two read as consistent sidebar items — same DSH
+ * tokens, type, radius, and inset hover pill. Width (inline) = sidebar minus the
+ * horizontal inset; sits just above the settings row. */
+.collapseBar {
+  position: absolute;
+  left: 8px;
+  bottom: 48px;
+  z-index: 6;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.collapseBar:hover,
+.collapseBar:focus-visible {
+  background: var(--dsw-specific-sidebar-nav-item-hover);
+  outline: none;
+}
+
+.collapseBar[data-collapsed] {
+  left: 0;
+  justify-content: center;
+  padding: 0;
+}
+
+.collapseLabel {
+  font-weight: 400;
+}
+
+/* Capability page: covers the main content area, leaves the sidebar exposed. */
+.page {
+  position: absolute;
+  top: 72px;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  overflow: auto;
+  padding: 28px 32px;
+  background: var(--theme-bg-canvas);
+  border-left: var(--theme-border-width) solid var(--theme-border-default);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navItem,
+  .navItem::after {
+    transition: none;
+  }
+}

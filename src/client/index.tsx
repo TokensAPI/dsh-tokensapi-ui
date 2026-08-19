@@ -1,42 +1,28 @@
-// tokens-core browser half: a visible row at the foot of the sidebar (next to
-// Settings), contributed into the `sidebar.footer.action` list slot.
-//
-// Ordinary DSH web-client plugin styled the idiomatic way — CSS Modules + the
-// platform's --dsw-* design tokens (docs/web-styling.md forbids Tailwind and a
-// component library). tsdown compiles the .module.css with lightningcss and
-// injects it as a <style> tag automatically; here we just consume the hashed
-// class map. The row follows the host's light/dark theme via the tokens.
+// tokens-core browser half. Ordinary DSH web-client plugin (loads under `dsh
+// web`, not Desktop-only). Reshapes the DSH web UI in place:
+//   - re-skins the whole app to the ELECTRO X look by overriding DSH's --dsw-*
+//     tokens (theme/reskin.css)
+//   - adds a persistent top capability nav + full-page capability views via the
+//     `shell.overlay` slot (DSH exposes no frame-level nav slot; the nav band
+//     rides a reserved top strip, the pages cover the main content area)
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
-// Type-only: pulls ui-sidebar's SlotMap merge (the 'sidebar.footer.action' entry
-// and its { wide } owner props), so the registration below is type-checked.
-import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
-import clsx from "clsx";
-import styles from "./TokensCoreRow.module.css";
+// Type-only slot-map merge for shell.overlay.
+import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
+import { injectTheme } from "./theme/inject.ts";
+import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
 
 export const name = "tokens-core";
 export const inject = ["slots"];
 
-/** Owner of `sidebar.footer.action` passes `wide`: true when the sidebar is
- * expanded, false when collapsed to the icon rail. */
-function TokensCoreRow({ wide }: { wide: boolean }): React.JSX.Element {
-  return (
-    <div
-      className={clsx(styles.row, wide ? styles.wide : styles.collapsed)}
-      title="tokens-core"
-    >
-      <span className={styles.badge}>T</span>
-      {wide ? <span>tokens-ui-3-core</span> : null}
-    </div>
-  );
-}
-
 export function apply(ctx: ClientContext): void {
-  // Defer registration until the slot is declared, so plugin load order does
-  // not matter (same pattern as packages/client/ui-jobs).
-  ctx.slots.inject("sidebar.footer.action", () =>
+  // Global theme: ELECTRO X design system + DSH re-skin.
+  ctx.effect(() => injectTheme(), "tokens-core: theme");
+
+  // Persistent capability shell (top nav + pages) over the DSH frame.
+  ctx.slots.inject("shell.overlay", () =>
     ctx.slots.register(
-      { name: "sidebar.footer.action", id: "tokens-core", order: 10 },
-      TokensCoreRow,
+      { name: "shell.overlay", id: "tokens-core-workspace", order: 10 },
+      CapabilityWorkspace,
     ),
   );
 }

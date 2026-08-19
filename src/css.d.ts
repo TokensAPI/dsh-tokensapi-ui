@@ -1,8 +1,12 @@
-// A `*.module.css` import resolves to its class-name map (local name → hashed
-// name). tsdown's cssModulesPlugin (tsdown.config.ts) compiles the stylesheet
-// with lightningcss, injects it as a <style> tag at load, and default-exports
-// this map.
-declare module '*.module.css' {
-  const classes: Record<string, string>
-  export default classes
+// `*.module.css` → class-name map (hashed local → global). `*.css` → raw text.
+// The tsdown plugins (tsdown.config.ts) compile the former with lightningcss and
+// inline the latter verbatim; the client injects both as <style> tags.
+declare module "*.module.css" {
+  const classes: Record<string, string>;
+  export default classes;
+}
+
+declare module "*.css" {
+  const cssText: string;
+  export default cssText;
 }
