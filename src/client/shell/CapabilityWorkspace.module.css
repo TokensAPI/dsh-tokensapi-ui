@@ -218,7 +218,12 @@
   z-index: 4;
   overflow: auto;
   padding: 28px 32px;
-  background: var(--theme-bg-canvas);
+  background-color: var(--theme-bg-canvas);
+  /* Subtle electrox grid texture (accent at 4%). */
+  background-image:
+    linear-gradient(var(--theme-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-color) 1px, transparent 1px);
+  background-size: var(--theme-grid-size, 32px) var(--theme-grid-size, 32px);
   border-left: var(--theme-border-width) solid var(--theme-border-default);
 }
 
