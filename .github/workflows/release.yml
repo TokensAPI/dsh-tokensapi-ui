@@ -1,0 +1,54 @@
+name: release
+
+# Tag-driven release: push a `v*` tag (matching package.json version) →
+# build the plugin, pack a tarball (lib/ + skills/ + manifest), and publish a
+# GitHub Release. The desktop update agent reads `manifest.json` from the
+# latest release to decide whether to hot-swap the client or prompt a restart.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Pack tarball + manifest
+        run: node scripts/make-release.mjs
+
+      - name: Verify tag matches package version
+        run: |
+          PKG_VER="v$(node -p "require('./package.json').version")"
+          if [ "${{ github.ref_name }}" != "$PKG_VER" ]; then
+            echo "::error::tag ${{ github.ref_name }} != package.json version $PKG_VER"
+            exit 1
+          fi
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}"
+          dist/*.tgz dist/manifest.json
+          --title "${{ github.ref_name }}"
+          --generate-notes

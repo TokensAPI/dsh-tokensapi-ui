@@ -1,9 +1,13 @@
 {
   "name": "tokens-core",
   "version": "0.1.0",
-  "description": "TokensHarness core plugin",
+  "description": "TokensHarness core plugin (ELECTRO X UI + skills)",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TokensAPI/dsh-tokensapi-ui.git"
+  },
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
@@ -33,7 +37,8 @@
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
-    }
+    },
+    "minHarness": "0.1.0-rc.6"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",

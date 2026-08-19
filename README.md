@@ -1,44 +1,56 @@
-# tokens-core
+# dsh-tokensapi-ui (`tokens-core`)
 
-TokensHarness 的核心插件。**普通 DSH web-client 插件**（不是 Desktop 插件），所以能在 `dsh web` 里开发。TypeScript + tsdown 构建，样式走生态正统的 **CSS Modules + `--dsw-*` 设计令牌**。
+TokensHarness 的核心 DSH 插件：把 DeepSeek Harness 的 Web/Desktop UI 重塑成
+**ELECTRO X / 粒刻** 电竞主题，并提供技能库（真实 `skill.list` 目录 + 本地上传/内置精选安装）。
 
-## 结构
+普通 DSH（cordis）插件，host + client 两半，随 `dsh web` 与 Desktop 一同加载。
+npm 包名固定为 `tokens-core`（loader 按此名解析），GitHub 仓库名为 `dsh-tokensapi-ui`。
 
-```
-src/index.ts                   Host 侧 apply(ctx)             → 构建 → lib/index.js
-src/client/index.tsx           Client 侧（React + slot）      → 构建 → lib/client.js
-src/client/TokensCoreRow.module.css   CSS Modules + --dsw-* 令牌
-src/dsh-client.d.ts            Client 类型 shim（ClientContext/slots）
-src/css.d.ts                   `*.module.css` 导入为类名映射
-tsdown.config.ts               两产物 + cssModulesPlugin（lightningcss 编译 + 自动注入 <style>）
-cordis.patch.yml               insert 行，把插件挂进 profile 插件树
-```
+## 开发
 
-UI 通过 slot 接入：组件注册到 `sidebar.footer.action`（侧栏底部）。样式在构建期由 lightningcss 编译进 bundle、运行时自动注入 `<style>`（host 只服务这一个 JS）。
-
-## 样式约定（重要）
-
-`desktop/deepseek-harness/docs/web-styling.md` 明文规定，**禁止 Tailwind / 组件库**：
-- `.module.css` + `clsx`；颜色/字体只用 `--dsw-alias-*` 语义令牌，不写字面量颜色 → 自动跟随明暗主题。
-- 复杂 UI 复用 `@deepseek-ai/dsh-client-ui-primitives`（`Button`/`Modal`/`Menu`/`Tooltip`/`Toast`…）。
-
-## 开发（在仓库根用 scripts/dev.sh）
-
-```sh
-scripts/dev.sh deps  tokens-core     # 首次：pnpm install（本插件 dev 依赖）
-scripts/dev.sh build tokens-core     # 构建一次（tsdown）
-scripts/dev.sh add   plugins/tokens-core   # 首次：link 进 web profile
-# 日常：终端A 监听，终端B 起 web
-scripts/dev.sh watch tokens-core     # tsdown --watch
-scripts/dev.sh web                   # http://127.0.0.1:3080
+```bash
+pnpm install
+pnpm build       # tsdown → lib/index.js (host) + lib/client.js (client)
+pnpm typecheck
+pnpm watch       # 改 src 自动重建
 ```
 
-- 改 `src/client/*.tsx` 或 `*.module.css` → 自动重建 → 浏览器热更。
-- 改 `src/index.ts`（host）→ 重启 `dev.sh web`。
-- 类型检查：`pnpm typecheck`（`tsc --noEmit`）。
-- 卸载：`scripts/dev.sh remove tokens-core`。
+在 TokensHarness 主项目里，`plugins/tokens-core` 以 submodule 指向本仓库；
+主项目的 `scripts/dev.sh` 驱动 dev web / 同步到桌面 `.build` 预览。
 
-## 注意
+## 发布（GitHub Releases 交付）
 
-- Client 类型走本地 `src/dsh-client.d.ts` shim：npm 上的 `@deepseek-ai/dsh-client-*` rc 包会拉未发布依赖（`dsh-compact` 404）装不上；host 类型用 GA 的 `@deepseek-ai/cordis`。用到更多 client API 就扩这个 shim。
-- `.npmrc` 关掉了 packageManager 强校验（本包嵌在 yarn 超项目下）。加依赖用 `pnpm install --no-frozen-lockfile`。
+打一个与 `package.json` `version` 匹配的 `v*` 标签即触发 `.github/workflows/release.yml`：
+
+```bash
+# 先 bump package.json 的 version 并提交
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+CI 会：`pnpm build` → `node scripts/make-release.mjs` 打出
+`dist/tokens-core-<version>.tgz` + `dist/manifest.json` → 发布为 GitHub Release。
+
+`manifest.json` 供桌面「更新代理」读取，决定热更方式：
+
+```jsonc
+{
+  "name": "tokens-core",
+  "version": "0.1.0",
+  "tarball": "tokens-core-0.1.0.tgz",
+  "tarballSha256": "…",   // 下载完整性校验
+  "clientSha256": "…",    // lib/client.js 哈希
+  "hostSha256": "…",      // lib/index.js 哈希：与本地不同 → 需重启；相同 → 客户端静默热更
+  "minHarness": "0.1.0-rc.6",
+  "yanked": false,        // 急停开关
+  "publishedAt": "…"
+}
+```
+
+## 更新模型（概览）
+
+- 安装包内置一份**基线**作为地板与安全网；运行时从**可写的 profile** 加载。
+- 更新代理查 `releases/latest`，比对 `version`（取 `max(bundle, profile)`，绝不降级）。
+- 纯客户端改动（`hostSha256` 未变）→ 覆盖 `lib/client.js` → 前端刷新，静默生效。
+- host 改动（`hostSha256` 变）→ 提示重启。
+- 载入失败或不兼容（`minHarness` 不满足）→ 回退到基线。
