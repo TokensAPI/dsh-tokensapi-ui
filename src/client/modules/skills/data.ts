@@ -239,6 +239,49 @@ export function insertSkillCommand(name: string): boolean {
   return true;
 }
 
+const PENDING_KEY = "tokens-pending-skill";
+
+/**
+ * Stash a skill to prefill after a reload. A full boot is the only reliable way
+ * to make a just-installed skill recognised in the composer: DSH caches the
+ * per-session skill lexicon and never invalidates it on install (no
+ * skills/change → client event), so mid-session the new `/name` shows no green
+ * chip and no autocomplete until a preset switch / reset / fresh boot.
+ */
+export function stashPendingSkill(name: string): void {
+  try {
+    sessionStorage.setItem(PENDING_KEY, name);
+  } catch {
+    // Private mode / disabled storage: skip the reload-restore path.
+  }
+}
+
+/**
+ * On boot, consume any stashed skill and prefill the composer once it mounts.
+ * Polls briefly for the composer (it renders a beat after boot), then inserts
+ * `/name ` — by now the fresh catalog recognises it (green chip + autocomplete).
+ */
+export function restorePendingSkillOnBoot(): void {
+  let name: string | null = null;
+  try {
+    name = sessionStorage.getItem(PENDING_KEY);
+    if (name !== null) sessionStorage.removeItem(PENDING_KEY);
+  } catch {
+    return;
+  }
+  if (name === null || name === "") return;
+  const target = name;
+  let tries = 0;
+  const timer = window.setInterval(() => {
+    tries += 1;
+    const done = insertSkillCommand(target);
+    if (done || tries > 40) {
+      window.clearInterval(timer);
+      if (done) showSkillCoach(`已为你填入 /${target}，补充需求后按回车即可调用`);
+    }
+  }, 200);
+}
+
 /**
  * Transient bottom-centre coaching toast. Rendered straight to <body> so it
  * survives the capability overlay closing (the composer lives behind it).

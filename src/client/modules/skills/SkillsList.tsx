@@ -6,15 +6,13 @@ import clsx from "clsx";
 import {
   copySkillCommand,
   installBundled,
-  insertSkillCommand,
-  showSkillCoach,
+  stashPendingSkill,
   uploadSkillFile,
   useBundledSkills,
   useCurrentSessionId,
   useSkillCatalog,
   type SkillEntry,
 } from "./data.ts";
-import { workspace } from "../../shell/workspace-store.ts";
 import { InstallSuccessDialog } from "./InstallSuccessDialog.tsx";
 import styles from "./SkillsList.module.css";
 
@@ -112,17 +110,17 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
     } else setNotice({ kind: "error", text: errorText(result.code) });
   };
 
-  // Return to the current conversation (or the new-chat surface) with the skill
-  // command prefilled, then a coaching toast — the "去对话里直接用" path.
+  // Return to the conversation with the skill command prefilled. We reload:
+  // DSH restores the current session (so "有当前对话就回当前对话"), and a fresh
+  // boot re-warms the skill catalog so `/name` is actually recognised (green +
+  // autocomplete) — mid-session the cache is stale after an install. The pending
+  // command is stashed and restored on boot (see data.ts).
   const goUse = (): void => {
     const target = installed;
+    if (target === null) return;
     setInstalled(null);
-    workspace.close();
-    window.setTimeout(() => {
-      if (target === null) return;
-      insertSkillCommand(target);
-      showSkillCoach(`已为你填入 /${target}，补充需求后按回车即可调用`);
-    }, 150);
+    stashPendingSkill(target);
+    window.location.reload();
   };
 
   const dialog =

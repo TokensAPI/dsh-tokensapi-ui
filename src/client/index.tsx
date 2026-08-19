@@ -13,7 +13,7 @@ import { injectTheme } from "./theme/inject.ts";
 import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
-import { setSkillsRuntime } from "./modules/skills/data.ts";
+import { restorePendingSkillOnBoot, setSkillsRuntime } from "./modules/skills/data.ts";
 
 export const name = "tokens-core";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -37,6 +37,10 @@ export function apply(ctx: ClientContext): void {
     connection: ctx.get("connection") as ConnectionHandle,
     sessions: ctx.get("sessions") as ISessions,
   });
+
+  // After a "去对话使用" reload, prefill the composer with the just-installed
+  // skill command (the reload is what makes it recognised — see data.ts).
+  restorePendingSkillOnBoot();
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.
