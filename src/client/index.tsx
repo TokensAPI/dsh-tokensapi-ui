@@ -7,6 +7,9 @@
 // injects it as a <style> tag automatically; here we just consume the hashed
 // class map. The row follows the host's light/dark theme via the tokens.
 import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+// Type-only: pulls ui-sidebar's SlotMap merge (the 'sidebar.footer.action' entry
+// and its { wide } owner props), so the registration below is type-checked.
+import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import clsx from "clsx";
 import styles from "./TokensCoreRow.module.css";
 
