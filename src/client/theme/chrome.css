@@ -1,6 +1,7 @@
-/* Structural DSH adjustments — tenant-agnostic (NO colors; colors live in the
- * tenant theme + dsh-bridge.css). These reshape the DSH shell to host our brand
- * band and capability nav, and strip upstream branding. */
+/* Structural DSH adjustments — tenant-agnostic (colors, when needed, come only
+ * from --theme-* tokens, never literals — so this stays tenant-neutral). These
+ * reshape the DSH shell to host our brand band and capability nav, strip upstream
+ * branding, and fix a couple of DSH surfaces the token bridge alone can't reach. */
 
 /* Remove DeepSeek / Harness branding: the whale mark (FishLogo, used on the
  * collapsed rail and the conversation hero) by its stable viewBox. */
@@ -24,4 +25,47 @@ div:has(> button[aria-label="打开侧边栏"]) {
 :where(div):has(> [data-shell-overlay]) {
   box-sizing: border-box;
   padding-top: 72px;
+}
+
+/* New-chat ("hero" / empty) surface: match the capability pages by sharing their
+ * electrox grid texture over the canvas — one background language across chat and
+ * module pages. data-phase="hero" is DSH's stable empty-state hook (the opaque
+ * chat surface, so painting here actually reads). */
+[data-phase="hero"] {
+  background-color: var(--theme-bg-canvas);
+  background-image:
+    linear-gradient(var(--theme-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-color) 1px, transparent 1px);
+  background-size:
+    var(--theme-grid-size, 32px) var(--theme-grid-size, 32px),
+    var(--theme-grid-size, 32px) var(--theme-grid-size, 32px);
+}
+
+/* Recolour DSH's hero "empty-glow" from DeepSeek blue (#6187D8) to the tenant
+ * accent, so the new-chat glow reads as brand light instead of a grey-blue halo.
+ * Targeted via the stable empty-glow filter id (the SVG's class is hashed). */
+svg:has(filter[id^="empty-glow"]) ellipse {
+  fill: var(--theme-accent-primary) !important;
+}
+
+/* Composer card: square it and reuse the tenant card border, so the input box
+ * reads like the capability pages' cards (skills etc.) instead of DSH's 22px
+ * pill. data-composer-card is DSH's stable hook. */
+[data-composer-card="true"] {
+  border-radius: var(--theme-radius-card, 0px) !important;
+  border: var(--theme-border-width, 1px) solid var(--theme-border-default) !important;
+}
+
+/* Send button (composer submit). The accent fill is light, so DSH's white arrow
+ * has poor contrast → recolor the glyph to the on-accent foreground. And keep the
+ * disabled (empty composer) state legibly green instead of DSH's 40% dim, which
+ * reads as grey on the new-chat page. */
+button[aria-label="发送消息"] svg {
+  color: var(--theme-fg-on-accent) !important;
+}
+button[aria-label="发送消息"] svg :is(path, polygon, polyline) {
+  fill: var(--theme-fg-on-accent) !important;
+}
+button[aria-label="发送消息"]:disabled {
+  opacity: 0.85 !important;
 }
