@@ -1,12 +1,10 @@
-// Shared capability-nav state. The top nav (in the shell.overlay slot) is always
-// visible; `active` selects which capability page covers the main content area,
+// Shared capability-nav state. `active` is a capability id (from the registry)
 // or null to show the underlying DSH conversation. State lives outside React
-// (separate slot trees) and is read via useSyncExternalStore.
+// (the trigger and the overlay render in separate slot trees) and is read via
+// useSyncExternalStore.
 import { useSyncExternalStore } from "react";
 
-export type Capability = "skills" | "knowledge" | "automation" | "tools";
-
-let active: Capability | null = null;
+let active: string | null = null;
 const listeners = new Set<() => void>();
 
 function emit(): void {
@@ -18,12 +16,12 @@ export const workspace = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  snapshot(): Capability | null {
+  snapshot(): string | null {
     return active;
   },
   /** Toggle a capability page (clicking the active tab returns to chat). */
-  select(capability: Capability): void {
-    active = active === capability ? null : capability;
+  select(id: string): void {
+    active = active === id ? null : id;
     emit();
   },
   /** Return to the conversation. */
@@ -33,7 +31,7 @@ export const workspace = {
   },
 };
 
-/** Subscribe a component to the active capability (null = conversation). */
-export function useActiveCapability(): Capability | null {
+/** Subscribe a component to the active capability id (null = conversation). */
+export function useActiveCapability(): string | null {
   return useSyncExternalStore(workspace.subscribe, workspace.snapshot, workspace.snapshot);
 }

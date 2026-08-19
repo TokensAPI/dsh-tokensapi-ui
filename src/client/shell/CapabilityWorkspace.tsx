@@ -12,19 +12,11 @@
 // injected frame padding (theme/reskin.css).
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { useActiveCapability, workspace, type Capability } from "./workspace-store.ts";
+import { useActiveCapability, workspace } from "./workspace-store.ts";
+import { useCapabilities } from "./capability-registry.ts";
 import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
 import { BRAND_LOGO } from "./brand-logo.ts";
-import { SkillsList } from "../modules/skills/SkillsList.tsx";
-import { ModulePlaceholder } from "../modules/ModulePlaceholder.tsx";
 import styles from "./CapabilityWorkspace.module.css";
-
-const NAV: { id: Capability; label: string; tag: string }[] = [
-  { id: "skills", label: "技能库", tag: "SKILLS" },
-  { id: "knowledge", label: "知识库", tag: "KNOWLEDGE" },
-  { id: "automation", label: "自动化", tag: "AUTOMATION" },
-  { id: "tools", label: "工具库", tag: "TOOLS" },
-];
 
 /** Measure the sidebar column width from the enclosing frame's grid tracks. */
 function useSidebarWidth(node: HTMLElement | null): number {
@@ -65,14 +57,10 @@ function toggleSidebar(): void {
   btn?.click();
 }
 
-function renderModule(active: Capability): React.JSX.Element {
-  if (active === "skills") return <SkillsList />;
-  const label = NAV.find((item) => item.id === active)?.label ?? "";
-  return <ModulePlaceholder title={label} />;
-}
-
 export function CapabilityWorkspace(): React.JSX.Element {
   const active = useActiveCapability();
+  const capabilities = useCapabilities();
+  const activeCap = capabilities.find((item) => item.id === active) ?? null;
   const [barNode, setBarNode] = useState<HTMLElement | null>(null);
   const sidebarWidth = useSidebarWidth(barNode);
   const wide = sidebarWidth === 0 || sidebarWidth > 150;
@@ -126,7 +114,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
         </div>
 
         <nav className={styles.nav} aria-label="能力导航">
-          {NAV.map((item) => (
+          {capabilities.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -162,15 +150,15 @@ export function CapabilityWorkspace(): React.JSX.Element {
         {wide ? <span className={styles.collapseLabel}>收起侧边栏</span> : null}
       </button>
 
-      {active !== null ? (
+      {activeCap !== null ? (
         <div
           className={clsx(styles.page, "theme-canvas")}
           data-theme="electrox"
           style={{ left: `${sidebarWidth}px` }}
           role="region"
-          aria-label={NAV.find((item) => item.id === active)?.label}
+          aria-label={activeCap.label}
         >
-          {renderModule(active)}
+          <activeCap.render />
         </div>
       ) : null}
     </>

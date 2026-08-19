@@ -1,0 +1,27 @@
+/* Structural DSH adjustments — tenant-agnostic (NO colors; colors live in the
+ * tenant theme + dsh-bridge.css). These reshape the DSH shell to host our brand
+ * band and capability nav, and strip upstream branding. */
+
+/* Remove DeepSeek / Harness branding: the whale mark (FishLogo, used on the
+ * collapsed rail and the conversation hero) by its stable viewBox. */
+svg[viewBox="0 0 23.16 17.04"] {
+  display: none !important;
+}
+
+/* Hide the entire sidebar logo row (deepseek/Harness wordmark + the collapse
+ * toggle it holds, whose aria-label is 收起/展开/打开侧边栏). The toggle stays in
+ * the DOM (display:none is still clickable) so our own collapse bar drives it. */
+div:has(> button[aria-label="收起侧边栏"]),
+div:has(> button[aria-label="展开侧边栏"]),
+div:has(> button[aria-label="打开侧边栏"]) {
+  display: none !important;
+}
+
+/* Reserve the top strip for our persistent brand + capability nav band. The
+ * frame is the element that directly contains the shell.overlay layer; :has
+ * selects it without a hashed class. border-box keeps the padding inside 100vh
+ * so the sidebar foot stays on-screen. Must match the topbar height (72px). */
+:where(div):has(> [data-shell-overlay]) {
+  box-sizing: border-box;
+  padding-top: 72px;
+}

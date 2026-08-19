@@ -10,13 +10,27 @@ import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import { injectTheme } from "./theme/inject.ts";
 import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
+import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
+import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
 
 export const name = "tokens-core";
 export const inject = ["slots"];
 
+/** Public capability API exposed to other plugins as `ctx.tokensWorkspace`. */
+export interface TokensWorkspaceApi {
+  registerCapability: typeof registerCapability;
+  listCapabilities: typeof listCapabilities;
+}
+
 export function apply(ctx: ClientContext): void {
-  // Global theme: ELECTRO X design system + DSH re-skin.
+  // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
+
+  // Capability registry: register the built-ins, and expose the API so
+  // third-party plugins can add their own capability tabs.
+  registerBuiltinCapabilities();
+  const api: TokensWorkspaceApi = { registerCapability, listCapabilities };
+  (ctx as { provide?: (key: string, value: unknown) => void }).provide?.("tokensWorkspace", api);
 
   // Persistent capability shell (top nav + pages) over the DSH frame.
   ctx.slots.inject("shell.overlay", () =>
