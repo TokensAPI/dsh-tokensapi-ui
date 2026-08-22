@@ -17,9 +17,13 @@ import { dirname, join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { unzipSync } from 'fflate'
 import type { Context } from '@deepseek-ai/cordis'
+import { defineTool } from '@deepseek-ai/dsh-tools'
+import { AutomationHost } from './automation-host.ts'
+import { DshAutomationExecutor } from './automation-executor.ts'
+import { DshAutomationDelivery } from './automation-delivery.ts'
 
 export const name = 'dsh-tokensapi-ui'
-export const inject = ['connection']
+export const inject = ['connection', 'skills', 'tools', 'agents', 'sessions', 'agentPresets', 'agentDefaultModel']
 
 /** RpcResult shape the Connection transport expects (subset we produce). */
 type RpcResult<T = unknown> =
@@ -45,6 +49,67 @@ const RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/
 const MAX_UPLOAD_BYTES = 10 << 20
 /** Curated skills shipped beside this plugin (../skills relative to lib/index.js). */
 const BUNDLED_DIR = fileURLToPath(new URL("../skills/", import.meta.url))
+const TRUSTED_TOOL_HOSTS = new Set(["electrox.cloud", "www.electrox.cloud"])
+const TOOL_BROWSER_CSS = `
+  :root { color-scheme: dark; }
+  * { scrollbar-width: thin; scrollbar-color: #4a4a4a #0a0a0a; }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: #0a0a0a; }
+  *::-webkit-scrollbar-thumb {
+    min-height: 36px;
+    background: #3c3c3c;
+    border: 2px solid #0a0a0a;
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover { background: #d4ff3a; }
+  *::-webkit-scrollbar-corner { background: #0a0a0a; }
+`
+interface NativeWebContents {
+  loadURL(url: string): Promise<void>
+  close(): void
+  on(event: "will-navigate", listener: (event: { preventDefault(): void }, url: string) => void): void
+  on(event: "did-finish-load", listener: () => void): void
+  insertCSS(css: string): Promise<string>
+  setWindowOpenHandler(handler: (details: { url: string }) => { action: "allow" | "deny" }): void
+}
+
+interface SkillCatalogControl {
+  invalidate(): void
+}
+
+interface HostSkills {
+  registerProvider(
+    factory: (control: SkillCatalogControl) => {
+      name: string
+      list(): Promise<readonly unknown[]>
+      get(): Promise<undefined>
+    },
+  ): () => void
+}
+
+interface HostSessionRecord {
+  id?: string
+  header?: { id?: string; agentPreset?: string }
+}
+
+interface HostSessions {
+  list(): readonly HostSessionRecord[]
+}
+
+interface NativeWebContentsView {
+  webContents: NativeWebContents
+  setBounds(bounds: { x: number; y: number; width: number; height: number }): void
+}
+
+interface NativeBrowserWindow {
+  isDestroyed(): boolean
+  contentView: {
+    addChildView(view: NativeWebContentsView): void
+    removeChildView(view: NativeWebContentsView): void
+  }
+}
+
+let embeddedToolBrowser: { parent: NativeBrowserWindow; view: NativeWebContentsView; url: string } | undefined
 
 /** The user-root skill directory this plugin writes to. */
 function skillRoot(): string {
@@ -341,30 +406,263 @@ async function bundledInstall(root: string, payload: unknown): Promise<RpcResult
 }
 
 /** Route one '/tokens-skills' endpoint over the user skill root. */
-async function dispatch(endpoint: string, payload: unknown): Promise<RpcResult> {
+async function dispatch(
+  endpoint: string,
+  payload: unknown,
+  afterWrite: () => void = () => {},
+): Promise<RpcResult> {
   const root = skillRoot()
   try {
     if (endpoint === "skills/inventory") return await inventory(root)
     if (endpoint === "skills/read") return await read(root, payload)
-    if (endpoint === "skills/upload") return await upload(root, payload)
-    if (endpoint === "skills/delete") return await remove(root, payload)
+    if (endpoint === "skills/upload") {
+      const result = await upload(root, payload)
+      if (result.ok) afterWrite()
+      return result
+    }
+    if (endpoint === "skills/delete") {
+      const result = await remove(root, payload)
+      if (result.ok) afterWrite()
+      return result
+    }
     if (endpoint === "bundled/list") return await bundledList(root)
-    if (endpoint === "bundled/install") return await bundledInstall(root, payload)
+    if (endpoint === "bundled/install") {
+      const result = await bundledInstall(root, payload)
+      if (result.ok) afterWrite()
+      return result
+    }
     return fail(`unknown endpoint ${endpoint}`)
   } catch (error) {
     return fail(error instanceof Error ? error.message : String(error))
   }
 }
 
+/** Refresh the Host catalog and the Web slash menu after a successful write. */
+function notifySkillCatalog(ctx: Context, invalidate: () => void): void {
+  try { invalidate() } catch {}
+  const host = ctx as Context & {
+    emit?: (event: string, ...args: unknown[]) => void
+    get?: (name: string) => unknown
+  }
+  try { host.emit?.("commands/change") } catch {}
+  try {
+    const sessions = host.get?.("sessions") as HostSessions | undefined
+    for (const session of sessions?.list?.() ?? []) {
+      const id = session.id ?? session.header?.id
+      const preset = session.header?.agentPreset
+      if (id === undefined || preset === undefined || preset === "") continue
+      host.emit?.("agent-preset/selected", id, preset)
+    }
+  } catch {}
+}
+
+function trustedToolUrl(raw: unknown): URL | undefined {
+  if (typeof raw !== "string") return undefined
+  try {
+    const url = new URL(raw)
+    if (url.protocol !== "https:" || !TRUSTED_TOOL_HOSTS.has(url.hostname)) return undefined
+    return url
+  } catch {
+    return undefined
+  }
+}
+
+function browserBounds(raw: unknown): { x: number; y: number; width: number; height: number } | undefined {
+  if (raw === null || typeof raw !== "object") return undefined
+  const value = raw as Record<string, unknown>
+  const keys = ["x", "y", "width", "height"] as const
+  if (!keys.every((key) => typeof value[key] === "number" && Number.isFinite(value[key]))) return undefined
+  return {
+    x: Math.max(0, Math.round(value.x as number)),
+    y: Math.max(0, Math.round(value.y as number)),
+    width: Math.max(1, Math.round(value.width as number)),
+    height: Math.max(1, Math.round(value.height as number)),
+  }
+}
+
+function disposeEmbeddedToolBrowser(): void {
+  const browser = embeddedToolBrowser
+  embeddedToolBrowser = undefined
+  if (browser === undefined) return
+  try { browser.parent.contentView.removeChildView(browser.view) } catch {}
+  try { browser.view.webContents.close() } catch {}
+}
+
+/** Open one trusted online tool inside an Electron-owned application window. */
+async function dispatchBrowser(endpoint: string, payload: unknown): Promise<RpcResult> {
+  if (endpoint === "hide") {
+    disposeEmbeddedToolBrowser()
+    return { ok: true, value: { hidden: true } }
+  }
+  const input = payload as { url?: unknown; bounds?: unknown } | null
+  const bounds = browserBounds(input?.bounds)
+  if (endpoint === "bounds") {
+    if (bounds === undefined) return fail("invalid-bounds")
+    embeddedToolBrowser?.view.setBounds(bounds)
+    return { ok: true, value: { updated: embeddedToolBrowser !== undefined } }
+  }
+  if (endpoint !== "mount") return fail(`unknown browser endpoint ${endpoint}`)
+  const url = trustedToolUrl(input?.url)
+  if (url === undefined) return fail("untrusted-url")
+  if (bounds === undefined) return fail("invalid-bounds")
+  try {
+    // Keep the ordinary web composition loadable: Electron is resolved only
+    // when this RPC is actually called inside the desktop main process.
+    const electronModule = "electron"
+    const electron = await import(electronModule) as unknown as {
+      BrowserWindow: {
+        getFocusedWindow(): NativeBrowserWindow | null
+        getAllWindows(): NativeBrowserWindow[]
+      }
+      WebContentsView: new (options: Record<string, unknown>) => NativeWebContentsView
+    }
+    if (embeddedToolBrowser !== undefined && !embeddedToolBrowser.parent.isDestroyed()) {
+      embeddedToolBrowser.view.setBounds(bounds)
+      if (embeddedToolBrowser.url !== url.href) {
+        await embeddedToolBrowser.view.webContents.loadURL(url.href)
+        embeddedToolBrowser.url = url.href
+      }
+      return { ok: true, value: { mounted: true } }
+    }
+    const parent = electron.BrowserWindow.getFocusedWindow()
+      ?? electron.BrowserWindow.getAllWindows().find((window) => !window.isDestroyed())
+    if (parent === undefined || parent === null) return fail("desktop-window-unavailable")
+    const view = new electron.WebContentsView({
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+        partition: "persist:tokens-electrox-tools",
+      },
+    })
+    const allow = (raw: string): boolean => trustedToolUrl(raw) !== undefined
+    view.webContents.on("will-navigate", (event, target) => {
+      if (!allow(target)) event.preventDefault()
+    })
+    view.webContents.on("did-finish-load", () => {
+      void view.webContents.insertCSS(TOOL_BROWSER_CSS).catch(() => {})
+    })
+    view.webContents.setWindowOpenHandler(({ url: target }) => ({ action: allow(target) ? "allow" : "deny" }))
+    view.setBounds(bounds)
+    parent.contentView.addChildView(view)
+    embeddedToolBrowser = { parent, view, url: url.href }
+    await view.webContents.loadURL(url.href)
+    return { ok: true, value: { mounted: true } }
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : String(error))
+  }
+}
+
+function registerAutomationTools(ctx: Context & { tools: { register(tool: ReturnType<typeof defineTool>): unknown } }, host: AutomationHost): void {
+  const output = {
+    schema: { type: 'object', properties: { result: { type: 'string', required: true } }, additionalProperties: false } as const,
+    render: (_args: unknown, value: { result: string }) => [{ type: 'text' as const, text: value.result }],
+  }
+  const invoke = async (endpoint: string, payload: unknown): Promise<{ result: string }> => {
+    const response = await host.dispatch(endpoint, payload)
+    if (!response.ok) throw Object.assign(new Error(response.error.message), { code: response.error.code })
+    return { result: JSON.stringify(response.value, null, 2) }
+  }
+  ctx.tools.register(defineTool({
+    name: 'automation_list',
+    description: 'List all persistent automation tasks and their run history. Use this whenever the user asks about scheduled tasks, reminders, next runs, or past automation results.',
+    parameters: {}, output,
+    execute: () => invoke('snapshot', {}),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_get',
+    description: 'Get one automation task by id.',
+    parameters: { id: { type: 'string', required: true } }, output,
+    execute: (args) => invoke('get', args),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_create',
+    description: 'Create and immediately enable a persistent local automation task. Use only when the user clearly asks to create or schedule future work. State the schedule and local-computer limitation in the response.',
+    parameters: {
+      name: { type: 'string', required: true },
+      description: { type: 'string', required: true, description: 'Complete prompt the future Agent should execute.' },
+      frequency: { type: 'string', required: true, enum: ['仅一次', '每天', '每周', '每月'] },
+      time: { type: 'string', required: true, description: 'Local Host time in HH:mm format.' },
+      agent: { type: 'string', description: 'Display label; defaults to 当前 Agent.' },
+      skill: { type: 'string', description: 'Optional skill display label.' },
+      delivery_mode: { type: 'string', enum: ['origin_chat', 'new_chat', 'inbox', 'silent'], description: 'Where completed results should be delivered. Defaults to the current chat.' },
+      desktop_notification: { type: 'boolean', description: 'Whether the client should also show a desktop notification.' },
+    }, output,
+    execute: (args, exec) => invoke('create', {
+      ...args,
+      projectPath: exec.agent?.session.header.cwd,
+      originSessionId: exec.agent?.session.id,
+      deliveryMode: args.delivery_mode,
+      desktopNotification: args.desktop_notification,
+      agent: args.agent ?? '当前 Agent', skill: args.skill ?? '暂不选择',
+    }),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_update',
+    description: 'Update an existing automation task. Use only after the user has clearly requested the change.',
+    parameters: {
+      id: { type: 'string', required: true }, name: { type: 'string' }, description: { type: 'string' },
+      frequency: { type: 'string', enum: ['仅一次', '每天', '每周', '每月'] }, time: { type: 'string' },
+    }, output,
+    execute: (args) => invoke('update', args),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_set_enabled',
+    description: 'Pause or resume an automation task.',
+    parameters: { id: { type: 'string', required: true }, enabled: { type: 'boolean', required: true } }, output,
+    execute: (args) => invoke('toggle', args),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_run_now',
+    description: 'Run an automation task immediately. This consumes model resources; use only when the user explicitly requests an immediate run.',
+    parameters: { id: { type: 'string', required: true } }, output,
+    timeoutMs: 6 * 60_000,
+    execute: (args) => invoke('run-now', args),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'automation_delete',
+    description: 'Permanently delete an automation task. Call only after the user explicitly confirms deletion.',
+    parameters: { id: { type: 'string', required: true } }, output,
+    execute: (args) => invoke('delete', args),
+  }))
+}
+
 export function apply(ctx: Context): void {
   ctx.logger.info("[dsh-tokensapi-ui] host loaded")
   // Mount the channel only when the Connection service is present (headless
   // compositions load the plugin but expose no transport).
-  ctx.inject(["connection"], (scoped) => {
+  ctx.inject(["connection", "skills", "tools", "agents", "sessions", "agentPresets", "agentDefaultModel"], (scoped) => {
     const connection = (scoped as unknown as { connection: HostConnection }).connection
+    const skills = (scoped as unknown as { skills: HostSkills }).skills
+    let invalidateSkills = (): void => {}
     scoped.effect(
-      () => connection.rpc.handle("/tokens-skills", dispatch, { authority: "trusted-host" }),
+      () => skills.registerProvider((control) => {
+        invalidateSkills = control.invalidate
+        return {
+          name: "dsh-tokensapi-ui-refresh",
+          list: async () => [],
+          get: async () => undefined,
+        }
+      }),
+      "tokens-core: skills catalog invalidator",
+    )
+    const dispatchSkills = (endpoint: string, payload: unknown): Promise<RpcResult> =>
+      dispatch(endpoint, payload, () => notifySkillCatalog(scoped, invalidateSkills))
+    scoped.effect(
+      () => connection.rpc.handle("/tokens-skills", dispatchSkills, { authority: "trusted-host" }),
       "tokens-core: skills rpc channel",
     )
+    scoped.effect(
+      () => connection.rpc.handle("/tokens-browser", dispatchBrowser, { authority: "trusted-host" }),
+      "tokens-core: embedded browser rpc channel",
+    )
+    const automation = new AutomationHost(new DshAutomationExecutor(scoped), {}, new DshAutomationDelivery(scoped))
+    void automation.start().catch((error) => scoped.logger.error(`tokens automation failed to start: ${String(error)}`))
+    scoped.effect(
+      () => connection.rpc.handle("/tokens-automation", (endpoint, payload) => automation.dispatch(endpoint, payload), { authority: "trusted-host" }),
+      "tokens-core: automation rpc channel",
+    )
+    scoped.effect(() => () => automation.dispose(), "tokens-core: automation scheduler")
+    registerAutomationTools(scoped as Context & { tools: { register(tool: ReturnType<typeof defineTool>): unknown } }, automation)
   })
 }

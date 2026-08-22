@@ -25,7 +25,8 @@
     "build": "tsdown",
     "prepare": "tsdown",
     "watch": "tsdown --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dsh": {
     "client": {
@@ -41,12 +42,24 @@
     },
     "minHarness": "0.1.0-rc.6"
   },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-llm": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-session": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.6"
+  },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.0-rc.6",
     "@deepseek-ai/dsh-api-remotes": "^0.1.0-rc.5",
     "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-client-ui-layout": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-sidebar": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-llm": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-session": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.6",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "clsx": "^2.1.1",
@@ -54,6 +67,6 @@
     "lightningcss": "^1.32.0",
     "tsdown": "0.22.2",
     "typescript": "6.0.3",
-    "@deepseek-ai/dsh-client-ui-layout": "^0.1.0-rc.6"
+    "vitest": "3.2.7"
   }
 }

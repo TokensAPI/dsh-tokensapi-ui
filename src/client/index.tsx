@@ -13,7 +13,10 @@ import { injectTheme } from "./theme/inject.ts";
 import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
-import { restorePendingSkillOnBoot, setSkillsRuntime } from "./modules/skills/data.ts";
+import { setSkillsRuntime } from "./modules/skills/data.ts";
+import { setToolsBrowserRuntime } from "./modules/tools/browser.ts";
+import { setAutomationRuntime } from "./modules/automation/data.ts";
+import { observeStartupGate } from "./startup/StartupLoading.ts";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -29,18 +32,17 @@ export interface TokensWorkspaceApi {
 export function apply(ctx: ClientContext): void {
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
+  ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
 
   // Hand the skills module its data plane: the root-context connection (for the
   // official skill.list RPC) + the sessions feed (current session id). Captured
   // once here so module components never read services off a per-call argument.
   setSkillsRuntime({
     connection: ctx.get("connection") as ConnectionHandle,
-    sessions: ctx.get("sessions") as ISessions,
+    sessions: ctx.get("sessions") as unknown as ISessions,
   });
-
-  // After a "去对话使用" reload, prefill the composer with the just-installed
-  // skill command (the reload is what makes it recognised — see data.ts).
-  restorePendingSkillOnBoot();
+  setToolsBrowserRuntime(ctx.get("connection") as ConnectionHandle);
+  setAutomationRuntime(ctx.get("connection") as ConnectionHandle);
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.

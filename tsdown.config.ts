@@ -109,6 +109,13 @@ const host: UserConfig = {
   dts: false,
   clean: false,
   sourcemap: true,
+  external: [
+    '@deepseek-ai/cordis',
+    '@deepseek-ai/dsh-agent',
+    '@deepseek-ai/dsh-llm',
+    '@deepseek-ai/dsh-session',
+    '@deepseek-ai/dsh-tools',
+  ],
 }
 
 const client: UserConfig = {
