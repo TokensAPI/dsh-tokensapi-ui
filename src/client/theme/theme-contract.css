@@ -25,6 +25,8 @@
 
   --theme-accent-primary: #ffffff;
   --theme-accent-primary-hover: #ffffff;
+  --theme-accent-fill: var(--theme-accent-primary);
+  --theme-accent-fill-hover: var(--theme-accent-primary-hover);
   --theme-accent-secondary: #a0a0a0;
   --theme-accent-soft: rgb(255 255 255 / 8%);
   --theme-accent-glow: rgb(255 255 255 / 22%);
@@ -108,8 +110,8 @@
 
 .theme-button-primary {
   color: var(--theme-fg-on-accent);
-  background: var(--theme-accent-primary);
-  border: var(--theme-border-width) solid var(--theme-accent-primary);
+  background: var(--theme-accent-fill);
+  border: var(--theme-border-width) solid var(--theme-accent-fill);
   border-radius: var(--theme-radius-control);
   transition:
     filter var(--theme-duration-control) var(--theme-ease-standard),

@@ -42,7 +42,7 @@
   height: 6px;
   margin-left: 4px;
   border-radius: 50%;
-  background: var(--theme-accent-primary);
+  background: var(--theme-accent-fill);
   box-shadow: 0 0 8px var(--theme-accent-glow);
 }
 

@@ -137,7 +137,7 @@
   left: 12px;
   height: 2px;
   content: "";
-  background: var(--theme-accent-primary);
+  background: var(--theme-accent-fill);
   opacity: 0;
   transition: opacity var(--theme-duration-control) var(--theme-ease-standard);
 }

@@ -25,6 +25,19 @@ export const DEFAULT_SKIN = "electrox";
 const STORAGE_KEY = "dsh-tokensapi-ui-skin";
 const STYLE_TAG = "dsh-tokensapi-ui-theme";
 
+type ColorScheme = "light" | "dark";
+
+/** Read the effective DSH appearance. Explicit dark mode is marked on body;
+ * light and follow-system are reflected by the root color-scheme style. */
+function getDshColorScheme(): ColorScheme {
+  if (document.body?.hasAttribute("data-ds-dark-theme")) return "dark";
+  return getComputedStyle(document.documentElement).colorScheme === "dark" ? "dark" : "light";
+}
+
+function syncColorScheme(): void {
+  document.documentElement.dataset.colorScheme = getDshColorScheme();
+}
+
 /** All registered skin ids (drives a skin picker). */
 export function listSkins(): readonly string[] {
   return Object.keys(SKINS);
@@ -58,8 +71,18 @@ export function injectTheme(): () => void {
   const root = document.documentElement;
   root.dataset.theme = getActiveSkin();
 
+  syncColorScheme();
+  const observer = new MutationObserver(syncColorScheme);
+  observer.observe(root, { attributes: true, attributeFilter: ["style"] });
+  if (document.body !== null) {
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-ds-dark-theme"] });
+  }
+
   const existing = document.head.querySelector(`style[data-plugin-css="${STYLE_TAG}"]`);
-  if (existing !== null) return () => existing.remove();
+  if (existing !== null) return () => {
+    observer.disconnect();
+    existing.remove();
+  };
 
   const skinSheets = Object.values(SKINS).join("\n");
   const tag = document.createElement("style");
@@ -68,7 +91,9 @@ export function injectTheme(): () => void {
   tag.textContent = `${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
   document.head.appendChild(tag);
   return () => {
+    observer.disconnect();
     tag.remove();
     delete root.dataset.theme;
+    delete root.dataset.colorScheme;
   };
 }

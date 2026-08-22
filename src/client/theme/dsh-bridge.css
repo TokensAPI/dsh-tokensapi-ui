@@ -21,7 +21,7 @@ body:not([data-ds-dark-theme]) {
   --dsw-specific-tip: var(--theme-bg-surface-raised) !important;
   --dsw-specific-sidebar-nav-item-active: var(--theme-accent-soft) !important;
   --dsw-specific-sidebar-nav-item-active-accent: var(--theme-accent-primary) !important;
-  --dsw-specific-sidebar-nav-item-hover: rgb(255 255 255 / 6%) !important;
+  --dsw-specific-sidebar-nav-item-hover: color-mix(in srgb, var(--theme-fg-primary) 6%, transparent) !important;
 
   /* State colors */
   --dsw-alias-state-error-primary: var(--theme-danger) !important;
@@ -69,21 +69,21 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-state-business-tertiary: var(--theme-accent-soft) !important;
   --dsw-alias-brand-primary-new-colorprimary-new-color: var(--theme-accent-primary) !important;
   --dsw-alias-interactive-bg-hover-accent: var(--theme-accent-soft) !important;
-  --dsw-alias-button-info-fill: var(--theme-accent-primary) !important;
-  --dsw-alias-button-info-hover: var(--theme-accent-primary-hover) !important;
+  --dsw-alias-button-info-fill: var(--theme-accent-fill) !important;
+  --dsw-alias-button-info-hover: var(--theme-accent-fill-hover) !important;
 
   /* Neutral elevated / floating buttons (e.g. the sidebar "新会话" button) */
   --dsw-alias-button-elevated-fill: var(--theme-bg-surface-raised) !important;
   --dsw-alias-button-floating-fill: var(--theme-bg-surface-raised) !important;
   --dsw-alias-button-floating-hover: var(--theme-border-default) !important;
-  --dsw-alias-button-contrast-fill: var(--theme-accent-primary) !important;
+  --dsw-alias-button-contrast-fill: var(--theme-accent-fill) !important;
 
   /* Brand + primary action */
   --dsw-alias-brand-primary: var(--theme-accent-primary) !important;
   --dsw-alias-brand-text: var(--theme-accent-primary) !important;
   --dsw-alias-brand-primary-invert: var(--theme-fg-on-accent) !important;
-  --dsw-alias-button-primary-fill: var(--theme-accent-primary) !important;
-  --dsw-alias-button-primary-hover: var(--theme-accent-primary-hover) !important;
+  --dsw-alias-button-primary-fill: var(--theme-accent-fill) !important;
+  --dsw-alias-button-primary-hover: var(--theme-accent-fill-hover) !important;
   --dsw-alias-button-primary-dimmed: var(--theme-accent-glow) !important;
   --dsw-alias-button-ghost-active-fill: var(--theme-accent-soft) !important;
   --dsw-alias-button-ghost-active-border: var(--theme-border-focus) !important;

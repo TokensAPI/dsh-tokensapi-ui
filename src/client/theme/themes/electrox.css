@@ -7,27 +7,29 @@
   --theme-font-display: "Archivo Black", "Helvetica Neue", "Arial Black", system-ui, sans-serif;
   --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --theme-bg-canvas: #070707;
-  --theme-bg-shell: #0a0a0a;
-  --theme-bg-surface: #0f0f0f;
-  --theme-bg-surface-raised: #181818;
-  --theme-bg-overlay: rgb(7 7 7 / 80%);
+  --theme-bg-canvas: #11140f;
+  --theme-bg-shell: #161a14;
+  --theme-bg-surface: #1d221a;
+  --theme-bg-surface-raised: #272e23;
+  --theme-bg-overlay: rgb(10 12 9 / 78%);
 
   --theme-fg-primary: #ffffff;
   --theme-fg-secondary: #a8a8a8;
   --theme-fg-muted: #8a8a8a;
   --theme-fg-on-accent: #0a0a0a;
 
-  --theme-border-subtle: #1d1d1d;
-  --theme-border-default: #262626;
-  --theme-border-strong: #444444;
+  --theme-border-subtle: #252b21;
+  --theme-border-default: #343d2f;
+  --theme-border-strong: #56624e;
   --theme-border-focus: #d4ff3a;
 
   --theme-accent-primary: #d4ff3a;
   --theme-accent-primary-hover: #ddff63;
+  --theme-accent-fill: #d4ff3a;
+  --theme-accent-fill-hover: #ddff63;
   --theme-accent-secondary: #ffffff;
-  --theme-accent-soft: rgb(212 255 58 / 10%);
-  --theme-accent-glow: rgb(212 255 58 / 25%);
+  --theme-accent-soft: rgb(212 255 58 / 13%);
+  --theme-accent-glow: rgb(212 255 58 / 30%);
 
   --theme-success: #d4ff3a;
   --theme-warning: #fbbf24;
@@ -40,7 +42,48 @@
 
   --theme-shadow-card-hover: 0 16px 60px -20px rgb(212 255 58 / 25%);
   --theme-shadow-button-hover: 0 0 26px rgb(212 255 58 / 35%);
-  --theme-grid-color: rgb(212 255 58 / 4%);
+  --theme-grid-color: rgb(212 255 58 / 6%);
+}
+
+/* Light ELECTRO X keeps the industrial geometry and acid-lime identity, but
+ * moves it onto a warm technical-paper palette. The accent is intentionally
+ * darker than the dark-mode lime so controls and text remain accessible on
+ * white surfaces. */
+[data-theme="electrox"][data-color-scheme="light"] {
+  color-scheme: light;
+
+  --theme-bg-canvas: #f4f6f0;
+  --theme-bg-shell: #e9ede5;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #f0f3ec;
+  --theme-bg-overlay: rgb(21 24 20 / 38%);
+
+  --theme-fg-primary: #151814;
+  --theme-fg-secondary: #4f574b;
+  --theme-fg-muted: #747d6e;
+  --theme-fg-on-accent: #101700;
+
+  --theme-border-subtle: #e1e5dc;
+  --theme-border-default: #cfd5ca;
+  --theme-border-strong: #929d8b;
+  --theme-border-focus: #769900;
+
+  --theme-accent-primary: #769900;
+  --theme-accent-primary-hover: #638200;
+  --theme-accent-fill: #b7ec25;
+  --theme-accent-fill-hover: #c7f944;
+  --theme-accent-secondary: #151814;
+  --theme-accent-soft: rgb(151 194 13 / 14%);
+  --theme-accent-glow: rgb(151 194 13 / 24%);
+
+  --theme-success: #397a34;
+  --theme-warning: #9a6500;
+  --theme-danger: #c63b42;
+  --theme-info: #366db3;
+
+  --theme-shadow-card-hover: 0 18px 54px -24px rgb(54 73 34 / 30%);
+  --theme-shadow-button-hover: 0 8px 24px rgb(118 153 0 / 22%);
+  --theme-grid-color: rgb(81 96 70 / 8%);
 }
 
 /* Optional client-specific cut-corner geometry. */

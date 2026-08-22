@@ -80,3 +80,15 @@ body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
   --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;
   background: var(--theme-bg-shell) !important;
 }
+
+/* DSH's appearance cubes use a fixed neutral-grey selected border instead of
+ * an alias token. Restore a clear tenant selection signal without depending
+ * on the component's generated class name. */
+[role="dialog"] button[aria-pressed="true"] {
+  color: var(--theme-accent-primary) !important;
+  background: var(--theme-accent-soft) !important;
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 28%, transparent),
+    0 8px 24px -18px var(--theme-accent-glow) !important;
+}

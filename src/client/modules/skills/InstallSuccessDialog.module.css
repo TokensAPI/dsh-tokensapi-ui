@@ -28,7 +28,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--theme-accent-primary);
+  background: var(--theme-accent-fill);
   color: var(--theme-fg-on-accent);
   font-size: 20px;
   font-weight: 800;
