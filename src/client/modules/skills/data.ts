@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { ConnectionHandle, SessionId, SkillEntry } from "@deepseek-ai/dsh-api-remotes/client";
 import type { ISessions } from "@deepseek-ai/dsh-client-runtime/client";
+import { workspace } from "../../shell/workspace-store.ts";
 
 export type { SkillEntry } from "@deepseek-ai/dsh-api-remotes/client";
 
@@ -239,47 +240,25 @@ export function insertSkillCommand(name: string): boolean {
   return true;
 }
 
-const PENDING_KEY = "tokens-pending-skill";
+export type UseSkillResult = "ready" | "no-session" | "composer-unavailable";
 
-/**
- * Stash a skill to prefill after a reload. A full boot is the only reliable way
- * to make a just-installed skill recognised in the composer: DSH caches the
- * per-session skill lexicon and never invalidates it on install (no
- * skills/change → client event), so mid-session the new `/name` shows no green
- * chip and no autocomplete until a preset switch / reset / fresh boot.
- */
-export function stashPendingSkill(name: string): void {
-  try {
-    sessionStorage.setItem(PENDING_KEY, name);
-  } catch {
-    // Private mode / disabled storage: skip the reload-restore path.
+/** Close the skills workspace and prefill the active task's composer. */
+export async function useSkillInCurrentTask(name: string): Promise<UseSkillResult> {
+  const current = runtime?.sessions.list.getSnapshot().current ?? null;
+  if (current === null) {
+    showSkillCoach("请先新建或选择一个任务，再使用该技能");
+    return "no-session";
   }
-}
-
-/**
- * On boot, consume any stashed skill and prefill the composer once it mounts.
- * Polls briefly for the composer (it renders a beat after boot), then inserts
- * `/name ` — by now the fresh catalog recognises it (green chip + autocomplete).
- */
-export function restorePendingSkillOnBoot(): void {
-  let name: string | null = null;
-  try {
-    name = sessionStorage.getItem(PENDING_KEY);
-    if (name !== null) sessionStorage.removeItem(PENDING_KEY);
-  } catch {
-    return;
-  }
-  if (name === null || name === "") return;
-  const target = name;
-  let tries = 0;
-  const timer = window.setInterval(() => {
-    tries += 1;
-    const done = insertSkillCommand(target);
-    if (done || tries > 40) {
-      window.clearInterval(timer);
-      if (done) showSkillCoach(`已为你填入 /${target}，补充需求后按回车即可调用`);
+  workspace.close();
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (insertSkillCommand(name)) {
+      showSkillCoach(`已为你填入 /${name}，补充需求后按回车即可调用`);
+      return "ready";
     }
-  }, 200);
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 50));
+  }
+  showSkillCoach("未找到当前任务的输入框，请稍后重试");
+  return "composer-unavailable";
 }
 
 /**

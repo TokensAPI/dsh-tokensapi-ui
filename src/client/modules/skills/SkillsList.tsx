@@ -4,10 +4,9 @@
 import { useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
-  copySkillCommand,
   installBundled,
-  stashPendingSkill,
   uploadSkillFile,
+  useSkillInCurrentTask,
   useBundledSkills,
   useCurrentSessionId,
   useSkillCatalog,
@@ -55,7 +54,6 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   const bundled = useBundledSkills();
   const [category, setCategory] = useState<Category>("all");
   const [query, setQuery] = useState("");
-  const [copied, setCopied] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [installed, setInstalled] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -77,13 +75,6 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
 
   const countFor = (id: Category): number =>
     id === "bundled" ? bundled.length : allSkills.filter((skill) => inCategory(skill, id)).length;
-
-  const onCopy = async (name: string): Promise<void> => {
-    const ok = await copySkillCommand(name);
-    if (!ok) return;
-    setCopied(name);
-    window.setTimeout(() => setCopied((current) => (current === name ? null : current)), 1500);
-  };
 
   const doUpload = async (file: File, overwrite: boolean): Promise<void> => {
     setNotice({ kind: "info", text: `正在安装 ${file.name}…` });
@@ -110,22 +101,23 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
     } else setNotice({ kind: "error", text: errorText(result.code) });
   };
 
-  // Return to the conversation with the skill command prefilled. We reload:
-  // DSH restores the current session (so "有当前对话就回当前对话"), and a fresh
-  // boot re-warms the skill catalog so `/name` is actually recognised (green +
-  // autocomplete) — mid-session the cache is stale after an install. The pending
-  // command is stashed and restored on boot (see data.ts).
-  const goUse = (): void => {
+  const goUse = async (): Promise<void> => {
     const target = installed;
     if (target === null) return;
-    setInstalled(null);
-    stashPendingSkill(target);
-    window.location.reload();
+    const result = await useSkillInCurrentTask(target);
+    if (result === "ready") setInstalled(null);
+    else if (result === "no-session") {
+      setInstalled(null);
+      setNotice({ kind: "error", text: "请先新建或选择一个任务，再使用该技能。" });
+    } else {
+      setInstalled(null);
+      setNotice({ kind: "error", text: "未找到当前任务的输入框，请稍后重试。" });
+    }
   };
 
   const dialog =
     installed === null ? null : (
-      <InstallSuccessDialog name={installed} onClose={() => setInstalled(null)} onGoUse={goUse} />
+      <InstallSuccessDialog name={installed} onClose={() => setInstalled(null)} onGoUse={() => void goUse()} />
     );
 
   const header = (
@@ -331,9 +323,9 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
                 <button
                   type="button"
                   className={clsx("theme-button-primary", "theme-cut-corner", styles.cardAction)}
-                  onClick={() => onCopy(skill.name)}
+                  onClick={() => void useSkillInCurrentTask(skill.name)}
                 >
-                  {copied === skill.name ? "✓ 已复制" : `复制命令 /${skill.name}`}
+                  在当前任务中使用
                 </button>
               </article>
             ))}

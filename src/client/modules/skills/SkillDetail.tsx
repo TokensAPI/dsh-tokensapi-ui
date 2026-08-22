@@ -5,7 +5,7 @@
 // channel (deferred) — a placeholder marks where it will slot in.
 import { useState } from "react";
 import clsx from "clsx";
-import { copySkillCommand, deleteSkill, useOwnedSkills, type SkillEntry } from "./data.ts";
+import { copySkillCommand, deleteSkill, useOwnedSkills, useSkillInCurrentTask, type SkillEntry } from "./data.ts";
 import styles from "./SkillDetail.module.css";
 
 export function SkillDetail({ skill, onBack }: { skill: SkillEntry; onBack: () => void }): React.JSX.Element {
@@ -67,6 +67,13 @@ export function SkillDetail({ skill, onBack }: { skill: SkillEntry; onBack: () =
           <button
             type="button"
             className={clsx("theme-button-primary", "theme-cut-corner", styles.copy)}
+            onClick={() => void useSkillInCurrentTask(skill.name)}
+          >
+            在当前任务中使用
+          </button>
+          <button
+            type="button"
+            className={clsx("theme-button-secondary", styles.copy)}
             onClick={onCopy}
           >
             {copied ? "✓ 已复制" : "复制命令"}
