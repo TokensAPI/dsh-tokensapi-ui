@@ -1,0 +1,21 @@
+.backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 28px;
+  color: var(--theme-fg-primary);
+  background:
+    radial-gradient(circle at 50% 42%, var(--theme-accent-soft), transparent 36%),
+    linear-gradient(var(--theme-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-color) 1px, transparent 1px),
+    color-mix(in srgb, var(--theme-bg-canvas) 96%, transparent);
+  background-size: auto, var(--theme-grid-size) var(--theme-grid-size), var(--theme-grid-size) var(--theme-grid-size), auto;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 560px) {
+  .backdrop { padding: 18px; }
+}
