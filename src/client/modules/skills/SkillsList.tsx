@@ -5,6 +5,8 @@ import { useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   installBundled,
+  mergeBundledSkillCatalog,
+  deleteSkill,
   uploadSkillFile,
   useSkillInCurrentTask,
   useBundledSkills,
@@ -58,7 +60,10 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   const [installed, setInstalled] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const allSkills = state.phase === "ready" ? state.skills : [];
+  const allSkills = useMemo(
+    () => mergeBundledSkillCatalog(state.phase === "ready" ? state.skills : [], bundled),
+    [bundled, state],
+  );
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -101,6 +106,12 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
     } else setNotice({ kind: "error", text: errorText(result.code) });
   };
 
+  const onDeleteBundled = async (name: string): Promise<void> => {
+    setNotice({ kind: "info", text: `正在删除 ${name}…` });
+    const result = await deleteSkill(name);
+    setNotice(result.ok ? { kind: "success", text: `已删除 ${name}。` } : { kind: "error", text: `删除失败：${result.code}` });
+  };
+
   const goUse = async (): Promise<void> => {
     const target = installed;
     if (target === null) return;
@@ -137,7 +148,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
           aria-label="搜索技能"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          disabled={category === "bundled" || state.phase !== "ready"}
+          disabled={category === "bundled"}
         />
         <input ref={fileRef} type="file" accept=".md,.zip" hidden onChange={onFile} aria-hidden="true" />
         <button
@@ -221,19 +232,28 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
                   <div className={styles.divider} />
                   <div className={styles.cardMeta}>
                     <span className={styles.path}>/{skill.name}</span>
+                    <button
+                      type="button"
+                      className={styles.detailLink}
+                      onClick={() => onOpen({
+                        name: skill.name,
+                        description: skill.description,
+                        modelInvocable: true,
+                      } as SkillEntry)}
+                    >
+                      详情 →
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className={clsx(
-                      skill.installed ? "theme-button-secondary" : "theme-button-primary",
-                      skill.installed ? undefined : "theme-cut-corner",
-                      styles.cardAction,
+                  <div className={styles.cardActions}>
+                    {skill.installed ? (
+                      <>
+                        <span className={styles.installedState}>✓ 已安装</span>
+                        <button type="button" className={styles.removeAction} onClick={() => void onDeleteBundled(skill.name)}>删除</button>
+                      </>
+                    ) : (
+                      <button type="button" className={clsx("theme-button-primary", "theme-cut-corner", styles.cardAction)} onClick={() => void onInstallBundled(skill.name)}>安装</button>
                     )}
-                    disabled={skill.installed}
-                    onClick={() => void onInstallBundled(skill.name)}
-                  >
-                    {skill.installed ? "✓ 已安装" : "安装"}
-                  </button>
+                  </div>
                 </article>
               ))}
             </div>
@@ -244,7 +264,7 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
   }
 
   // Catalog phases (no-session / loading / error): a single centered placeholder.
-  if (state.phase !== "ready") {
+  if (state.phase !== "ready" && allSkills.length === 0) {
     return (
       <div className={styles.layout}>
         {dialog}
@@ -323,7 +343,9 @@ export function SkillsList({ onOpen }: { onOpen: (skill: SkillEntry) => void }):
                 <button
                   type="button"
                   className={clsx("theme-button-primary", "theme-cut-corner", styles.cardAction)}
-                  onClick={() => void useSkillInCurrentTask(skill.name)}
+                  onClick={() => {
+                    void useSkillInCurrentTask(skill.name);
+                  }}
                 >
                   在当前任务中使用
                 </button>

@@ -1,0 +1,17 @@
+.mark {
+  display: block;
+  flex: none;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.name {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

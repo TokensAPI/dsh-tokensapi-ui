@@ -79,6 +79,10 @@ function decorateAccessForm(gate: HTMLElement): void {
 function decorateCheckingGate(): void {
   const gate = document.getElementById(GATE_ID);
   if (!(gate instanceof HTMLElement)) return;
+  if (document.documentElement.dataset.theme !== "electrox") {
+    clearDecoration(gate);
+    return;
+  }
   if (gate.querySelector(`#${KEY_INPUT_ID}`) !== null) {
     decorateAccessForm(gate);
     return;
@@ -127,7 +131,12 @@ export function observeStartupGate(): () => void {
   if (typeof document === "undefined") return () => {};
   decorateCheckingGate();
   const observer = new MutationObserver(decorateCheckingGate);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
   return () => {
     observer.disconnect();
     const gate = document.getElementById(GATE_ID);

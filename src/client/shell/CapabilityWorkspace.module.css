@@ -26,39 +26,9 @@
   -webkit-app-region: drag;
 }
 
-:global(body[data-dsh-desktop-mode]) .topbar :is(button, input, select, textarea, a, [role="button"], [aria-label="TokensAPI 身份与 Key"]) {
+:global(body[data-dsh-desktop-mode]) .topbar :is(button, input, select, textarea, a, [role="button"]) {
   user-select: auto;
   -webkit-app-region: no-drag;
-}
-
-/* The account trigger owns an absolutely positioned menu; keep the whole
- * island interactive, including padding between its controls. */
-:global(body[data-dsh-desktop-mode]) .topbar > :last-child {
-  -webkit-app-region: no-drag;
-}
-
-/* Identity is a quiet status affordance, not a second titlebar panel. */
-.topbar > :last-child > button {
-  min-width: 132px !important;
-  margin: 9px 0;
-  padding: 5px 10px !important;
-  background: color-mix(in srgb, var(--theme-bg-surface) 55%, transparent) !important;
-  border-color: color-mix(in srgb, var(--theme-border-default) 65%, transparent) !important;
-  border-radius: 8px;
-}
-
-/* This selector is intentionally account-specific. Never target generic DSH
- * dialogs or forms: settings and other host surfaces share those semantics. */
-.topbar [aria-label="TokensAPI 身份与 Key"] {
-  position: fixed !important;
-  top: 50% !important;
-  right: auto !important;
-  left: 50% !important;
-  width: min(380px, calc(100vw - 48px)) !important;
-  box-sizing: border-box;
-  transform: translate(-50%, -50%);
-  border-radius: 14px;
-  box-shadow: 0 0 0 100vmax rgb(3 7 18 / 58%), 0 28px 80px rgb(0 0 0 / 55%) !important;
 }
 
 /* Brand seat tracks the live sidebar column width; its right border lines up with
@@ -220,41 +190,34 @@
  * (right below it) so the two read as consistent sidebar items — same DSH
  * tokens, type, radius, and inset hover pill. Width (inline) = sidebar minus the
  * horizontal inset; sits just above the settings row. */
-.collapseBar {
-  position: absolute;
-  left: 8px;
-  bottom: 48px;
-  z-index: 6;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
-  font-size: 14px;
-  font-weight: 400;
-  cursor: pointer;
-  transition: background-color 150ms ease;
+/* The neutral product skin uses the upstream shell as one continuous surface.
+ * Partner branding, capability navigation and the extra collapse affordance are
+ * intentionally scoped to the partner theme only. */
+:global([data-theme="clean"]) .topbar {
+  display: none;
 }
 
-.collapseBar:hover,
-.collapseBar:focus-visible {
+.sidebarToggle {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  color: var(--theme-fg-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebarToggle:hover,
+.sidebarToggle:focus-visible {
+  color: var(--theme-fg-primary);
   background: var(--dsw-specific-sidebar-nav-item-hover);
   outline: none;
-}
-
-.collapseBar[data-collapsed] {
-  left: 0;
-  justify-content: center;
-  padding: 0;
-}
-
-.collapseLabel {
-  font-weight: 400;
 }
 
 /* Capability page: covers the main content area, leaves the sidebar exposed. */

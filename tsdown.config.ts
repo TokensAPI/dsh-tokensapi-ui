@@ -10,6 +10,7 @@
 // (resolved from the loader's runtime require table) and `*.module.css` is
 // compiled with lightningcss into a class map + an auto-injected <style> tag.
 import { existsSync, readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { basename, dirname, resolve as resolvePath } from 'node:path'
 import { transform } from 'lightningcss'
 import type { UserConfig } from 'tsdown'
@@ -79,6 +80,7 @@ const cssModulesPlugin = {
 // `.mjs`-suffixed virtual id trick to dodge tsdown's css-guard.
 const RAW_CSS_PREFIX = '\0raw-css:'
 const RAW_CSS_SUFFIX = '.mjs'
+const require = createRequire(import.meta.url)
 const rawCssPlugin = {
   name: 'tokens-core-raw-css',
   resolveId(source: string, importer: string | undefined): string | null {
@@ -90,7 +92,15 @@ const rawCssPlugin = {
     if (!id.startsWith(RAW_CSS_PREFIX)) return null
     const file = id.slice(RAW_CSS_PREFIX.length, -RAW_CSS_SUFFIX.length)
     this.addWatchFile(file)
-    const css = existsSync(file) ? readFileSync(file, 'utf8') : ''
+    let css = existsSync(file) ? readFileSync(file, 'utf8') : ''
+    if (css.includes('@fontsource-variable') && css !== '') {
+      css = css.replace(/url\((['"]?)(@fontsource-variable\/[^'")]+)\1\)/g, (_match, _quote, assetSpecifier: string) => {
+        const assetPath = require.resolve(assetSpecifier)
+        this.addWatchFile(assetPath)
+        const encoded = readFileSync(assetPath).toString('base64')
+        return `url("data:font/woff2;base64,${encoded}")`
+      })
+    }
     return `export default ${JSON.stringify(css)}`
   },
 }

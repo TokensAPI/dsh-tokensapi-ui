@@ -45,6 +45,12 @@
   --theme-grid-color: rgb(212 255 58 / 6%);
 }
 
+/* Acid-lime controls always use dark text, including dark appearance. */
+[data-theme="electrox"] .theme-button-primary,
+[data-theme="electrox"] .theme-button-primary :is(span, strong, svg) {
+  color: #0a0a0a !important;
+}
+
 /* Light ELECTRO X keeps the industrial geometry and acid-lime identity, but
  * moves it onto a warm technical-paper palette. The accent is intentionally
  * darker than the dark-mode lime so controls and text remain accessible on

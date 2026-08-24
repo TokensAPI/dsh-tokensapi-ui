@@ -2,8 +2,8 @@
 //
 // Produces (under dist/):
 //   - <name>-<version>.tgz   — an npm-shaped tarball (files under `package/`)
-//     containing exactly the runtime payload: lib/ + skills/ + package.json +
-//     cordis.patch.yml + README.md. Built explicitly (not `npm pack`) to dodge
+//     containing exactly the runtime payload: lib/ + skills/ + licenses/ +
+//     package.json + cordis.patch.yml + README.md. Built explicitly (not `npm pack`) to dodge
 //     the "files field vs .gitignore" gotcha that would drop the gitignored lib/.
 //   - manifest.json          — what the desktop update agent reads to decide
 //     between a silent client hot-swap and a restart:
@@ -31,7 +31,7 @@ for (const required of ["lib/index.js", "lib/client.js"]) {
 // Stage the runtime payload under dist/package/ (npm tarball convention).
 rmSync("dist", { recursive: true, force: true });
 mkdirSync("dist/package", { recursive: true });
-for (const item of ["lib", "skills", "package.json", "cordis.patch.yml", "README.md"]) {
+for (const item of ["lib", "skills", "licenses", "package.json", "cordis.patch.yml", "README.md"]) {
   if (existsSync(item)) cpSync(item, join("dist/package", item), { recursive: true });
 }
 

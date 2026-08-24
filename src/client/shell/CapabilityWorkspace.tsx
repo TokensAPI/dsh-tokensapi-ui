@@ -14,10 +14,16 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useActiveCapability, workspace } from "./workspace-store.ts";
 import { useCapabilities } from "./capability-registry.ts";
+import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
 import { BRAND_LOGO } from "./brand-logo.ts";
 import styles from "./CapabilityWorkspace.module.css";
-import { TokensAccountIdentity } from "../account/TokensAccount.tsx";
+
+let layoutRuntime: ILayout | null = null;
+
+export function setCapabilityWorkspaceLayout(layout: ILayout): void {
+  layoutRuntime = layout;
+}
 
 /** Measure the sidebar column width from the enclosing frame's grid tracks. */
 function useSidebarWidth(node: HTMLElement | null): number {
@@ -48,16 +54,6 @@ function useSidebarWidth(node: HTMLElement | null): number {
   return width;
 }
 
-/** Drive DSH's own (now hidden) sidebar collapse toggle from our nav band. */
-function toggleSidebar(): void {
-  // DSH's toggle is "收起侧边栏" when open; when collapsed the expand affordance
-  // is the rail button "打开侧边栏" (also "展开侧边栏" in some builds).
-  const btn = document.querySelector<HTMLButtonElement>(
-    'button[aria-label="收起侧边栏"], button[aria-label="展开侧边栏"], button[aria-label="打开侧边栏"]',
-  );
-  btn?.click();
-}
-
 export function CapabilityWorkspace(): React.JSX.Element {
   const active = useActiveCapability();
   const capabilities = useCapabilities();
@@ -65,6 +61,17 @@ export function CapabilityWorkspace(): React.JSX.Element {
   const [barNode, setBarNode] = useState<HTMLElement | null>(null);
   const sidebarWidth = useSidebarWidth(barNode);
   const wide = sidebarWidth === 0 || sidebarWidth > 150;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = (): void => {
+      if (root.dataset.theme === "clean") workspace.close();
+    };
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const overlay = barNode?.closest<HTMLElement>("[data-shell-overlay]") ?? null;
@@ -111,18 +118,21 @@ export function CapabilityWorkspace(): React.JSX.Element {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Returning to the conversation: the capability page covers only the main
-  // content area, so the sidebar (conversation list) stays clickable. A click
-  // anywhere OUTSIDE our overlay (i.e. in the DSH sidebar) while a page is open
-  // means the user picked a conversation — close the page to reveal it. Capture
-  // phase so the sidebar's own handler still runs and loads the conversation.
+  // Return to the conversation only for a real session-row selection. Sidebar
+  // chrome (toggle, Settings, search, filters, workspace rows) must remain usable
+  // without dismissing the active capability page. Session rows and search
+  // results share role=treeitem + aria-selected; nested row-action buttons are
+  // excluded because capture runs before their stopPropagation handlers.
   useEffect(() => {
     const onClick = (event: MouseEvent): void => {
       if (workspace.snapshot() === null) return;
       const target = event.target as Element | null;
-      if (target !== null && target.closest("[data-shell-overlay]") === null) {
-        workspace.close();
-      }
+      if (target === null) return;
+      const sessionRow = target.closest<HTMLElement>('[role="treeitem"][aria-selected]');
+      if (sessionRow === null) return;
+      const nestedButton = target.closest("button");
+      if (nestedButton !== null && nestedButton !== sessionRow) return;
+      workspace.close();
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
@@ -149,6 +159,21 @@ export function CapabilityWorkspace(): React.JSX.Element {
               </div>
             </div>
           ) : null}
+          {wide ? (
+            <button
+              type="button"
+              className={styles.sidebarToggle}
+              data-tokens-partner-sidebar-toggle="true"
+              aria-label="收起侧边栏"
+              title="收起侧边栏"
+              onClick={() => layoutRuntime?.toggleSidebar()}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+                <rect x="1.5" y="2.5" width="13" height="11" rx="2" />
+                <line x1="6" y1="2.5" x2="6" y2="13.5" />
+              </svg>
+            </button>
+          ) : null}
         </div>
 
         <nav className={styles.nav} aria-label="能力导航">
@@ -167,27 +192,8 @@ export function CapabilityWorkspace(): React.JSX.Element {
           ))}
         </nav>
 
-        <TokensAccountIdentity />
-
       </header>
 
-      {/* Collapse control as a bottom-left bar over the sidebar foot (reference
-          places 收起侧边栏 there); tracks sidebar width, icon-only when collapsed. */}
-      <button
-        type="button"
-        className={styles.collapseBar}
-        data-collapsed={!wide || undefined}
-        aria-label="切换侧栏"
-        title="收起 / 展开侧栏"
-        style={sidebarWidth > 0 ? { width: `${wide ? sidebarWidth - 16 : sidebarWidth}px` } : undefined}
-        onClick={toggleSidebar}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-          <rect x="1.5" y="2.5" width="13" height="11" rx="2" />
-          <line x1="6" y1="2.5" x2="6" y2="13.5" />
-        </svg>
-        {wide ? <span className={styles.collapseLabel}>收起侧边栏</span> : null}
-      </button>
 
       {activeCap !== null ? (
         <div

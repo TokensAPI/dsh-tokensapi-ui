@@ -1,18 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./AutomationModule.module.css";
 import { automationCall, type AutomationRun, type AutomationSnapshot, type AutomationTask } from "./data.ts";
 
 type View = "tasks" | "runs";
 type Page = "list" | "create";
-
-interface AutomationTemplate {
-  readonly id: string;
-  readonly icon: string;
-  readonly name: string;
-  readonly description: string;
-  readonly cadence: string;
-  readonly category: string;
-}
 
 interface Draft {
   readonly name: string;
@@ -22,17 +13,6 @@ interface Draft {
   readonly agent: string;
   readonly skill: string;
 }
-
-const TEMPLATES: readonly AutomationTemplate[] = [
-  { id: "ai-news", icon: "N", name: "每日 AI 新闻推送", description: "汇总当天重要 AI 动态并生成一份精简速览。", cadence: "每天 08:30", category: "资讯" },
-  { id: "english-words", icon: "A", name: "每日英语单词", description: "每天生成一组单词、释义与情境例句。", cadence: "每天 07:30", category: "学习" },
-  { id: "bedtime-story", icon: "S", name: "每日儿童睡前故事", description: "按年龄和主题生成一篇温和的睡前故事。", cadence: "每天 20:30", category: "内容" },
-  { id: "weekly-report", icon: "W", name: "每周工作周报", description: "整理本周对话与工作内容，生成结构化周报。", cadence: "每周五 17:30", category: "办公" },
-  { id: "movie", icon: "M", name: "经典电影推荐", description: "根据偏好推荐一部经典影片并附上观看理由。", cadence: "每周六 10:00", category: "生活" },
-  { id: "history", icon: "H", name: "历史上的今天", description: "选取值得了解的历史事件并生成背景解读。", cadence: "每天 09:00", category: "知识" },
-  { id: "meeting", icon: "P", name: "会议前准备", description: "会前整理议题、资料清单和需要确认的问题。", cadence: "会议前 30 分钟", category: "办公" },
-  { id: "health", icon: "+", name: "体检预约提醒", description: "在计划日期前提醒准备材料与注意事项。", cadence: "指定时间", category: "提醒" },
-];
 
 const EMPTY_DRAFT: Draft = {
   name: "",
@@ -46,7 +26,6 @@ const EMPTY_DRAFT: Draft = {
 export function AutomationModule(): React.JSX.Element {
   const [view, setView] = useState<View>("tasks");
   const [page, setPage] = useState<Page>("list");
-  const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [store, setStore] = useState<AutomationSnapshot>({ version: 1, revision: 0, tasks: [], runs: [] });
   const [notice, setNotice] = useState<string | null>(null);
@@ -70,25 +49,8 @@ export function AutomationModule(): React.JSX.Element {
 
   const refresh = async (): Promise<void> => setStore(await automationCall<AutomationSnapshot>("snapshot"));
 
-  const templates = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    if (needle === "") return TEMPLATES;
-    return TEMPLATES.filter((template) =>
-      [template.name, template.description, template.category, template.cadence]
-        .join(" ")
-        .toLocaleLowerCase()
-        .includes(needle),
-    );
-  }, [query]);
-
-  const openCreate = (template?: AutomationTemplate): void => {
-    setDraft(template === undefined ? EMPTY_DRAFT : {
-      ...EMPTY_DRAFT,
-      name: template.name,
-      description: template.description,
-      frequency: template.cadence.startsWith("每周") ? "每周" : template.cadence === "指定时间" ? "仅一次" : "每天",
-      time: template.cadence.match(/\d{2}:\d{2}/)?.[0] ?? "08:30",
-    });
+  const openCreate = (): void => {
+    setDraft(EMPTY_DRAFT);
     setPage("create");
   };
 
@@ -126,7 +88,7 @@ export function AutomationModule(): React.JSX.Element {
         <div>
           <div className={styles.crumb}><span /> AUTOMATION <b>//</b> 自动化</div>
           <h1 className={`theme-display ${styles.title}`}>让工作自动发生.</h1>
-          <p className={styles.subtitle}>通过模板快速建立计划任务；任务由本机 Host 持久化并负责调度。</p>
+          <p className={styles.subtitle}>创建计划任务，由本机 Host 持久化并负责调度。</p>
         </div>
         <button className={`theme-button-primary theme-cut-corner ${styles.primary}`} type="button" onClick={() => openCreate()}>
           ＋ 添加自动化
@@ -154,45 +116,13 @@ export function AutomationModule(): React.JSX.Element {
             <div className={styles.heroCopy}>
               <span className={styles.eyebrow}>NO ACTIVE AUTOMATIONS</span>
               <h2>开启你的第一个自动化任务吧</h2>
-              <p>从空白任务开始，或者选择下方模板快速填写名称、描述和执行时间。</p>
+              <p>从空白任务开始，填写名称、描述和执行时间。</p>
             </div>
             <button className={`theme-button-primary theme-cut-corner ${styles.heroAction}`} type="button" onClick={() => openCreate()}>
               创建第一个任务 →
             </button>
             <i className={styles.heroLine} />
           </section> : !loading ? <TaskList tasks={store.tasks} onToggle={toggleTask} onRun={runNow} onRemove={removeTask} /> : null}
-
-          <section className={styles.templates}>
-            <div className={styles.sectionHead}>
-              <div>
-                <span className={styles.sectionIndex}>02</span>
-                <h2>从模板开始</h2>
-                <p>选择一个常用场景，进入预填的新建页面。</p>
-              </div>
-              <input className={styles.search} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索模板或用途" aria-label="搜索自动化模板" />
-            </div>
-
-            {templates.length === 0 ? <div className={styles.noMatch}>没有匹配的自动化模板。</div> : (
-              <div className={styles.grid}>
-                {templates.map((template, index) => (
-                  <article key={template.id} className={`theme-card theme-corners ${styles.card}`} onClick={() => openCreate(template)}>
-                    <div className={styles.cardTop}>
-                      <span className={styles.templateIcon}>{template.icon}</span>
-                      <span className={styles.cardIndex}>{String(index + 1).padStart(2, "0")}</span>
-                    </div>
-                    <span className="theme-chip">{template.category}</span>
-                    <h3>{template.name}</h3>
-                    <p>{template.description}</p>
-                    <footer>
-                      <span className={styles.cadence}>◷ {template.cadence}</span>
-                      <button type="button" aria-label={`使用${template.name}模板`} onClick={(event) => { event.stopPropagation(); openCreate(template); }}>使用模板 →</button>
-                    </footer>
-                    <i />
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
         </>
       )}
     </section>

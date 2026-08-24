@@ -9,9 +9,8 @@
 // on <html>, so SWITCHING a skin is just an attribute swap — no re-injection.
 // Add a skin: create themes/<id>.css (`[data-theme="<id>"] { --theme-*: … }`) and
 // register it in SKINS below. Components never change.
+import albertSans from "./albert-sans.css";
 import contract from "./theme-contract.css";
-import glass from "./themes/glass.css";
-import aurora from "./themes/aurora.css";
 import clean from "./themes/clean.css";
 import electrox from "./themes/electrox.css";
 import bridge from "./dsh-bridge.css";
@@ -19,18 +18,15 @@ import chrome from "./chrome.css";
 
 /** Registered skins (id → its [data-theme="<id>"]-scoped --theme-* sheet). */
 const SKINS: Record<string, string> = {
-  glass,
-  aurora,
   clean,
   electrox,
 };
 
 /** Default skin when none is stored. */
-export const DEFAULT_SKIN = "electrox";
+export const DEFAULT_SKIN = "clean";
 
 const STORAGE_KEY = "dsh-tokensapi-ui-skin";
 const STYLE_TAG = "dsh-tokensapi-ui-theme";
-const AMBIENT_TAG = "dsh-tokensapi-ui-ambient";
 
 type ColorScheme = "light" | "dark";
 
@@ -95,17 +91,11 @@ export function injectTheme(): () => void {
   const tag = document.createElement("style");
   tag.dataset.plugin = "dsh-tokensapi-ui";
   tag.dataset.pluginCss = STYLE_TAG;
-  tag.textContent = `${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
+  tag.textContent = `${albertSans}\n${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
   document.head.appendChild(tag);
-  const ambient = document.createElement("div");
-  ambient.dataset.tokensAmbient = AMBIENT_TAG;
-  ambient.setAttribute("aria-hidden", "true");
-  ambient.innerHTML = '<i data-blob="one"></i><i data-blob="two"></i><i data-blob="three"></i><i data-mesh></i>';
-  document.body.prepend(ambient);
   return () => {
     observer.disconnect();
     tag.remove();
-    ambient.remove();
     delete root.dataset.theme;
     delete root.dataset.colorScheme;
   };

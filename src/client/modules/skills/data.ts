@@ -240,6 +240,20 @@ export function insertSkillCommand(name: string): boolean {
   return true;
 }
 
+export function mergeBundledSkillCatalog(
+  catalog: readonly SkillEntry[],
+  bundled: readonly BundledSkill[],
+): SkillEntry[] {
+  const merged = [...catalog];
+  const names = new Set(merged.map((skill) => skill.name));
+  for (const skill of bundled) {
+    if (!skill.installed || names.has(skill.name)) continue;
+    merged.push({ name: skill.name, description: skill.description, modelInvocable: true } as SkillEntry);
+    names.add(skill.name);
+  }
+  return merged;
+}
+
 export type UseSkillResult = "ready" | "no-session" | "composer-unavailable";
 
 /** Close the skills workspace and prefill the active task's composer. */

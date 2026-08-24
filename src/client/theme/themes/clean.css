@@ -1,70 +1,83 @@
-/* Neutral, low-decoration option for users who prefer a conventional UI. */
+/* TokensAPI Lake View: quiet neutral foundations, lake-green interaction color. */
 [data-theme="clean"] {
   color-scheme: dark;
-  --theme-font-sans: Inter, system-ui, sans-serif;
+  --lake-primary: oklch(0.765 0.177 163.22);
+  --lake-secondary: oklch(0.551 0.0899 200.52);
+  --lake-background: oklch(0.185 0 0);
+  --theme-font-sans: "Albert Sans Variable", "Albert Sans", system-ui, sans-serif;
   --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --theme-font-display: Inter, system-ui, sans-serif;
+  --theme-font-display: "Albert Sans Variable", "Albert Sans", system-ui, sans-serif;
   --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --theme-bg-canvas: #171717;
-  --theme-bg-shell: #1c1c1c;
-  --theme-bg-surface: #242424;
-  --theme-bg-surface-raised: #2d2d2d;
+  --theme-bg-canvas: var(--lake-background);
+  /* These are the actual Lake View dark-mode mixes, expanded to concrete
+   * colours for the Electron build. Keeping the derived chroma explicit
+   * avoids both hue drift and translucent green stacking across surfaces. */
+  --theme-bg-shell: oklch(0.214 0.00885 163.22);
+  --theme-bg-surface: oklch(0.2314 0.01416 163.22);
+  --theme-bg-surface-raised: oklch(0.2546 0.02124 163.22);
   --theme-bg-overlay: rgb(0 0 0 / 70%);
-  --theme-fg-primary: #fafafa;
-  --theme-fg-secondary: #c7c7c7;
-  --theme-fg-muted: #929292;
-  --theme-fg-on-accent: #ffffff;
-  --theme-border-subtle: #2d2d2d;
-  --theme-border-default: #3b3b3b;
-  --theme-border-strong: #5b5b5b;
-  --theme-border-focus: #60a5fa;
-  --theme-accent-primary: #60a5fa;
-  --theme-accent-primary-hover: #93c5fd;
-  --theme-accent-fill: #2563eb;
-  --theme-accent-fill-hover: #3b82f6;
-  --theme-accent-secondary: #f5f5f5;
-  --theme-accent-soft: rgb(96 165 250 / 12%);
-  --theme-accent-glow: rgb(96 165 250 / 18%);
-  --theme-success: #4ade80;
-  --theme-warning: #fbbf24;
-  --theme-danger: #f87171;
-  --theme-info: #60a5fa;
+  --theme-fg-primary: oklch(0.965 0 0);
+  --theme-fg-secondary: oklch(0.82 0 0);
+  --theme-fg-muted: oklch(0.66 0 0);
+  --theme-fg-on-accent: oklch(0 0 0);
+  --theme-border-subtle: oklch(0.2778 0.02832 163.22);
+  --theme-border-default: oklch(0.3242 0.04248 163.22);
+  --theme-border-strong: oklch(0.3938 0.06372 163.22);
+  --theme-border-focus: var(--lake-primary);
+  --theme-accent-primary: var(--lake-primary);
+  --theme-accent-primary-hover: color-mix(in srgb, var(--lake-primary) 88%, white);
+  --theme-accent-fill: var(--lake-primary);
+  --theme-accent-fill-hover: color-mix(in srgb, var(--lake-primary) 88%, white);
+  --theme-accent-secondary: var(--lake-secondary);
+  --theme-accent-soft: oklch(0.2894 0.03186 163.22);
+  --theme-accent-glow: color-mix(in srgb, var(--lake-primary) 22%, transparent);
+  --theme-success: oklch(0.696 0.17 162.48);
+  --theme-warning: oklch(0.769 0.188 70.08);
+  --theme-danger: oklch(0.704 0.191 22.216);
+  --theme-info: oklch(0.68 0.17 237.323);
   --theme-radius-control: 8px;
-  --theme-radius-card: 10px;
+  --theme-radius-card: 12px;
   --theme-radius-panel: 12px;
-  --theme-shadow-card-hover: 0 16px 40px -24px rgb(0 0 0 / 70%);
-  --theme-shadow-button-hover: 0 8px 22px rgb(0 0 0 / 28%);
-  --theme-grid-color: rgb(255 255 255 / 4%);
+  --theme-shadow-card-hover: 0 18px 42px -26px rgb(0 0 0 / 72%);
+  --theme-shadow-button-hover: 0 8px 22px color-mix(in srgb, var(--lake-primary) 18%, transparent);
+  --theme-grid-color: color-mix(in srgb, var(--lake-primary) 5%, transparent);
 }
 
 [data-theme="clean"][data-color-scheme="light"] {
   color-scheme: light;
-  --theme-bg-canvas: #f5f5f5;
-  --theme-bg-shell: #fafafa;
-  --theme-bg-surface: #ffffff;
-  --theme-bg-surface-raised: #f7f7f7;
+  --lake-background: oklch(1 0 0);
+  /* Liquid-glass light material. The desktop frame remains fully opaque;
+   * translucency only reveals the controlled TokensAPI ambient canvas. */
+  --theme-bg-canvas: rgb(248 251 249 / 78%);
+  --theme-bg-shell: rgb(244 250 247 / 72%);
+  --theme-bg-surface: rgb(255 255 255 / 66%);
+  --theme-bg-surface-raised: rgb(255 255 255 / 86%);
   --theme-bg-overlay: rgb(0 0 0 / 35%);
-  --theme-fg-primary: #171717;
-  --theme-fg-secondary: #525252;
-  --theme-fg-muted: #737373;
-  --theme-fg-on-accent: #ffffff;
-  --theme-border-subtle: #eeeeee;
-  --theme-border-default: #dedede;
-  --theme-border-strong: #b8b8b8;
-  --theme-border-focus: #2563eb;
-  --theme-accent-primary: #2563eb;
-  --theme-accent-primary-hover: #1d4ed8;
-  --theme-accent-fill: #2563eb;
-  --theme-accent-fill-hover: #1d4ed8;
-  --theme-accent-secondary: #171717;
-  --theme-accent-soft: rgb(37 99 235 / 9%);
-  --theme-accent-glow: rgb(37 99 235 / 15%);
-  --theme-success: #15803d;
-  --theme-warning: #a16207;
-  --theme-danger: #dc2626;
-  --theme-info: #2563eb;
-  --theme-shadow-card-hover: 0 16px 38px -24px rgb(15 23 42 / 28%);
-  --theme-shadow-button-hover: 0 8px 20px rgb(15 23 42 / 14%);
-  --theme-grid-color: rgb(15 23 42 / 4%);
+  --theme-fg-primary: oklch(0.145 0 0);
+  --theme-fg-secondary: oklch(0.3434 0.05664 163.22);
+  --theme-fg-muted: oklch(0.38 0.04 163.22);
+  --theme-fg-on-accent: oklch(0 0 0);
+  --theme-border-subtle: rgb(31 86 61 / 14%);
+  --theme-border-default: rgb(31 86 61 / 20%);
+  --theme-border-strong: rgb(31 86 61 / 30%);
+  --theme-border-focus: var(--lake-primary);
+  --theme-accent-primary: color-mix(in srgb, var(--lake-primary) 78%, black);
+  --theme-accent-primary-hover: color-mix(in srgb, var(--lake-primary) 68%, black);
+  --theme-accent-fill: var(--lake-primary);
+  --theme-accent-fill-hover: color-mix(in srgb, var(--lake-primary) 88%, black);
+  --theme-accent-secondary: var(--lake-secondary);
+  --theme-accent-soft: oklch(0.9671 0.02478 163.22);
+  --theme-accent-glow: color-mix(in srgb, var(--lake-primary) 17%, transparent);
+  --theme-success: oklch(0.596 0.145 163.225);
+  --theme-warning: oklch(0.58 0.15 75.834);
+  --theme-danger: oklch(0.577 0.245 27.325);
+  --theme-info: oklch(0.52 0.158 241.966);
+  --theme-shadow-card-hover:
+    inset 0 1px 0 rgb(255 255 255 / 82%),
+    0 18px 44px -24px rgb(35 86 65 / 26%);
+  --theme-shadow-button-hover: 0 8px 20px color-mix(in srgb, var(--lake-primary) 18%, transparent);
+  --theme-grid-color: color-mix(in srgb, var(--lake-primary) 6%, transparent);
+  --theme-glass-highlight: rgb(255 255 255 / 72%);
+  --theme-glass-shadow: rgb(29 68 53 / 16%);
+  --theme-glass-blur: 18px;
 }
-

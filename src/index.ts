@@ -21,7 +21,6 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import { AutomationHost } from './automation-host.ts'
 import { DshAutomationExecutor } from './automation-executor.ts'
 import { DshAutomationDelivery } from './automation-delivery.ts'
-import { installTokensAccount } from './tokens-account.ts'
 
 export const name = 'dsh-tokensapi-ui'
 export const inject = ['connection', 'skills', 'tools', 'agents', 'sessions', 'agentPresets', 'agentDefaultModel']
@@ -657,7 +656,6 @@ export function apply(ctx: Context): void {
       () => connection.rpc.handle("/tokens-browser", dispatchBrowser, { authority: "trusted-host" }),
       "tokens-core: embedded browser rpc channel",
     )
-    installTokensAccount(scoped, connection)
     const automation = new AutomationHost(new DshAutomationExecutor(scoped), {}, new DshAutomationDelivery(scoped))
     void automation.start().catch((error) => scoped.logger.error(`tokens automation failed to start: ${String(error)}`))
     scoped.effect(

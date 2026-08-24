@@ -10,6 +10,11 @@
 :root,
 body[data-ds-dark-theme],
 body:not([data-ds-dark-theme]) {
+  /* Typography belongs to the selected tenant as much as colour does. DSH
+   * components consume these two upstream variables directly. */
+  --dsw-font-family: var(--theme-font-sans) !important;
+  --ds-font-family-code: var(--theme-font-mono) !important;
+
   /* Sidebar + specific surfaces (light-mode values in DSH; not covered by aliases) */
   --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;
   --dsw-specific-input-major: var(--theme-bg-surface) !important;
@@ -49,7 +54,7 @@ body:not([data-ds-dark-theme]) {
 
   /* Text */
   --dsw-alias-label-primary: var(--theme-fg-primary) !important;
-  --dsw-alias-label-primary-foreground: var(--theme-fg-primary) !important;
+  --dsw-alias-label-primary-foreground: var(--theme-fg-on-accent) !important;
   --dsw-alias-label-primary-bluish: var(--theme-fg-primary) !important;
   --dsw-alias-label-secondary: var(--theme-fg-secondary) !important;
   --dsw-alias-label-tertiary: var(--theme-fg-muted) !important;
