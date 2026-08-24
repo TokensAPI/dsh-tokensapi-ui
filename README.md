@@ -26,20 +26,20 @@ pnpm watch       # 改 src 自动重建
 
 ```bash
 # 先 bump package.json 的 version 并提交
-git tag v0.1.0
-git push origin v0.1.0
+git tag v<version>
+git push origin v<version>
 ```
 
 CI 会：`pnpm build` → `node scripts/make-release.mjs` 打出
-`dist/tokens-core-<version>.tgz` + `dist/manifest.json` → 发布为 GitHub Release。
+`dist/dsh-tokensapi-ui-<version>.tgz` + `dist/manifest.json` → 发布为 GitHub Release。
 
 `manifest.json` 供桌面「更新代理」读取，决定热更方式：
 
 ```jsonc
 {
-  "name": "tokens-core",
-  "version": "0.1.0",
-  "tarball": "tokens-core-0.1.0.tgz",
+  "name": "dsh-tokensapi-ui",
+  "version": "<version>",
+  "tarball": "dsh-tokensapi-ui-<version>.tgz",
   "tarballSha256": "…",   // 下载完整性校验
   "clientSha256": "…",    // lib/client.js 哈希
   "hostSha256": "…",      // lib/index.js 哈希：与本地不同 → 需重启；相同 → 客户端静默热更
