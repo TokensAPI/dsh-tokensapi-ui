@@ -1,5 +1,7 @@
 # dsh-tokensapi-ui (`tokens-core`)
 
+插件同时拥有 TokensAPI 桌面账号体验：顶部身份区可在手动 Key 与 TokensAPI 账号之间切换，账号模式会恢复 Cookie 会话、选择或创建 DSH Key，并在登录后注册共享同一 Electron Session 的 AIGC 第五入口。普通 `dsh web` 环境没有桌面凭据服务时仍可正常加载插件，但账号模式会明确显示为不可用。
+
 TokensHarness 的核心 DSH 插件：把 DeepSeek Harness 的 Web/Desktop UI 重塑成
 **ELECTRO X / 粒刻** 电竞主题，并提供技能库（真实 `skill.list` 目录 + 本地上传/内置精选安装）。
 

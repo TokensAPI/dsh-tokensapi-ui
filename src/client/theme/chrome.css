@@ -3,6 +3,48 @@
  * reshape the DSH shell to host our brand band and capability nav, strip upstream
  * branding, and fix a couple of DSH surfaces the token bridge alone can't reach. */
 
+[data-tokens-ambient] { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 240ms ease; }
+[data-theme="glass"] [data-tokens-ambient], [data-theme="aurora"] [data-tokens-ambient] { opacity: 1; }
+[data-theme="glass"] body > :not([data-tokens-ambient]),
+[data-theme="aurora"] body > :not([data-tokens-ambient]) { position: relative; z-index: 1; }
+[data-tokens-ambient] [data-blob] { position: absolute; width: 68vw; height: 68vw; max-width: 1050px; max-height: 1050px; border-radius: 42% 58% 65% 35% / 45% 36% 64% 55%; opacity: .55; filter: blur(72px) saturate(125%); animation: tokens-fluid-drift 22s ease-in-out infinite alternate; will-change: transform, border-radius; }
+[data-tokens-ambient] [data-mesh] { position: absolute; inset: 0; opacity: .22; background-image: radial-gradient(circle, rgb(255 255 255 / 20%) 0 1px, transparent 1.5px); background-size: 34px 34px; mask-image: radial-gradient(circle at 50% 45%, black, transparent 76%); }
+@keyframes tokens-fluid-drift { 0% { transform: translate3d(-4%, -2%, 0) rotate(-8deg) scale(.92); } 50% { border-radius: 65% 35% 38% 62% / 36% 62% 38% 64%; } 100% { transform: translate3d(16%, 12%, 0) rotate(16deg) scale(1.12); } }
+[data-theme="glass"] :is([data-composer-card="true"], [role="dialog"]),
+[data-theme="aurora"] :is([data-composer-card="true"], [role="dialog"]) { backdrop-filter: blur(var(--tokens-glass-blur, 20px)) saturate(135%); -webkit-backdrop-filter: blur(var(--tokens-glass-blur, 20px)) saturate(135%); }
+[data-theme="glass"] [data-phase="hero"], [data-theme="aurora"] [data-phase="hero"] { background-color: transparent !important; }
+[data-theme="glass"] body, [data-theme="aurora"] body { background: transparent !important; }
+[data-theme="glass"], [data-theme="aurora"] { background: transparent !important; }
+
+/* Windows Chromium needs every opaque application plate above the backdrop
+ * made translucent; native vibrancy is not available like it is on macOS. */
+[data-theme="glass"] [class*="bubble"],
+[data-theme="aurora"] [class*="bubble"] {
+  background: var(--theme-bg-surface) !important;
+  border-color: var(--theme-border-default) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 16px 44px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(var(--tokens-glass-blur, 20px)) saturate(135%);
+  -webkit-backdrop-filter: blur(var(--tokens-glass-blur, 20px)) saturate(135%);
+}
+[data-theme="glass"] :is([class*="sidebarCol"], [data-dsh-surface], .dshDesktopSidebarSurface),
+[data-theme="aurora"] :is([class*="sidebarCol"], [data-dsh-surface], .dshDesktopSidebarSurface) {
+  background: var(--theme-bg-surface) !important;
+  border-color: var(--theme-border-default) !important;
+  /* Do not apply filter/backdrop-filter here. These elements can contain the
+   * fixed Settings/Login portals; a filter would make them positioning blocks
+   * on Windows Chromium and constrain or clip their dialogs. */
+}
+[data-theme="glass"] [data-composer-card="true"],
+[data-theme="aurora"] [data-composer-card="true"] {
+  background: var(--theme-bg-surface) !important;
+  border-color: var(--theme-border-strong) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%), 0 18px 52px rgb(0 0 0 / 22%) !important;
+}
+[data-theme="glass"] :is([data-phase="hero"], [data-phase="active"]),
+[data-theme="aurora"] :is([data-phase="hero"], [data-phase="active"]) { background: transparent !important; }
+html[data-tokens-motion="reduced"] [data-tokens-ambient] [data-blob] { animation: none; }
+@media (prefers-reduced-motion: reduce) { [data-tokens-ambient] [data-blob] { animation: none; } }
+
 /* Remove DeepSeek / Harness branding: the whale mark (FishLogo, used on the
  * collapsed rail and the conversation hero) by its stable viewBox. */
 svg[viewBox="0 0 23.16 17.04"] {
@@ -25,6 +67,21 @@ div:has(> button[aria-label="打开侧边栏"]) {
 :where(div):has(> [data-shell-overlay]) {
   box-sizing: border-box;
   padding-top: 72px;
+}
+
+/* Advanced Desktop already owns a native Windows/macOS caption row. Replace
+ * that row with the 72px product bar instead of adding another 72px inset. */
+body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
+  padding-top: 0 !important;
+  grid-template-rows: 72px minmax(0, 1fr) !important;
+}
+
+/* The advanced sidebar deliberately spans both grid rows. Its product brand
+ * seat lives in the overlay topbar, so keep the upstream sidebar content below
+ * that seat without reintroducing padding on the conversation/details frame. */
+body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar {
+  box-sizing: border-box;
+  padding-top: 72px !important;
 }
 
 /* New-chat ("hero" / empty) surface: match the capability pages by sharing their
@@ -79,6 +136,14 @@ button[aria-label="发送消息"]:disabled {
 body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
   --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;
   background: var(--theme-bg-shell) !important;
+}
+
+/* A capability is a replacement main page, not a transparent layer over the
+ * conversation. Keep the Host tree mounted for state preservation, but remove
+ * it from painting, hit testing and accessibility while a capability is open. */
+[data-tokens-capability-active] > [data-tokens-host-main="true"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* DSH's appearance cubes use a fixed neutral-grey selected border instead of

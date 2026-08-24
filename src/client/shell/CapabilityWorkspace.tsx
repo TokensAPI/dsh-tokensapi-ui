@@ -17,6 +17,7 @@ import { useCapabilities } from "./capability-registry.ts";
 import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
 import { BRAND_LOGO } from "./brand-logo.ts";
 import styles from "./CapabilityWorkspace.module.css";
+import { TokensAccountIdentity } from "../account/TokensAccount.tsx";
 
 /** Measure the sidebar column width from the enclosing frame's grid tracks. */
 function useSidebarWidth(node: HTMLElement | null): number {
@@ -64,6 +65,43 @@ export function CapabilityWorkspace(): React.JSX.Element {
   const [barNode, setBarNode] = useState<HTMLElement | null>(null);
   const sidebarWidth = useSidebarWidth(barNode);
   const wide = sidebarWidth === 0 || sidebarWidth > 150;
+
+  useEffect(() => {
+    const overlay = barNode?.closest<HTMLElement>("[data-shell-overlay]") ?? null;
+    const frame = overlay?.parentElement ?? null;
+    if (frame === null) return;
+    frame.toggleAttribute("data-tokens-capability-active", activeCap !== null);
+    if (activeCap !== null) frame.dataset.tokensCapabilityActive = activeCap.id;
+    else delete frame.dataset.tokensCapabilityActive;
+
+    let hostMain: HTMLElement | null = null;
+    let previousInert = false;
+    let previousAriaHidden: string | null = null;
+    if (activeCap !== null && overlay !== null) {
+      const boundary = sidebarWidth > 0 ? sidebarWidth : 56;
+      hostMain = Array.from(frame.children)
+        .filter((child): child is HTMLElement => child instanceof HTMLElement && child !== overlay && !child.contains(overlay))
+        .map((child) => ({ child, rect: child.getBoundingClientRect() }))
+        .filter(({ rect }) => rect.width > 0 && rect.height > 0 && rect.right > boundary + 80)
+        .sort((a, b) => b.rect.width * b.rect.height - a.rect.width * a.rect.height)[0]?.child ?? null;
+      if (hostMain !== null) {
+        previousInert = hostMain.inert;
+        previousAriaHidden = hostMain.getAttribute("aria-hidden");
+        hostMain.dataset.tokensHostMain = "true";
+        hostMain.inert = true;
+        hostMain.setAttribute("aria-hidden", "true");
+      }
+    }
+    return () => {
+      frame.removeAttribute("data-tokens-capability-active");
+      if (hostMain !== null) {
+        delete hostMain.dataset.tokensHostMain;
+        hostMain.inert = previousInert;
+        if (previousAriaHidden === null) hostMain.removeAttribute("aria-hidden");
+        else hostMain.setAttribute("aria-hidden", previousAriaHidden);
+      }
+    };
+  }, [activeCap, barNode, sidebarWidth]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
@@ -128,6 +166,8 @@ export function CapabilityWorkspace(): React.JSX.Element {
             </button>
           ))}
         </nav>
+
+        <TokensAccountIdentity />
 
       </header>
 

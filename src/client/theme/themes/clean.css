@@ -1,0 +1,70 @@
+/* Neutral, low-decoration option for users who prefer a conventional UI. */
+[data-theme="clean"] {
+  color-scheme: dark;
+  --theme-font-sans: Inter, system-ui, sans-serif;
+  --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --theme-font-display: Inter, system-ui, sans-serif;
+  --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --theme-bg-canvas: #171717;
+  --theme-bg-shell: #1c1c1c;
+  --theme-bg-surface: #242424;
+  --theme-bg-surface-raised: #2d2d2d;
+  --theme-bg-overlay: rgb(0 0 0 / 70%);
+  --theme-fg-primary: #fafafa;
+  --theme-fg-secondary: #c7c7c7;
+  --theme-fg-muted: #929292;
+  --theme-fg-on-accent: #ffffff;
+  --theme-border-subtle: #2d2d2d;
+  --theme-border-default: #3b3b3b;
+  --theme-border-strong: #5b5b5b;
+  --theme-border-focus: #60a5fa;
+  --theme-accent-primary: #60a5fa;
+  --theme-accent-primary-hover: #93c5fd;
+  --theme-accent-fill: #2563eb;
+  --theme-accent-fill-hover: #3b82f6;
+  --theme-accent-secondary: #f5f5f5;
+  --theme-accent-soft: rgb(96 165 250 / 12%);
+  --theme-accent-glow: rgb(96 165 250 / 18%);
+  --theme-success: #4ade80;
+  --theme-warning: #fbbf24;
+  --theme-danger: #f87171;
+  --theme-info: #60a5fa;
+  --theme-radius-control: 8px;
+  --theme-radius-card: 10px;
+  --theme-radius-panel: 12px;
+  --theme-shadow-card-hover: 0 16px 40px -24px rgb(0 0 0 / 70%);
+  --theme-shadow-button-hover: 0 8px 22px rgb(0 0 0 / 28%);
+  --theme-grid-color: rgb(255 255 255 / 4%);
+}
+
+[data-theme="clean"][data-color-scheme="light"] {
+  color-scheme: light;
+  --theme-bg-canvas: #f5f5f5;
+  --theme-bg-shell: #fafafa;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #f7f7f7;
+  --theme-bg-overlay: rgb(0 0 0 / 35%);
+  --theme-fg-primary: #171717;
+  --theme-fg-secondary: #525252;
+  --theme-fg-muted: #737373;
+  --theme-fg-on-accent: #ffffff;
+  --theme-border-subtle: #eeeeee;
+  --theme-border-default: #dedede;
+  --theme-border-strong: #b8b8b8;
+  --theme-border-focus: #2563eb;
+  --theme-accent-primary: #2563eb;
+  --theme-accent-primary-hover: #1d4ed8;
+  --theme-accent-fill: #2563eb;
+  --theme-accent-fill-hover: #1d4ed8;
+  --theme-accent-secondary: #171717;
+  --theme-accent-soft: rgb(37 99 235 / 9%);
+  --theme-accent-glow: rgb(37 99 235 / 15%);
+  --theme-success: #15803d;
+  --theme-warning: #a16207;
+  --theme-danger: #dc2626;
+  --theme-info: #2563eb;
+  --theme-shadow-card-hover: 0 16px 38px -24px rgb(15 23 42 / 28%);
+  --theme-shadow-button-hover: 0 8px 20px rgb(15 23 42 / 14%);
+  --theme-grid-color: rgb(15 23 42 / 4%);
+}
+

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ONLINE_TOOLS, type OnlineTool } from "./data.ts";
 import { hideToolBrowser, mountToolBrowser, updateToolBrowserBounds } from "./browser.ts";
+import { useNativeViewsSuspended } from "../../shell/surface-hooks.ts";
 import styles from "./ToolsModule.module.css";
 
 const CATEGORIES = ["全部", "金蝶", "吉客云", "数据处理"] as const;
@@ -48,7 +49,7 @@ export function ToolsModule(): React.JSX.Element {
     <section className={styles.root}>
       <header className={styles.head}>
         <div>
-          <div className={styles.crumb}>ONLINE TOOLS // 在线工具</div>
+          <div className={styles.crumb}><span /> ONLINE TOOLS <b>//</b> 在线工具</div>
           <h1 className={`theme-display ${styles.title}`}>开箱即用.</h1>
           <p className={styles.subtitle}>在客户端内直接使用粒刻现有在线工具。</p>
         </div>
@@ -123,6 +124,7 @@ export function ToolsModule(): React.JSX.Element {
 
 function NativeBrowserSurface({ tool, onError }: { tool: OnlineTool; onError: (message: string) => void }): React.JSX.Element {
   const surface = useRef<HTMLDivElement | null>(null);
+  const suspended = useNativeViewsSuspended();
 
   useEffect(() => {
     const element = surface.current;
@@ -134,6 +136,11 @@ function NativeBrowserSurface({ tool, onError }: { tool: OnlineTool; onError: (m
       return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     };
     const sync = (): void => {
+      if (suspended) {
+        void hideToolBrowser();
+        mounted = false;
+        return;
+      }
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const next = bounds();
@@ -157,7 +164,7 @@ function NativeBrowserSurface({ tool, onError }: { tool: OnlineTool; onError: (m
       window.removeEventListener("scroll", sync, true);
       void hideToolBrowser();
     };
-  }, [onError, tool.runUrl]);
+  }, [onError, suspended, tool.runUrl]);
 
   return <div ref={surface} className={styles.nativeSurface}>正在挂载客户端内置页面…</div>;
 }

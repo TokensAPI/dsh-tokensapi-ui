@@ -13,6 +13,54 @@
   border-bottom: var(--theme-border-width) solid var(--theme-border-default);
 }
 
+/* Keep the web capability chrome out of Windows' native caption controls. */
+:global(body[data-dsh-desktop-platform="win32"]) .topbar {
+  box-sizing: border-box;
+  padding-right: 144px;
+}
+
+/* This band covers Desktop's native caption row, so its non-interactive
+ * background must become the replacement Electron drag surface. */
+:global(body[data-dsh-desktop-mode]) .topbar {
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+:global(body[data-dsh-desktop-mode]) .topbar :is(button, input, select, textarea, a, [role="button"], [aria-label="TokensAPI 身份与 Key"]) {
+  user-select: auto;
+  -webkit-app-region: no-drag;
+}
+
+/* The account trigger owns an absolutely positioned menu; keep the whole
+ * island interactive, including padding between its controls. */
+:global(body[data-dsh-desktop-mode]) .topbar > :last-child {
+  -webkit-app-region: no-drag;
+}
+
+/* Identity is a quiet status affordance, not a second titlebar panel. */
+.topbar > :last-child > button {
+  min-width: 132px !important;
+  margin: 9px 0;
+  padding: 5px 10px !important;
+  background: color-mix(in srgb, var(--theme-bg-surface) 55%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-border-default) 65%, transparent) !important;
+  border-radius: 8px;
+}
+
+/* This selector is intentionally account-specific. Never target generic DSH
+ * dialogs or forms: settings and other host surfaces share those semantics. */
+.topbar [aria-label="TokensAPI 身份与 Key"] {
+  position: fixed !important;
+  top: 50% !important;
+  right: auto !important;
+  left: 50% !important;
+  width: min(380px, calc(100vw - 48px)) !important;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  border-radius: 14px;
+  box-shadow: 0 0 0 100vmax rgb(3 7 18 / 58%), 0 28px 80px rgb(0 0 0 / 55%) !important;
+}
+
 /* Brand seat tracks the live sidebar column width; its right border lines up with
  * the sidebar/content boundary so the band reads as one piece expanded or
  * collapsed. */

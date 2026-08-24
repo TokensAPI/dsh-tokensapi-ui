@@ -10,6 +10,8 @@ import type { ConnectionHandle } from "@deepseek-ai/dsh-api-remotes/client";
 // Type-only slot-map merge for shell.overlay.
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import { injectTheme } from "./theme/inject.ts";
+import { ThemePicker } from "./theme/ThemePicker.tsx";
+import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import { CapabilityWorkspace } from "./shell/CapabilityWorkspace.tsx";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
@@ -17,6 +19,8 @@ import { setSkillsRuntime } from "./modules/skills/data.ts";
 import { setToolsBrowserRuntime } from "./modules/tools/browser.ts";
 import { setAutomationRuntime } from "./modules/automation/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
+import { observeGlobalModals } from "./shell/surface-store.ts";
+import { setAccountRuntime } from "./account/TokensAccount.tsx";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -33,6 +37,14 @@ export function apply(ctx: ClientContext): void {
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
   ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
+  ctx.effect(() => observeGlobalModals(), "tokens-core: modal surface coordination");
+
+  ctx.slots.inject("settings.general.item", () =>
+    ctx.slots.register(
+      { name: "settings.general.item", id: "tokens-theme-picker", order: 20 },
+      ThemePicker,
+    ),
+  );
 
   // Hand the skills module its data plane: the root-context connection (for the
   // official skill.list RPC) + the sessions feed (current session id). Captured
@@ -43,6 +55,7 @@ export function apply(ctx: ClientContext): void {
   });
   setToolsBrowserRuntime(ctx.get("connection") as ConnectionHandle);
   setAutomationRuntime(ctx.get("connection") as ConnectionHandle);
+  setAccountRuntime(ctx.get("connection") as ConnectionHandle);
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.

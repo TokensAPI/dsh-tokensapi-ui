@@ -1,0 +1,77 @@
+/* Default product skin: quiet translucent glass without tenant branding. */
+[data-theme="glass"] {
+  color-scheme: dark;
+
+  --theme-font-sans: Inter, system-ui, sans-serif;
+  --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --theme-font-display: Inter, system-ui, sans-serif;
+  --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --theme-bg-canvas: transparent;
+  --theme-bg-shell: rgb(15 23 42 / var(--tokens-glass-alpha, .64));
+  --theme-bg-surface: rgb(30 41 59 / var(--tokens-glass-alpha, .56));
+  --theme-bg-surface-raised: rgb(51 65 85 / var(--tokens-glass-alpha, .68));
+  --theme-bg-overlay: rgb(2 6 23 / 72%);
+  --theme-fg-primary: #f8fafc;
+  --theme-fg-secondary: #cbd5e1;
+  --theme-fg-muted: #94a3b8;
+  --theme-fg-on-accent: #ffffff;
+  --theme-border-subtle: rgb(255 255 255 / 8%);
+  --theme-border-default: rgb(255 255 255 / 14%);
+  --theme-border-strong: rgb(255 255 255 / 26%);
+  --theme-border-focus: #7dd3fc;
+  --theme-accent-primary: #38bdf8;
+  --theme-accent-primary-hover: #7dd3fc;
+  --theme-accent-fill: #0284c7;
+  --theme-accent-fill-hover: #0ea5e9;
+  --theme-accent-secondary: #a78bfa;
+  --theme-accent-soft: rgb(56 189 248 / 14%);
+  --theme-accent-glow: rgb(56 189 248 / 28%);
+  --theme-success: #4ade80;
+  --theme-warning: #fbbf24;
+  --theme-danger: #fb7185;
+  --theme-info: #60a5fa;
+  --theme-radius-control: 10px;
+  --theme-radius-card: 16px;
+  --theme-radius-panel: 20px;
+  --theme-shadow-card-hover: 0 24px 70px -28px rgb(14 165 233 / 42%);
+  --theme-shadow-button-hover: 0 10px 30px rgb(14 165 233 / 24%);
+  --theme-grid-color: rgb(148 163 184 / 6%);
+}
+
+[data-theme="glass"][data-color-scheme="light"] {
+  color-scheme: light;
+  --theme-bg-canvas: transparent;
+  --theme-bg-shell: rgb(248 250 252 / var(--tokens-glass-alpha, .70));
+  --theme-bg-surface: rgb(255 255 255 / var(--tokens-glass-alpha, .64));
+  --theme-bg-surface-raised: rgb(255 255 255 / var(--tokens-glass-alpha, .84));
+  --theme-bg-overlay: rgb(15 23 42 / 34%);
+  --theme-fg-primary: #0f172a;
+  --theme-fg-secondary: #334155;
+  --theme-fg-muted: #64748b;
+  --theme-fg-on-accent: #ffffff;
+  --theme-border-subtle: rgb(15 23 42 / 7%);
+  --theme-border-default: rgb(15 23 42 / 13%);
+  --theme-border-strong: rgb(15 23 42 / 24%);
+  --theme-border-focus: #0284c7;
+  --theme-accent-primary: #0284c7;
+  --theme-accent-primary-hover: #0369a1;
+  --theme-accent-fill: #0284c7;
+  --theme-accent-fill-hover: #0369a1;
+  --theme-accent-secondary: #7c3aed;
+  --theme-accent-soft: rgb(2 132 199 / 10%);
+  --theme-accent-glow: rgb(2 132 199 / 18%);
+  --theme-success: #15803d;
+  --theme-warning: #a16207;
+  --theme-danger: #be123c;
+  --theme-info: #2563eb;
+  --theme-shadow-card-hover: 0 24px 64px -30px rgb(2 132 199 / 32%);
+  --theme-shadow-button-hover: 0 10px 26px rgb(2 132 199 / 18%);
+  --theme-grid-color: rgb(30 64 175 / 5%);
+}
+
+[data-theme="glass"] [data-tokens-ambient] { background: #071923; }
+[data-theme="glass"] [data-blob="one"] { background: #0891b2; left: -12%; top: -12%; }
+[data-theme="glass"] [data-blob="two"] { background: #0f766e; right: -10%; top: 4%; animation-delay: -8s; }
+[data-theme="glass"] [data-blob="three"] { background: #2563eb; left: 34%; bottom: -34%; animation-delay: -15s; }
+[data-theme="glass"][data-color-scheme="light"] [data-tokens-ambient] { background: #e7f8fb; }

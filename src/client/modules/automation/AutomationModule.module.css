@@ -1,10 +1,10 @@
 .root { min-height: 100%; color: var(--theme-fg-primary); }
-.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
-.crumb { color: var(--theme-accent-primary); font: 500 10px/1.4 var(--theme-font-mono); letter-spacing: .14em; text-transform: uppercase; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.crumb { display: flex; align-items: center; gap: 7px; color: var(--theme-fg-secondary); font: 500 11px/1.4 var(--theme-font-mono); letter-spacing: .14em; text-transform: uppercase; }
 .crumb span { display: inline-block; width: 6px; height: 6px; margin-right: 8px; background: var(--theme-accent-primary); box-shadow: 0 0 12px var(--theme-accent-primary); }
 .crumb b { padding: 0 5px; color: var(--theme-fg-muted); font-weight: 400; }
-.title { margin: 11px 0 8px; font-size: 36px; }
-.subtitle { max-width: 660px; margin: 0; color: var(--theme-fg-secondary); font-size: 13px; line-height: 1.65; }
+.title { margin: 8px 0 0; font-size: 34px; }
+.subtitle { max-width: 660px; margin: 8px 0 0; color: var(--theme-fg-secondary); font-size: 13px; line-height: 1.55; }
 .primary { height: 42px; padding: 0 18px; cursor: pointer; white-space: nowrap; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--theme-accent-primary); outline-offset: 2px; }
 .toolbar { display: flex; min-height: 48px; align-items: center; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px solid var(--theme-border-default); }
