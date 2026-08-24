@@ -26,7 +26,7 @@ const SKINS: Record<string, string> = {
 };
 
 /** Default skin when none is stored. */
-export const DEFAULT_SKIN = "glass";
+export const DEFAULT_SKIN = "electrox";
 
 const STORAGE_KEY = "dsh-tokensapi-ui-skin";
 const STYLE_TAG = "dsh-tokensapi-ui-theme";

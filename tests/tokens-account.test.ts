@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectTokensApiDshToken, tokensAccountViewBounds } from "../src/tokens-account.ts";
+import { resolvedCredentialValue, selectTokensApiDshToken, tokensAccountViewBounds } from "../src/tokens-account.ts";
 
 const token = (id: number, extra: Record<string, unknown> = {}) => ({ id, name: `key-${id}`, status: 1, expired_time: -1, unlimited_quota: true, remain_quota: 0, org_id: 0, accessed_time: id, ...extra });
 
@@ -15,4 +15,9 @@ describe("TokensAPI AIGC view bounds", () => {
     expect(tokensAccountViewBounds({})).toBeUndefined();
     expect(tokensAccountViewBounds({ bounds: { x: 0, y: 0, width: Number.NaN, height: 500 } })).toBeUndefined();
   });
+});
+
+describe("TokensAPI credential compatibility", () => {
+  it("treats an unconfigured credential as empty", () => expect(resolvedCredentialValue(undefined)).toBe(""));
+  it("reads the configured credential value", () => expect(resolvedCredentialValue({ value: "key" })).toBe("key"));
 });

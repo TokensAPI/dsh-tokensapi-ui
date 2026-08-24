@@ -12,7 +12,7 @@ const STATE_FILE = "tokens-account/state.json";
 
 type Mode = "manual-key" | "account";
 type RpcResult<T = unknown> = { ok: true; value: T } | { ok: false; error: { code: string; message: string; details: Record<string, unknown> } };
-interface Credentials { resolve(ref: string): Promise<{ value?: string }>; set(ref: string, value: string): Promise<void>; unset(ref: string): Promise<void> }
+interface Credentials { resolve(ref: string): Promise<{ value: string } | undefined>; set(ref: string, value: string): Promise<void>; unset(ref: string): Promise<void> }
 interface TokenRow { id: number; name?: string; status: number; expired_time: number; unlimited_quota?: boolean; remain_quota?: number; org_id?: number; group?: string; accessed_time?: number }
 interface State { mode: Mode; preferredTokenId?: number; userId?: number }
 interface AccountView { webContents: { isDestroyed(): boolean; close(): void; loadURL(url: string): Promise<void>; on(event: string, listener: (event: { preventDefault(): void }, url: string) => void): void; setWindowOpenHandler(handler: (details: { url: string }) => { action: "deny" }): void }; setBounds(bounds: { x: number; y: number; width: number; height: number }): void }
@@ -44,6 +44,7 @@ function externalUrl(raw: string): string | undefined {
   }
 }
 function fingerprint(key: string): string { return `sha256:${createHash("sha256").update(key).digest("hex")}`; }
+export function resolvedCredentialValue(result: { value: string } | undefined): string { return result?.value ?? ""; }
 function usable(token: TokenRow): boolean {
   return Number.isInteger(token.id) && token.id > 0 && token.status === 1 && token.expired_time !== 0
     && (token.expired_time === -1 || token.expired_time > Math.floor(Date.now() / 1000))
@@ -114,7 +115,7 @@ export function installTokensAccount(ctx: Context, connection: { rpc: { handle(c
   };
   const tokens = async (): Promise<TokenRow[]> => { const data = await api("/api/token/?p=0&page_size=100") as { items?: TokenRow[] }; if (!Array.isArray(data?.items)) throw new Error("TokensAPI Key 列表无效"); return data.items; };
   const store = async (ref: string, value: string): Promise<void> => { if (credentials === undefined) throw new Error("当前运行环境不支持桌面凭据"); if (value === "") await credentials.unset(ref); else await credentials.set(ref, value); };
-  const resolve = async (ref: string): Promise<string> => credentials === undefined ? "" : (await credentials.resolve(ref)).value ?? "";
+  const resolve = async (ref: string): Promise<string> => credentials === undefined ? "" : resolvedCredentialValue(await credentials.resolve(ref));
   const activate = async (token: TokenRow): Promise<void> => { const data = await api(`/api/token/${token.id}/key`, { method: "POST", body: "{}" }) as { key?: string }; if (!data.key) throw new Error("TokensAPI Key 内容无效"); await store(CURRENT_KEY, data.key); await store(CURRENT_FINGERPRINT, fingerprint(data.key)); active = token; state.preferredTokenId = token.id; await save(); };
   const restoreManual = async (): Promise<void> => { await store(CURRENT_KEY, await resolve(MANUAL_KEY)); await store(CURRENT_FINGERPRINT, await resolve(MANUAL_FINGERPRINT)); active = undefined; user = undefined; };
   const snapshot = async () => ({ available: credentials !== undefined, mode: state.mode, authenticated: user !== undefined, user: user === undefined ? undefined : { id: user.id, username: user.username, displayName: user.display_name || user.username, group: user.group || "", role: user.role, quota: user.quota }, dshToken: active === undefined ? undefined : { id: active.id, name: active.name || "", orgId: active.org_id || 0, group: active.group || "" }, manualConfigured: state.mode === "manual-key" && (await resolve(CURRENT_KEY)) !== "", aigcVisible: state.mode === "account" && user !== undefined });
