@@ -104,7 +104,7 @@ function decorateCheckingGate(): void {
 
   const title = document.createElement("h1");
   title.className = css("title");
-  title.textContent = "正在启动 TokensHarness";
+  title.textContent = "正在启动 Tokens Cowork";
   const description = document.createElement("p");
   description.className = css("description");
   description.textContent = "正在验证本地配置并初始化模型服务";

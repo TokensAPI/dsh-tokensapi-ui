@@ -23,13 +23,13 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).toContain("--lake-primary: oklch(0.765 0.177 163.22)");
     expect(cleanTheme).toContain("--lake-secondary: oklch(0.551 0.0899 200.52)");
     expect(cleanTheme).toContain('[data-theme="clean"][data-color-scheme="light"]');
-    expect(cleanTheme).toContain("--theme-bg-shell: oklch(0.214 0.00885 163.22)");
-    expect(cleanTheme).toContain("--theme-bg-surface: oklch(0.2314 0.01416 163.22)");
-    expect(cleanTheme).toContain("--theme-accent-soft: oklch(0.2894 0.03186 163.22)");
+    expect(cleanTheme).toContain("--theme-bg-shell: rgb(22 27 25 / 84%)");
+    expect(cleanTheme).toContain("--theme-bg-surface: rgb(27 34 31 / 76%)");
+    expect(cleanTheme).toContain("--theme-accent-soft: rgb(59 128 94 / 20%)");
     expect(cleanTheme).toContain("--theme-fg-secondary: oklch(0.3434 0.05664 163.22)");
-    expect(cleanTheme).toContain("--theme-bg-surface: rgb(255 255 255 / 66%)");
+    expect(cleanTheme).toContain("--theme-bg-surface: rgb(255 255 255 / 58%)");
     expect(cleanTheme).toContain("--theme-border-subtle: rgb(31 86 61 / 14%)");
-    expect(cleanTheme).toContain("--theme-accent-soft: oklch(0.9671 0.02478 163.22)");
+    expect(cleanTheme).toContain("--theme-accent-soft: rgb(56 185 125 / 10%)");
     expect(chrome).toContain('[data-composer-card="true"]::before');
     expect(chrome).toContain("pointer-events: none");
     expect(chrome).not.toMatch(/\[data-composer-card="true"\]\s*\{[^}]*backdrop-filter/s);

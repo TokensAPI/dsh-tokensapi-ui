@@ -1,8 +1,31 @@
 .mark {
   display: block;
   flex: none;
+  position: relative;
+}
+
+.mark img {
+  display: block;
+  inset: 0;
   object-fit: contain;
-  border-radius: 6px;
+  position: absolute;
+}
+
+.lightMark {
+  filter: drop-shadow(0 4px 8px rgb(61 80 184 / 18%));
+}
+
+.darkMark {
+  display: none !important;
+  filter: drop-shadow(0 3px 8px rgb(118 140 255 / 24%));
+}
+
+:global(html[data-theme="clean"]:not([data-color-scheme="light"])) .lightMark {
+  display: none;
+}
+
+:global(html[data-theme="clean"]:not([data-color-scheme="light"])) .darkMark {
+  display: block !important;
 }
 
 .name {
@@ -10,8 +33,17 @@
   overflow: hidden;
   color: inherit;
   font-size: 15px;
-  font-weight: 650;
+  font-weight: 680;
+  letter-spacing: -0.025em;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cowork {
+  color: transparent;
+  background: linear-gradient(100deg, #629cf4 0%, #9275ee 52%, #45d4df 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: saturate(1.08);
 }

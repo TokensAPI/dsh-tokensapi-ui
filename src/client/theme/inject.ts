@@ -81,17 +81,23 @@ export function injectTheme(): () => void {
     observer.observe(document.body, { attributes: true, attributeFilter: ["data-ds-dark-theme"] });
   }
 
-  const existing = document.head.querySelector(`style[data-plugin-css="${STYLE_TAG}"]`);
-  if (existing !== null) return () => {
-    observer.disconnect();
-    existing.remove();
-  };
-
   const skinSheets = Object.values(SKINS).join("\n");
+  const cssText = `${albertSans}\n${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
+  const existing = document.head.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_TAG}"]`);
+  if (existing !== null) {
+    // Watch/HMR reloads the module while the previous style element remains in
+    // the document. Refresh its contents instead of silently keeping stale CSS.
+    existing.textContent = cssText;
+    return () => {
+      observer.disconnect();
+      existing.remove();
+    };
+  }
+
   const tag = document.createElement("style");
   tag.dataset.plugin = "dsh-tokensapi-ui";
   tag.dataset.pluginCss = STYLE_TAG;
-  tag.textContent = `${albertSans}\n${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
+  tag.textContent = cssText;
   document.head.appendChild(tag);
   return () => {
     observer.disconnect();

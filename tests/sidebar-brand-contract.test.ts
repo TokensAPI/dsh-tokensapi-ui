@@ -28,9 +28,12 @@ describe("sidebar branding contract", () => {
 
   it("honours the host-requested mark size", () => {
     const mark = TokensBrandMark({ size: 24, className: "host-mark" });
-    expect(mark.type).toBe("img");
-    expect(mark.props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
+    expect(mark.type).toBe("span");
+    expect(mark.props.style).toEqual({ width: 24, height: 24 });
     expect(mark.props.className).toContain("host-mark");
-    expect(TokensBrandName().props.children).toBe("TokensAPI");
+    expect(mark.props.children).toHaveLength(2);
+    expect(mark.props.children[0].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
+    expect(mark.props.children[1].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
+    expect(TokensBrandName().props.children).toHaveLength(3);
   });
 });

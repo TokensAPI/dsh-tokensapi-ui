@@ -12,35 +12,40 @@
   /* These are the actual Lake View dark-mode mixes, expanded to concrete
    * colours for the Electron build. Keeping the derived chroma explicit
    * avoids both hue drift and translucent green stacking across surfaces. */
-  --theme-bg-shell: oklch(0.214 0.00885 163.22);
-  --theme-bg-surface: oklch(0.2314 0.01416 163.22);
-  --theme-bg-surface-raised: oklch(0.2546 0.02124 163.22);
+  --theme-bg-shell: rgb(22 27 25 / 84%);
+  --theme-bg-surface: rgb(27 34 31 / 76%);
+  --theme-bg-surface-raised: rgb(37 45 41 / 86%);
   --theme-bg-overlay: rgb(0 0 0 / 70%);
   --theme-fg-primary: oklch(0.965 0 0);
   --theme-fg-secondary: oklch(0.82 0 0);
   --theme-fg-muted: oklch(0.66 0 0);
   --theme-fg-on-accent: oklch(0 0 0);
-  --theme-border-subtle: oklch(0.2778 0.02832 163.22);
-  --theme-border-default: oklch(0.3242 0.04248 163.22);
-  --theme-border-strong: oklch(0.3938 0.06372 163.22);
+  --theme-border-subtle: rgb(111 153 133 / 15%);
+  --theme-border-default: rgb(111 171 142 / 22%);
+  --theme-border-strong: rgb(120 194 158 / 34%);
   --theme-border-focus: var(--lake-primary);
   --theme-accent-primary: var(--lake-primary);
   --theme-accent-primary-hover: color-mix(in srgb, var(--lake-primary) 88%, white);
   --theme-accent-fill: var(--lake-primary);
   --theme-accent-fill-hover: color-mix(in srgb, var(--lake-primary) 88%, white);
   --theme-accent-secondary: var(--lake-secondary);
-  --theme-accent-soft: oklch(0.2894 0.03186 163.22);
+  --theme-accent-soft: rgb(59 128 94 / 20%);
   --theme-accent-glow: color-mix(in srgb, var(--lake-primary) 22%, transparent);
   --theme-success: oklch(0.696 0.17 162.48);
   --theme-warning: oklch(0.769 0.188 70.08);
   --theme-danger: oklch(0.704 0.191 22.216);
   --theme-info: oklch(0.68 0.17 237.323);
-  --theme-radius-control: 8px;
-  --theme-radius-card: 12px;
-  --theme-radius-panel: 12px;
-  --theme-shadow-card-hover: 0 18px 42px -26px rgb(0 0 0 / 72%);
+  --theme-radius-control: 10px;
+  --theme-radius-card: 14px;
+  --theme-radius-panel: 16px;
+  --theme-shadow-card-hover:
+    inset 0 1px 0 rgb(255 255 255 / 7%),
+    0 20px 48px -26px rgb(0 0 0 / 82%);
   --theme-shadow-button-hover: 0 8px 22px color-mix(in srgb, var(--lake-primary) 18%, transparent);
   --theme-grid-color: color-mix(in srgb, var(--lake-primary) 5%, transparent);
+  --theme-glass-highlight: rgb(255 255 255 / 10%);
+  --theme-glass-shadow: rgb(0 0 0 / 52%);
+  --theme-glass-blur: 20px;
 }
 
 [data-theme="clean"][data-color-scheme="light"] {
@@ -50,8 +55,8 @@
    * translucency only reveals the controlled TokensAPI ambient canvas. */
   --theme-bg-canvas: rgb(248 251 249 / 78%);
   --theme-bg-shell: rgb(244 250 247 / 72%);
-  --theme-bg-surface: rgb(255 255 255 / 66%);
-  --theme-bg-surface-raised: rgb(255 255 255 / 86%);
+  --theme-bg-surface: rgb(255 255 255 / 58%);
+  --theme-bg-surface-raised: rgb(255 255 255 / 72%);
   --theme-bg-overlay: rgb(0 0 0 / 35%);
   --theme-fg-primary: oklch(0.145 0 0);
   --theme-fg-secondary: oklch(0.3434 0.05664 163.22);
@@ -66,7 +71,7 @@
   --theme-accent-fill: var(--lake-primary);
   --theme-accent-fill-hover: color-mix(in srgb, var(--lake-primary) 88%, black);
   --theme-accent-secondary: var(--lake-secondary);
-  --theme-accent-soft: oklch(0.9671 0.02478 163.22);
+  --theme-accent-soft: rgb(56 185 125 / 10%);
   --theme-accent-glow: color-mix(in srgb, var(--lake-primary) 17%, transparent);
   --theme-success: oklch(0.596 0.145 163.225);
   --theme-warning: oklch(0.58 0.15 75.834);

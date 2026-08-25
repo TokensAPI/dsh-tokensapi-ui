@@ -16,7 +16,7 @@ import { ThemePicker } from "./theme/ThemePicker.tsx";
 import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import { CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
-import { TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
+import { observeTokensCoworkHeadline, TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
 import { setSkillsRuntime } from "./modules/skills/data.ts";
@@ -42,6 +42,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => injectTheme(), "tokens-core: theme");
   ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
   ctx.effect(() => observeGlobalModals(), "tokens-core: modal surface coordination");
+  ctx.effect(() => observeTokensCoworkHeadline(), "tokens-core: hero brand copy");
 
   ctx.slots.inject("settings.general.item", () =>
     ctx.slots.register(

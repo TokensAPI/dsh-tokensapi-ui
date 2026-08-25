@@ -105,6 +105,23 @@ const rawCssPlugin = {
   },
 }
 
+const PNG_PREFIX = '\0inline-png:'
+const pngPlugin = {
+  name: 'tokens-core-inline-png',
+  resolveId(source: string, importer: string | undefined): string | null {
+    if (!source.endsWith('.png')) return null
+    const abs = importer !== undefined ? resolvePath(dirname(importer), source) : source
+    return PNG_PREFIX + abs
+  },
+  load(this: { addWatchFile: (id: string) => void }, id: string): string | null {
+    if (!id.startsWith(PNG_PREFIX)) return null
+    const file = id.slice(PNG_PREFIX.length)
+    this.addWatchFile(file)
+    const encoded = readFileSync(file).toString('base64')
+    return `export default ${JSON.stringify(`data:image/png;base64,${encoded}`)}`
+  },
+}
+
 const mode = process.env.NODE_ENV ?? 'production'
 
 const host: UserConfig = {
@@ -144,7 +161,7 @@ const client: UserConfig = {
     'import.meta.env.MODE': JSON.stringify(mode),
     'import.meta.env': JSON.stringify({ MODE: mode }),
   },
-  plugins: [cssModulesPlugin, rawCssPlugin],
+  plugins: [cssModulesPlugin, rawCssPlugin, pngPlugin],
   outputOptions: {
     entryFileNames: 'client.js',
     banner: 'window.__ModuleLoader__.load({ id: "dsh-tokensapi-ui", factory: (require) => {',

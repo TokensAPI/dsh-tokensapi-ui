@@ -6,6 +6,11 @@ declare module "*.module.css" {
   export default classes;
 }
 
+declare module "*.png" {
+  const url: string;
+  export default url;
+}
+
 declare module "*.css" {
   const cssText: string;
   export default cssText;
