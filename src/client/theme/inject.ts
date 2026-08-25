@@ -9,7 +9,6 @@
 // on <html>, so SWITCHING a skin is just an attribute swap — no re-injection.
 // Add a skin: create themes/<id>.css (`[data-theme="<id>"] { --theme-*: … }`) and
 // register it in SKINS below. Components never change.
-import albertSans from "./albert-sans.css";
 import contract from "./theme-contract.css";
 import clean from "./themes/clean.css";
 import electrox from "./themes/electrox.css";
@@ -82,7 +81,7 @@ export function injectTheme(): () => void {
   }
 
   const skinSheets = Object.values(SKINS).join("\n");
-  const cssText = `${albertSans}\n${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
+  const cssText = `${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
   const existing = document.head.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_TAG}"]`);
   if (existing !== null) {
     // Watch/HMR reloads the module while the previous style element remains in

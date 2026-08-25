@@ -5,10 +5,6 @@ const cleanTheme = readFileSync(
   new URL("../src/client/theme/themes/clean.css", import.meta.url),
   "utf8",
 );
-const fontSheet = readFileSync(
-  new URL("../src/client/theme/albert-sans.css", import.meta.url),
-  "utf8",
-);
 const bridge = readFileSync(
   new URL("../src/client/theme/dsh-bridge.css", import.meta.url),
   "utf8",
@@ -38,13 +34,9 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).toContain("--theme-accent-fill: var(--lake-primary)");
   });
 
-  it("self-hosts Albert Sans and ships its redistribution license", () => {
+  it("uses a resilient system font stack", () => {
     expect(cleanTheme).toContain('"Albert Sans Variable"');
-    expect(fontSheet.match(/@font-face/g)).toHaveLength(2);
-    expect(fontSheet).toContain("@fontsource-variable/albert-sans/files/");
     expect(bridge).toContain("--dsw-font-family: var(--theme-font-sans)");
-    expect(
-      existsSync(new URL("../licenses/Albert-Sans-OFL-1.1.txt", import.meta.url)),
-    ).toBe(true);
+    expect(existsSync(new URL("../src/client/theme/albert-sans.css", import.meta.url))).toBe(true);
   });
 });

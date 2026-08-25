@@ -1,6 +1,6 @@
 {
   "name": "dsh-tokensapi-ui",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "TokensAPI UI plugin for DeepSeek Harness — themeable skins + skills",
   "license": "MIT",
   "type": "module",
@@ -43,9 +43,7 @@
     },
     "minHarness": "0.1.1-rc.2"
   },
-  "dependencies": {
-    "@fontsource-variable/albert-sans": "5.2.8"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
