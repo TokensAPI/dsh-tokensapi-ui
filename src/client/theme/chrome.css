@@ -372,19 +372,23 @@ html[data-theme="clean"] :is(
 /* The composer's lower-left command trigger also opens a listbox, but it is a
  * compact plus-icon tool rather than a selection control. Keep it out of the
  * global glass selector treatment and ensure its glyph remains visible. */
-html[data-theme="clean"] [data-composer-card="true"] button:is(
+html[data-theme="clean"] [data-composer-card] button:is(
   [aria-label="命令"],
   [aria-label="Commands"]
 )[aria-haspopup="listbox"] {
-  color: var(--theme-fg-secondary) !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  position: relative;
+  z-index: 2;
+  color: var(--theme-fg-primary) !important;
+  border-color: var(--theme-border-default) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 78%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 52%, transparent),
+    0 5px 14px -10px var(--clean-control-shadow) !important;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-html[data-theme="clean"] [data-composer-card="true"] button:is(
+html[data-theme="clean"] [data-composer-card] button:is(
   [aria-label="命令"],
   [aria-label="Commands"]
 )[aria-haspopup="listbox"]:hover:not(:disabled) {

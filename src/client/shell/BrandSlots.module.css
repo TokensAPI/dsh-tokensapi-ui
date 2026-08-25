@@ -20,11 +20,11 @@
   filter: drop-shadow(0 3px 8px rgb(118 140 255 / 24%));
 }
 
-:global(html[data-theme="clean"]:not([data-color-scheme="light"])) .lightMark {
+:global(html:is([data-theme="clean"], [data-theme="electrox"]):not([data-color-scheme="light"])) .lightMark {
   display: none;
 }
 
-:global(html[data-theme="clean"]:not([data-color-scheme="light"])) .darkMark {
+:global(html:is([data-theme="clean"], [data-theme="electrox"]):not([data-color-scheme="light"])) .darkMark {
   display: block !important;
 }
 

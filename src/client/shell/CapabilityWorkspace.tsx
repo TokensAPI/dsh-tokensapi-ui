@@ -17,6 +17,7 @@ import { useCapabilities } from "./capability-registry.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
 import { BRAND_LOGO } from "./brand-logo.ts";
+import darkTokensApiLogo from "./assets/tokens-cowork-dark-mark-96.png";
 import styles from "./CapabilityWorkspace.module.css";
 
 let layoutRuntime: ILayout | null = null;
@@ -146,7 +147,9 @@ export function CapabilityWorkspace(): React.JSX.Element {
           data-collapsed={!wide || undefined}
           style={sidebarWidth > 0 ? { width: `${sidebarWidth}px` } : undefined}
         >
-          <img className={styles.mark} src={BRAND_LOGO} alt="ELECTRO X / 粒刻" />
+          <span className={styles.markFrame}>
+            <img className={styles.mark} src={BRAND_LOGO} alt="ELECTRO X / 粒刻" />
+          </span>
           {wide ? (
             <div className={styles.brandText}>
               <div className={styles.brandTitle}>
@@ -154,7 +157,10 @@ export function CapabilityWorkspace(): React.JSX.Element {
               </div>
               <div className={styles.poweredBy}>
                 powered by
-                <img className={styles.poweredLogo} src={TOKENSAPI_LOGO} alt="" aria-hidden="true" />
+                <span className={styles.poweredLogo} aria-hidden="true">
+                  <img className={styles.poweredLogoLight} src={TOKENSAPI_LOGO} alt="" />
+                  <img className={styles.poweredLogoDark} src={darkTokensApiLogo} alt="" />
+                </span>
                 <span className={styles.poweredName}>TokensAPI</span>
               </div>
             </div>
