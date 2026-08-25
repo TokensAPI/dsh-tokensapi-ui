@@ -14,6 +14,7 @@ describe("sidebar branding contract", () => {
     expect(client).toContain('ctx.slots.inject("conversation.hero.brand.mark"');
     expect(workspace).not.toMatch(/document\.querySelector|\.click\(\)/);
     expect(workspace).toContain("layoutRuntime?.toggleSidebar()");
+    expect(workspace).toContain('<span className={styles.poweredName}>TokensAPI</span>');
     expect(workspace).toContain("'[role=\"treeitem\"][aria-selected]'");
     expect(workspace).not.toContain('target.closest("[data-shell-overlay]") === null');
     expect(chrome).not.toMatch(/data-tokens-sidebar|viewBox="0 0 23\.16 17\.04"/);
@@ -23,6 +24,8 @@ describe("sidebar branding contract", () => {
     expect(chrome).not.toContain('top: -56px');
     expect(chrome).toContain(':has(textarea[aria-haspopup="menu"][readonly])');
     expect(chrome).toContain(".dshMarketEmpty > button");
+    expect(chrome).toContain('[aria-label="命令"]');
+    expect(chrome).toContain('[aria-label="Commands"]');
     expect(bridge).toContain("--dsw-alias-label-primary-foreground: var(--theme-fg-on-accent)");
   });
 

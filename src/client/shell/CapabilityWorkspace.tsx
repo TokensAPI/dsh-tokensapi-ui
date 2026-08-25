@@ -155,7 +155,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
               <div className={styles.poweredBy}>
                 powered by
                 <img className={styles.poweredLogo} src={TOKENSAPI_LOGO} alt="" aria-hidden="true" />
-                <span className={styles.poweredName}>tokensapi</span>
+                <span className={styles.poweredName}>TokensAPI</span>
               </div>
             </div>
           ) : null}

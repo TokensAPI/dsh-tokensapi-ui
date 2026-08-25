@@ -369,6 +369,29 @@ html[data-theme="clean"] :is(
     0 12px 30px -18px var(--theme-accent-glow) !important;
 }
 
+/* The composer's lower-left command trigger also opens a listbox, but it is a
+ * compact plus-icon tool rather than a selection control. Keep it out of the
+ * global glass selector treatment and ensure its glyph remains visible. */
+html[data-theme="clean"] [data-composer-card="true"] button:is(
+  [aria-label="命令"],
+  [aria-label="Commands"]
+)[aria-haspopup="listbox"] {
+  color: var(--theme-fg-secondary) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="clean"] [data-composer-card="true"] button:is(
+  [aria-label="命令"],
+  [aria-label="Commands"]
+)[aria-haspopup="listbox"]:hover:not(:disabled) {
+  color: var(--theme-fg-primary) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
 /* Dropdowns are commonly portaled to body, so give all selection/menu panels
  * the same material instead of coupling the surface to one trigger. */
 html[data-theme="clean"] :is([role="listbox"], [role="menu"]) {
