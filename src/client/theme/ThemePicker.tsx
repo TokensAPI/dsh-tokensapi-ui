@@ -7,7 +7,7 @@ import css from "./ThemePicker.module.css";
 type ThemePickerProps = PropsRuntime<"settings.general.item">;
 
 const THEMES = [
-  { id: "clean", name: "基础主题", description: "简洁统一，不包含合作方品牌与专属菜单", colors: ["#171717", "#3b82f6", "#f5f5f5"] },
+  { id: "clean", name: "基础主题", description: "TokensAPI Lake View，湖绿色交互与通透浅色外观", colors: ["#161b19", "#5fd7a1", "#f8fbf9"] },
   { id: "electrox", name: "合作方主题", description: "保留 ELECTRO X 联合品牌与能力导航", colors: ["#11140f", "#d4ff3a", "#ffffff"] },
 ] as const;
 

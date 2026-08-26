@@ -8,6 +8,7 @@
   z-index: 5;
   display: flex;
   align-items: stretch;
+  box-sizing: border-box;
   height: 72px;
   background: var(--theme-bg-shell);
   border-bottom: var(--theme-border-width) solid var(--theme-border-default);
@@ -35,6 +36,7 @@
  * the sidebar/content boundary so the band reads as one piece expanded or
  * collapsed. */
 .brandSeat {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -42,7 +44,21 @@
   box-sizing: border-box;
   padding: 0 16px;
   overflow: hidden;
-  border-right: var(--theme-border-width) solid var(--theme-border-default);
+}
+
+/* Continue the host sidebar's native seam through the product header without
+ * adding another box-model border. The capability page intentionally owns no
+ * border at this boundary, so resize/collapse transitions cannot overlap two
+ * independently positioned lines. */
+.brandSeat::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--theme-border-width);
+  background: var(--theme-border-default);
+  content: "";
+  pointer-events: none;
 }
 
 .markFrame {
@@ -278,12 +294,6 @@
   overflow: auto;
   padding: 28px 32px;
   background-color: var(--theme-bg-canvas);
-  /* Subtle electrox grid texture (accent at 4%). */
-  background-image:
-    linear-gradient(var(--theme-grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--theme-grid-color) 1px, transparent 1px);
-  background-size: var(--theme-grid-size, 32px) var(--theme-grid-size, 32px);
-  border-left: var(--theme-border-width) solid var(--theme-border-default);
 }
 
 @media (prefers-reduced-motion: reduce) {

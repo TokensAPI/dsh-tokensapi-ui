@@ -15,9 +15,9 @@ import clsx from "clsx";
 import { useActiveCapability, workspace } from "./workspace-store.ts";
 import { useCapabilities } from "./capability-registry.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
-import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
 import { BRAND_LOGO } from "./brand-logo.ts";
 import darkTokensApiLogo from "./assets/tokens-cowork-dark-mark-96.png";
+import lightTokensApiLogo from "./assets/tokensapi-mark-1024.png";
 import styles from "./CapabilityWorkspace.module.css";
 
 let layoutRuntime: ILayout | null = null;
@@ -158,7 +158,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
               <div className={styles.poweredBy}>
                 powered by
                 <span className={styles.poweredLogo} aria-hidden="true">
-                  <img className={styles.poweredLogoLight} src={TOKENSAPI_LOGO} alt="" />
+                  <img className={styles.poweredLogoLight} src={lightTokensApiLogo} alt="" />
                   <img className={styles.poweredLogoDark} src={darkTokensApiLogo} alt="" />
                 </span>
                 <span className={styles.poweredName}>TokensAPI</span>

@@ -262,7 +262,7 @@ html[data-theme="clean"] [role="dialog"] :is(h1, h2, h3) {
 
 html[data-theme="clean"] [role="dialog"] :is(
   [aria-current="page"],
-  [aria-selected="true"]
+  [aria-selected="true"]:not([role="tab"])
 ) {
   border-color: color-mix(in srgb, var(--theme-accent-primary) 14%, transparent) !important;
   background: color-mix(in srgb, var(--theme-accent-primary) 9%, transparent) !important;
@@ -431,7 +431,7 @@ html[data-theme="clean"] [role="dialog"] button:not(:disabled):active {
 /* DSH occasionally paints the pressed/focus shadow on a rectangular button
  * box even when a rounded child supplies the visible surface. Make the actual
  * interactive node own the radius so every shadow follows the same curve. */
-html[data-theme="clean"][data-color-scheme="light"] [role="dialog"] button:not([aria-label]),
+html[data-theme="clean"][data-color-scheme="light"] [role="dialog"] button:not([aria-label], [role="tab"]),
 html[data-theme="clean"][data-color-scheme="light"] [role="dialog"] [role="button"] {
   border-radius: max(10px, var(--theme-radius-control)) !important;
   background-clip: padding-box !important;

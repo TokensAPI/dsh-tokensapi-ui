@@ -13,6 +13,10 @@ const chrome = readFileSync(
   new URL("../src/client/theme/chrome.css", import.meta.url),
   "utf8",
 );
+const themePicker = readFileSync(
+  new URL("../src/client/theme/ThemePicker.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("TokensAPI Lake View basic theme", () => {
   it("uses the Lake View palette for both appearances with accessible primary controls", () => {
@@ -38,5 +42,17 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).toContain('"Albert Sans Variable"');
     expect(bridge).toContain("--dsw-font-family: var(--theme-font-sans)");
     expect(existsSync(new URL("../src/client/theme/albert-sans.css", import.meta.url))).toBe(true);
+  });
+
+  it("keeps settings tabs out of dialog selection and control chrome", () => {
+    expect(chrome).toContain('[aria-selected="true"]:not([role="tab"])');
+    expect(chrome).toContain('button:not([aria-label], [role="tab"])');
+    expect(chrome).not.toMatch(/\[aria-selected="true"\]\s*\n?\s*\)\s*\{/);
+  });
+
+  it("describes and previews the Lake View palette accurately", () => {
+    expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与通透浅色外观");
+    expect(themePicker).toContain('["#161b19", "#5fd7a1", "#f8fbf9"]');
+    expect(themePicker).not.toContain('["#171717", "#3b82f6", "#f5f5f5"]');
   });
 });

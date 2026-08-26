@@ -1,5 +1,5 @@
 import darkLogoUrl from "./assets/tokens-cowork-dark-mark-96.png";
-import { TOKENSAPI_LOGO } from "./tokensapi-logo.ts";
+import lightLogoUrl from "./assets/tokensapi-mark-1024.png";
 import css from "./BrandSlots.module.css";
 
 export interface TokensBrandMarkProps {
@@ -11,7 +11,13 @@ export interface TokensBrandMarkProps {
 export function TokensBrandMark({ size, className }: TokensBrandMarkProps): React.JSX.Element {
   return (
     <span className={[css.mark, className].filter(Boolean).join(" ")} style={{ width: size, height: size }}>
-      <img aria-hidden="true" className={css.lightMark} src={TOKENSAPI_LOGO} width={size} height={size} />
+      <img
+        aria-hidden="true"
+        className={css.lightMark}
+        src={lightLogoUrl}
+        width={size}
+        height={size}
+      />
       <img aria-hidden="true" className={css.darkMark} src={darkLogoUrl} width={size} height={size} />
     </span>
   );
