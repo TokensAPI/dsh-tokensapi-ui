@@ -57,6 +57,17 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain('backdrop-filter: blur(var(--clean-menu-blur))');
   });
 
+  it("uses a runtime floating-surface marker without broadly styling trees", () => {
+    expect(chrome).toContain("[data-tokens-floating-surface]");
+    expect(chrome).not.toContain('[role="tree"]');
+  });
+
+  it("releases composer clipping for classified and semantic host popups", () => {
+    expect(chrome).toMatch(
+      /\[data-composer-card="true"\]:has\([\s\S]*\[data-tokens-floating-surface\][\s\S]*\[role="menu"\][\s\S]*\[role="listbox"\][\s\S]*\)\s*\{\s*overflow:\s*visible;/,
+    );
+  });
+
   it("themes the outer shell of the active Agent preset card", () => {
     expect(chrome).toContain('li:has(> button[aria-pressed="true"])');
     expect(chrome).toContain('li:has(> button[aria-pressed="false"]):hover');

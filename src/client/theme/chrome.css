@@ -191,6 +191,17 @@ body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
     transform 220ms ease;
 }
 
+/* Composer menus are anchored inside the card and may open upward. Keep the
+ * card clipped at rest for its glass paint layer, then release that clip for
+ * runtime-classified surfaces and semantic host menus. The semantic fallback
+ * covers older controls that expose role=menu/listbox but no popup state on
+ * their trigger (for example the access-mode selector). */
+[data-theme="clean"] [data-composer-card="true"]:has(
+  :is([data-tokens-floating-surface], [role="menu"], [role="listbox"])
+) {
+  overflow: visible;
+}
+
 [data-theme="clean"] [data-composer-card="true"]:focus-within {
   border-color: color-mix(in srgb, var(--theme-accent-primary) 42%, var(--theme-border-default)) !important;
   box-shadow:
@@ -396,9 +407,14 @@ html[data-theme="clean"] [data-composer-card] button:is(
   background: var(--theme-accent-soft) !important;
 }
 
-/* Dropdowns are commonly portaled to body, so give all selection/menu panels
- * the same material instead of coupling the surface to one trigger. */
-html[data-theme="clean"] :is([role="listbox"], [role="menu"]) {
+/* Runtime marks panels associated with an expanded aria-haspopup trigger, so
+ * generated classes and new popup roles share one stable glass contract.
+ * Standard listbox/menu roles remain as a compatibility fallback. */
+html[data-theme="clean"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
   border: 1px solid var(--clean-control-border) !important;
   background: transparent !important;
   box-shadow:
@@ -530,7 +546,11 @@ html[data-theme="clean"] :is(button, a, [role="button"]):focus-visible {
     0 12px 30px -20px var(--theme-accent-glow) !important;
 }
 
-html[data-theme="clean"] :is([role="listbox"], [role="menu"]) {
+html[data-theme="clean"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
   transform-origin: top right;
   animation: clean-menu-enter 150ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
 }
@@ -650,6 +670,7 @@ html[data-theme="clean"]:not([data-color-scheme="light"]) [data-composer-card="t
     [role="combobox"],
     button[aria-haspopup="listbox"],
     button[class*="_selector"],
+    [data-tokens-floating-surface],
     [role="listbox"],
     [role="menu"]
   ) {
