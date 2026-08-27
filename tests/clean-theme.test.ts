@@ -50,6 +50,24 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).not.toMatch(/\[aria-selected="true"\]\s*\n?\s*\)\s*\{/);
   });
 
+  it("bridges the TokensAPI model manager's custom picker into the glass controls", () => {
+    expect(chrome).toContain('input[placeholder="搜索模型"]');
+    expect(chrome).toContain('input[placeholder="Search models"]');
+    expect(chrome).toContain('> button[aria-expanded]');
+    expect(chrome).toContain('backdrop-filter: blur(var(--clean-menu-blur))');
+  });
+
+  it("themes the outer shell of the active Agent preset card", () => {
+    expect(chrome).toContain('li:has(> button[aria-pressed="true"])');
+    expect(chrome).toContain('li:has(> button[aria-pressed="false"]):hover');
+    expect(chrome).toContain("var(--theme-accent-primary) 56%");
+  });
+
+  it("completes the directory picker's bare show-hidden toggle as a glass button", () => {
+    expect(chrome).toContain('button[class*="_showHiddenToggle"][aria-pressed]');
+    expect(chrome).toContain("min-height: 36px");
+  });
+
   it("describes and previews the Lake View palette accurately", () => {
     expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与通透浅色外观");
     expect(themePicker).toContain('["#161b19", "#5fd7a1", "#f8fbf9"]');
