@@ -83,7 +83,6 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain('[data-theme="electrox"] [data-phase="hero"]');
     expect(chrome).toContain("overflow-wrap: anywhere");
     expect(chrome).toContain("background: var(--theme-bg-canvas)");
-    expect(chrome).toContain("background: var(--theme-bg-surface) !important");
     const recommendationBlocks = [
       ...chrome.matchAll(
         /span:has\(> span:nth-child\(3\)\) > span:nth-child\(2\) \{([^}]+)\}/g,
@@ -91,6 +90,7 @@ describe("TokensAPI Lake View basic theme", () => {
     ].map((match) => match[1]);
     expect(recommendationBlocks).toHaveLength(2);
     for (const block of recommendationBlocks) {
+      expect(block).toContain("var(--theme-accent-primary)");
       expect(block).not.toContain("background: var(--theme-accent-primary)");
       expect(block).not.toContain("background: var(--theme-accent-fill)");
     }

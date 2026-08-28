@@ -450,10 +450,10 @@ html[data-theme="clean"] [data-question-key] [role="radiogroup"] > button[role="
   align-items: center;
   min-height: 20px;
   padding: 0 7px;
-  color: var(--theme-fg-secondary) !important;
-  border: 1px solid var(--theme-border-default);
+  color: color-mix(in srgb, var(--theme-accent-primary) 88%, var(--theme-fg-primary)) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 22%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--theme-bg-surface-raised) 72%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-accent-primary) 10%, transparent) !important;
   font-size: 11px !important;
   font-weight: 650;
   line-height: 1;
@@ -803,10 +803,10 @@ html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[rol
   align-items: center;
   min-height: 19px;
   padding: 0 6px;
-  color: var(--theme-fg-secondary) !important;
-  border: 1px solid var(--theme-border-default);
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 34%, transparent);
   border-radius: 0 !important;
-  background: var(--theme-bg-surface) !important;
+  background: var(--theme-accent-soft) !important;
   font-family: var(--theme-font-mono);
   font-size: 10px !important;
   font-weight: 750;
