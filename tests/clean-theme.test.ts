@@ -75,6 +75,26 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain(
       "backdrop-filter: blur(var(--theme-glass-blur)) saturate(128%) contrast(1.02)",
     );
+    expect(chrome).toContain('[data-question-key] [role="radiogroup"] > button[role="radio"]');
+    expect(chrome).toContain('[data-question-key] [role="radiogroup"] > div:has(> input[type="text"])');
+    expect(chrome).toContain('button[role="radio"][aria-checked="true"]');
+    expect(chrome).toContain('> footer > div:last-child > button:last-child');
+    expect(chrome).toContain('html[data-theme="electrox"] [data-question-key]');
+    expect(chrome).toContain('[data-theme="electrox"] [data-phase="hero"]');
+    expect(chrome).toContain("overflow-wrap: anywhere");
+    expect(chrome).toContain("background: var(--theme-bg-canvas)");
+    expect(chrome).toContain("background: var(--theme-bg-surface) !important");
+    const recommendationBlocks = [
+      ...chrome.matchAll(
+        /span:has\(> span:nth-child\(3\)\) > span:nth-child\(2\) \{([^}]+)\}/g,
+      ),
+    ].map((match) => match[1]);
+    expect(recommendationBlocks).toHaveLength(2);
+    for (const block of recommendationBlocks) {
+      expect(block).not.toContain("background: var(--theme-accent-primary)");
+      expect(block).not.toContain("background: var(--theme-accent-fill)");
+    }
+    expect(chrome).not.toContain("Mbwy4a_");
   });
 
   it("themes the outer shell of the active Agent preset card", () => {
