@@ -418,12 +418,12 @@ html[data-theme="clean"] [data-question-key] [role="radiogroup"] > div:has(> inp
 }
 
 html[data-theme="clean"] [data-question-key] [role="radiogroup"] > button[role="radio"][aria-checked="true"] > span:first-child {
-  color: var(--theme-fg-on-accent) !important;
-  border-color: var(--theme-accent-fill) !important;
-  background: var(--theme-accent-fill) !important;
+  color: var(--theme-accent-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 58%, var(--theme-border-default)) !important;
+  background: var(--theme-accent-soft) !important;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, white 34%, transparent),
-    0 7px 16px -10px var(--theme-accent-glow);
+    inset 0 1px 0 color-mix(in srgb, var(--theme-glass-highlight) 68%, transparent),
+    0 7px 16px -12px var(--theme-accent-glow);
 }
 
 html[data-theme="clean"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) {
@@ -768,9 +768,9 @@ html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > div:has(> 
 }
 
 html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"][aria-checked="true"] > span:first-child {
-  color: var(--theme-fg-on-accent) !important;
-  border-color: var(--theme-accent-primary) !important;
-  background: var(--theme-accent-primary) !important;
+  color: var(--theme-accent-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 58%, var(--theme-border-strong)) !important;
+  background: var(--theme-accent-soft) !important;
 }
 
 html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) {

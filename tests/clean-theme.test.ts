@@ -94,6 +94,17 @@ describe("TokensAPI Lake View basic theme", () => {
       expect(block).not.toContain("background: var(--theme-accent-primary)");
       expect(block).not.toContain("background: var(--theme-accent-fill)");
     }
+    const selectedNumberBlocks = [
+      ...chrome.matchAll(
+        /button\[role="radio"\]\[aria-checked="true"\] > span:first-child \{([^}]+)\}/g,
+      ),
+    ].map((match) => match[1]);
+    expect(selectedNumberBlocks).toHaveLength(2);
+    for (const block of selectedNumberBlocks) {
+      expect(block).toContain("background: var(--theme-accent-soft)");
+      expect(block).not.toContain("background: var(--theme-accent-primary)");
+      expect(block).not.toContain("background: var(--theme-accent-fill)");
+    }
     expect(chrome).not.toContain("Mbwy4a_");
   });
 
