@@ -68,6 +68,15 @@ describe("TokensAPI Lake View basic theme", () => {
     );
   });
 
+  it("frosts agent question cards without depending on generated classes", () => {
+    expect(chrome).toContain(
+      '[data-question-key] > section[aria-labelledby^="question-"]',
+    );
+    expect(chrome).toContain(
+      "backdrop-filter: blur(var(--theme-glass-blur)) saturate(128%) contrast(1.02)",
+    );
+  });
+
   it("themes the outer shell of the active Agent preset card", () => {
     expect(chrome).toContain('li:has(> button[aria-pressed="true"])');
     expect(chrome).toContain('li:has(> button[aria-pressed="false"]):hover');
