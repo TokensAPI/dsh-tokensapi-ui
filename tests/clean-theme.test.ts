@@ -36,6 +36,25 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).not.toContain("color-mix(in oklch");
     expect(cleanTheme).toMatch(/--theme-fg-on-accent:\s*oklch\(0 0 0\)/);
     expect(cleanTheme).toContain("--theme-accent-fill: var(--lake-primary)");
+    expect(cleanTheme).toContain("--theme-text-shadow:");
+    expect(cleanTheme).toContain("--theme-glass-text-shadow:");
+    expect(cleanTheme).toContain("--theme-glass-muted-text-shadow:");
+    expect(cleanTheme).toContain("--theme-glass-panel-fill:");
+    expect(cleanTheme).toContain('[data-theme="clean"][data-glass-panels="false"]');
+    expect(chrome).toContain('html[data-theme="clean"][data-glass-panels="false"]');
+    expect(chrome).toContain("background: var(--theme-bg-surface-raised) !important");
+    expect(chrome).toContain('[data-glass-panels="true"]');
+    expect(chrome).toContain("-webkit-text-stroke: .1px currentColor");
+    expect(chrome).toContain("text-shadow: var(--theme-glass-text-shadow) !important");
+    expect(chrome).toContain("text-shadow: var(--theme-glass-muted-text-shadow) !important");
+    expect(chrome).toContain("var(--theme-glass-panel-fill) !important");
+    expect(chrome).toContain('[data-glass-panels="true"] :where(');
+    expect(cleanTheme).toContain("--theme-neon-text-shadow:");
+    expect(chrome).toContain('[data-input-backdrop="true"]');
+    expect(chrome).toContain("-webkit-text-fill-color: transparent");
+    expect(chrome).toContain('[role="presentation"][data-source="command"]');
+    expect(chrome).toContain('[role="option"] > span:first-child');
+    expect(chrome).toContain('[role="option"] > span:last-child');
   });
 
   it("uses a resilient system font stack", () => {
@@ -123,5 +142,11 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与通透浅色外观");
     expect(themePicker).toContain('["#161b19", "#5fd7a1", "#f8fbf9"]');
     expect(themePicker).not.toContain('["#171717", "#3b82f6", "#f5f5f5"]');
+    expect(themePicker).toContain("高级外观选项");
+    expect(themePicker).toContain("界面主题 · 基础主题专属");
+    expect(themePicker).toContain("玻璃面板");
+    expect(themePicker).toContain("getGlassPanelsEnabled");
+    expect(themePicker).toContain('theme.id === "clean" && selected');
+    expect(themePicker).not.toContain("此选项仅用于基础主题");
   });
 });

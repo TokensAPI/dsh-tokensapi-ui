@@ -54,6 +54,7 @@
   --theme-shadow-card-hover: 0 16px 60px -20px var(--theme-accent-glow);
   --theme-shadow-button-hover: 0 0 26px var(--theme-accent-glow);
   --theme-shadow-focus: 0 0 0 1px var(--theme-accent-primary);
+  --theme-text-shadow: none;
 
   --theme-grid-color: rgb(255 255 255 / 4%);
   --theme-grid-size: 32px;

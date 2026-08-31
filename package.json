@@ -1,6 +1,6 @@
 {
   "name": "dsh-tokensapi-ui",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "TokensAPI UI plugin for DeepSeek Harness — themeable skins + skills",
   "license": "MIT",
   "type": "module",

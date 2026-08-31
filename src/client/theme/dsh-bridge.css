@@ -14,6 +14,7 @@ body:not([data-ds-dark-theme]) {
    * components consume these two upstream variables directly. */
   --dsw-font-family: var(--theme-font-sans) !important;
   --ds-font-family-code: var(--theme-font-mono) !important;
+  text-shadow: var(--theme-text-shadow);
 
   /* Sidebar + specific surfaces (light-mode values in DSH; not covered by aliases) */
   --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;

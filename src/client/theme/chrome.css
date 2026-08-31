@@ -1122,7 +1122,13 @@ html[data-theme="clean"] :is(
   [role="menu"]
 ) {
   border: 1px solid var(--clean-control-border) !important;
-  background: transparent !important;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--theme-glass-highlight) 34%, transparent),
+      transparent 46%
+    ),
+    var(--theme-glass-panel-fill) !important;
   box-shadow:
     inset 0 1px 0 var(--clean-control-inset-top),
     inset 0 -1px 0 var(--clean-control-inset-bottom),
@@ -1389,6 +1395,149 @@ html[data-theme="clean"]:not([data-color-scheme="light"]) [data-composer-card="t
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+}
+
+/* User-selected practical mode. Keep the theme palette and hierarchy while
+ * removing translucent paint and backdrop processing from panel surfaces. */
+html[data-theme="clean"][data-glass-panels="false"] :is(
+  .dshDesktopSidebarSurface,
+  [data-composer-card="true"],
+  [role="dialog"],
+  [data-question-key] > section[aria-labelledby^="question-"]
+) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"][data-glass-panels="false"] [data-composer-card="true"] {
+  background: var(--theme-bg-surface) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="false"] [data-composer-card="true"]::before {
+  display: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"][data-glass-panels="false"] [role="dialog"],
+html[data-theme="clean"][data-glass-panels="false"] [data-question-key] > section[aria-labelledby^="question-"] {
+  background: var(--theme-bg-surface-raised) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="false"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"][data-glass-panels="false"] [role="dialog"]
+  div:has(> div > :is(input[placeholder="搜索模型"], input[placeholder="Search models"]))
+  > button[aria-expanded],
+html[data-theme="clean"][data-glass-panels="false"] [role="dialog"]
+  div:has(> :is(input[placeholder="搜索模型"], input[placeholder="Search models"])),
+html[data-theme="clean"][data-glass-panels="false"] [role="dialog"]
+  button[class*="_showHiddenToggle"][aria-pressed] {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Glass needs its own typography pass. DSH resets text-shadow on controls and
+ * nested labels, so target both each material root and every descendant. A
+ * fractional stroke adds physical weight; the layered shadow supplies a crisp
+ * highlight plus enough depth to survive bright content behind the blur. */
+html[data-theme="clean"][data-glass-panels="true"] :where(
+  .dshDesktopSidebarSurface,
+  [data-composer-card="true"],
+  [role="dialog"],
+  [data-question-key] > section[aria-labelledby^="question-"],
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"],
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+),
+html[data-theme="clean"][data-glass-panels="true"] :where(
+  .dshDesktopSidebarSurface,
+  [data-composer-card="true"],
+  [role="dialog"],
+  [data-question-key] > section[aria-labelledby^="question-"],
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"],
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) * {
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-text-stroke: .1px currentColor;
+  text-rendering: geometricPrecision;
+  text-shadow: var(--theme-glass-text-shadow) !important;
+}
+
+/* The textarea intentionally paints transparent glyphs over a visible syntax
+ * backdrop. Never decorate that transparent editing layer: doing so turns its
+ * shadow white and creates a doubled ghost behind the real text. */
+html[data-theme="clean"][data-glass-panels="true"] [data-composer-card="true"] textarea {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: 0 transparent !important;
+  text-shadow: none !important;
+}
+
+/* The visible composer text is the backdrop, not the textarea. Give it an ink
+ * foreground with a restrained lake-green neon edge; the hidden mirror keeps
+ * the same colour contract for any future highlighted spans. */
+html[data-theme="clean"][data-color-scheme="light"][data-glass-panels="true"] :is(
+  [data-input-backdrop="true"],
+  [data-input-mirror="true"]
+) {
+  color: var(--theme-fg-primary) !important;
+  -webkit-text-stroke: .1px currentColor;
+  text-shadow: var(--theme-neon-text-shadow) !important;
+}
+
+/* Slash/command suggestions keep a clear hierarchy while every visible label
+ * still receives material depth. Names use the stronger neon treatment;
+ * descriptions use the restrained glass token so small text stays legible. */
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="presentation"][data-source="command"] {
+  color: var(--theme-accent-primary) !important;
+  font-weight: 650 !important;
+  -webkit-text-stroke: .1px currentColor;
+  text-shadow: var(--theme-neon-text-shadow) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"] > span:first-child {
+  color: var(--theme-fg-primary) !important;
+  font-weight: 680 !important;
+  -webkit-text-stroke: .1px currentColor;
+  text-shadow: var(--theme-neon-text-shadow) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"][aria-selected="true"] > span:first-child {
+  color: color-mix(in srgb, var(--theme-accent-primary) 82%, var(--theme-fg-primary)) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"] > span:last-child {
+  color: var(--theme-fg-secondary) !important;
+  font-weight: 500 !important;
+  -webkit-text-stroke: .05px currentColor !important;
+  text-shadow: var(--theme-glass-muted-text-shadow) !important;
 }
 
 /* A capability is a replacement main page, not a transparent layer over the

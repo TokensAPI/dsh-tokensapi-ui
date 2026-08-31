@@ -25,6 +25,7 @@ const SKINS: Record<string, string> = {
 export const DEFAULT_SKIN = "clean";
 
 const STORAGE_KEY = "dsh-tokensapi-ui-skin";
+const GLASS_PANELS_STORAGE_KEY = "dsh-tokensapi-ui-glass-panels";
 const STYLE_TAG = "dsh-tokensapi-ui-theme";
 
 type ColorScheme = "light" | "dark";
@@ -67,11 +68,33 @@ export function setActiveSkin(id: string): void {
   if (typeof document !== "undefined") document.documentElement.dataset.theme = id;
 }
 
+/** Whether the optional translucent panel treatment is enabled. */
+export function getGlassPanelsEnabled(): boolean {
+  try {
+    return localStorage.getItem(GLASS_PANELS_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+/** Toggle the optional glass treatment. The practical opaque mode is the default. */
+export function setGlassPanelsEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(GLASS_PANELS_STORAGE_KEY, String(enabled));
+  } catch {
+    // storage unavailable — still apply for this session
+  }
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.glassPanels = String(enabled);
+  }
+}
+
 /** Inject all skin layers once and activate the stored (or default) skin. */
 export function injectTheme(): () => void {
   if (typeof document === "undefined") return () => {};
   const root = document.documentElement;
   root.dataset.theme = getActiveSkin();
+  root.dataset.glassPanels = String(getGlassPanelsEnabled());
 
   syncColorScheme();
   const observer = new MutationObserver(syncColorScheme);
@@ -103,5 +126,6 @@ export function injectTheme(): () => void {
     tag.remove();
     delete root.dataset.theme;
     delete root.dataset.colorScheme;
+    delete root.dataset.glassPanels;
   };
 }

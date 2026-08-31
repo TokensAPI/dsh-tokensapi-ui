@@ -46,6 +46,19 @@
   --theme-glass-highlight: rgb(255 255 255 / 10%);
   --theme-glass-shadow: rgb(0 0 0 / 52%);
   --theme-glass-blur: 20px;
+  --theme-glass-panel-fill: rgb(25 33 29 / 70%);
+  --theme-glass-text-shadow:
+    0 0 .45px currentColor,
+    0 1px 1px rgb(0 0 0 / 72%),
+    0 0 6px color-mix(in srgb, var(--lake-primary) 24%, transparent);
+  --theme-glass-muted-text-shadow:
+    0 0 .32px currentColor,
+    0 1px .7px rgb(0 0 0 / 58%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 16%, transparent);
+  --theme-neon-text-shadow:
+    0 0 .55px currentColor,
+    0 0 4px color-mix(in srgb, var(--lake-primary) 32%, transparent),
+    0 0 9px color-mix(in srgb, var(--lake-primary) 18%, transparent);
 }
 
 [data-theme="clean"][data-color-scheme="light"] {
@@ -62,6 +75,9 @@
   --theme-fg-secondary: oklch(0.3434 0.05664 163.22);
   --theme-fg-muted: oklch(0.38 0.04 163.22);
   --theme-fg-on-accent: oklch(0 0 0);
+  --theme-text-shadow:
+    0 0 .42px currentColor,
+    0 1px 1px rgb(20 71 48 / 11%);
   --theme-border-subtle: rgb(31 86 61 / 14%);
   --theme-border-default: rgb(31 86 61 / 20%);
   --theme-border-strong: rgb(31 86 61 / 30%);
@@ -85,4 +101,38 @@
   --theme-glass-highlight: rgb(255 255 255 / 72%);
   --theme-glass-shadow: rgb(29 68 53 / 16%);
   --theme-glass-blur: 18px;
+  --theme-glass-panel-fill: rgb(248 253 250 / 68%);
+  --theme-glass-text-shadow:
+    0 0 .62px currentColor,
+    -.45px -.55px 0 rgb(255 255 255 / 96%),
+    .58px .78px .55px rgb(18 70 47 / 38%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 34%, transparent),
+    0 0 10px color-mix(in srgb, var(--lake-primary) 17%, transparent);
+  --theme-glass-muted-text-shadow:
+    0 0 .38px currentColor,
+    -.35px -.4px 0 rgb(255 255 255 / 88%),
+    .48px .64px .45px rgb(18 70 47 / 28%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 20%, transparent),
+    0 0 8px color-mix(in srgb, var(--lake-primary) 10%, transparent);
+  --theme-neon-text-shadow:
+    0 0 .55px currentColor,
+    0 0 2px rgb(255 255 255 / 32%),
+    0 0 5px color-mix(in srgb, var(--lake-primary) 38%, transparent),
+    0 0 10px color-mix(in srgb, var(--lake-primary) 22%, transparent);
+}
+
+/* Practical mode is intentionally the default: opaque surfaces preserve
+ * contrast and predictable rendering. The advanced setting opts back into
+ * the original translucent Lake View material. */
+[data-theme="clean"][data-glass-panels="false"] {
+  --theme-bg-shell: #f2f8f5;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #ffffff;
+  --theme-glass-blur: 0px;
+}
+
+[data-theme="clean"][data-glass-panels="false"]:not([data-color-scheme="light"]) {
+  --theme-bg-shell: #161b19;
+  --theme-bg-surface: #1b221f;
+  --theme-bg-surface-raised: #252d29;
 }
