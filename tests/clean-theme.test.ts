@@ -83,7 +83,20 @@ describe("TokensAPI Lake View basic theme", () => {
 
   it("releases composer clipping for classified and semantic host popups", () => {
     expect(chrome).toMatch(
-      /\[data-composer-card="true"\]:has\([\s\S]*\[data-tokens-floating-surface\][\s\S]*\[role="menu"\][\s\S]*\[role="listbox"\][\s\S]*\)\s*\{\s*overflow:\s*visible;/,
+      /\[data-composer-card="true"\]:has\([\s\S]*\[data-tokens-floating-surface\][\s\S]*\[role="menu"\][\s\S]*\[role="listbox"\][\s\S]*\[role="dialog"\][\s\S]*\)\s*\{\s*overflow:\s*visible;/,
+    );
+  });
+
+  it("uses the explicit product-bar grid for every advanced desktop theme", () => {
+    expect(chrome).toMatch(
+      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame \{[\s\S]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
+    );
+    expect(chrome).toMatch(
+      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopUpstreamSidebar \{[\s\S]*padding-top:\s*72px !important;/,
+    );
+    expect(chrome).not.toContain("revert !important");
+    expect(chrome).not.toContain(
+      '[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame',
     );
   });
 

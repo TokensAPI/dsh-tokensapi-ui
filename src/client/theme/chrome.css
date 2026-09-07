@@ -82,20 +82,11 @@
   padding-top: 72px;
 }
 
-[data-theme="clean"] :where(div):has(> [data-shell-overlay]) {
-  padding-top: 0;
-}
-
 /* Advanced Desktop already owns a native Windows/macOS caption row. Replace
  * that row with the 72px product bar instead of adding another 72px inset. */
 body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
   padding-top: 0 !important;
   grid-template-rows: 72px minmax(0, 1fr) !important;
-}
-
-[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
-  padding-top: revert !important;
-  grid-template-rows: revert !important;
 }
 
 /* The advanced sidebar deliberately spans both grid rows. Its product brand
@@ -104,10 +95,6 @@ body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
 body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar {
   box-sizing: border-box;
   padding-top: 72px !important;
-}
-
-[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar {
-  padding-top: 0 !important;
 }
 
 /* New-chat ("hero" / empty) surface: match the capability pages by sharing their
@@ -192,11 +179,10 @@ body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
 
 /* Composer menus are anchored inside the card and may open upward. Keep the
  * card clipped at rest for its glass paint layer, then release that clip for
- * runtime-classified surfaces and semantic host menus. The semantic fallback
- * covers older controls that expose role=menu/listbox but no popup state on
- * their trigger (for example the access-mode selector). */
+ * runtime-classified surfaces and semantic host popups. The semantic fallback
+ * covers both selection controls and the context meter's click-open dialog. */
 [data-theme="clean"] [data-composer-card="true"]:has(
-  :is([data-tokens-floating-surface], [role="menu"], [role="listbox"])
+  :is([data-tokens-floating-surface], [role="menu"], [role="listbox"], [role="dialog"])
 ) {
   overflow: visible;
 }
