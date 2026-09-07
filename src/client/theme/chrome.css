@@ -75,26 +75,49 @@
 
 /* Reserve the top strip for our persistent brand + capability nav band. The
  * frame is the element that directly contains the shell.overlay layer; :has
- * selects it without a hashed class. border-box keeps the padding inside 100vh
- * so the sidebar foot stays on-screen. Must match the topbar height (72px). */
-:where(div):has(> [data-shell-overlay]) {
+ * selects it without a hashed class. Requiring a mounted child is important:
+ * if the host cannot load the overlay slot, do not reserve an empty strip.
+ * border-box keeps the padding inside 100vh. Must match the topbar height. */
+:where(div):has(> [data-shell-overlay] > *) {
   box-sizing: border-box;
   padding-top: 72px;
 }
 
+/* The neutral skin intentionally hides the partner navigation bar (see
+ * CapabilityWorkspace.module.css), so it must not reserve that bar's strip.
+ * Keep the host's native caption row instead. */
+html[data-theme="clean"] :where(div):has(> [data-shell-overlay] > *) {
+  padding-top: 0;
+}
+
 /* Advanced Desktop already owns a native Windows/macOS caption row. Replace
- * that row with the 72px product bar instead of adding another 72px inset. */
-body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
+ * that row with the 72px product bar only while the product bar is mounted.
+ * Otherwise retain the host's native row and avoid a blank reserved strip. */
+body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame:has(> [data-shell-overlay] > *) {
   padding-top: 0 !important;
   grid-template-rows: 72px minmax(0, 1fr) !important;
+}
+
+html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
+  padding-top: 0 !important;
+  grid-template-rows: 32px minmax(0, 1fr) !important;
+}
+
+html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"]
+  .dshDesktopFrame[data-desktop-platform="darwin"] {
+  grid-template-rows: 20px minmax(0, 1fr) !important;
 }
 
 /* The advanced sidebar deliberately spans both grid rows. Its product brand
  * seat lives in the overlay topbar, so keep the upstream sidebar content below
  * that seat without reintroducing padding on the conversation/details frame. */
-body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar {
+body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame:has(> [data-shell-overlay] > *) .dshDesktopUpstreamSidebar {
   box-sizing: border-box;
   padding-top: 72px !important;
+}
+
+html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar {
+  padding-top: 0 !important;
 }
 
 /* New-chat ("hero" / empty) surface: match the capability pages by sharing their

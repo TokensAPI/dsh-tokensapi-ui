@@ -89,15 +89,19 @@ describe("TokensAPI Lake View basic theme", () => {
 
   it("uses the explicit product-bar grid for every advanced desktop theme", () => {
     expect(chrome).toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame \{[\s\S]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
+      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \{[\s\S]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
     );
     expect(chrome).toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopUpstreamSidebar \{[\s\S]*padding-top:\s*72px !important;/,
+      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \.dshDesktopUpstreamSidebar \{[\s\S]*padding-top:\s*72px !important;/,
     );
     expect(chrome).not.toContain("revert !important");
     expect(chrome).not.toContain(
-      '[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame',
+      'html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {\n  padding-top: revert',
     );
+    expect(chrome).toContain('html[data-theme="clean"] :where(div):has(> [data-shell-overlay] > *)');
+    expect(chrome).toContain('grid-template-rows: 32px minmax(0, 1fr) !important');
+    expect(chrome).toContain('grid-template-rows: 20px minmax(0, 1fr) !important');
+    expect(chrome).toContain('html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar');
   });
 
   it("frosts agent question cards without depending on generated classes", () => {
