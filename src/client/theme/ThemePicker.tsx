@@ -69,7 +69,7 @@ export function ThemePicker(_props: ThemePickerProps): React.JSX.Element {
                       <label className={css.option}>
                         <span>
                           <b>玻璃面板</b>
-                          <small>开启透明层与背景模糊；关闭时使用更清晰、厚实的不透明面板。</small>
+                          <small>仅增强选择框和设置弹窗；窗口与侧栏使用桌面原生材质。</small>
                         </span>
                         <input
                           type="checkbox"

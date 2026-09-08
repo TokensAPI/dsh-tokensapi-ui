@@ -25,6 +25,7 @@ import { setAutomationRuntime } from "./modules/automation/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
 import { observeGlobalModals } from "./shell/surface-store.ts";
 import { observeFloatingSurfaces } from "./theme/floating-surfaces.ts";
+import { observeDesktopSettingsSelect } from "./theme/desktop-select.ts";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -44,6 +45,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
   ctx.effect(() => observeGlobalModals(), "tokens-core: modal surface coordination");
   ctx.effect(() => observeFloatingSurfaces(), "tokens-core: floating surface theming");
+  ctx.effect(() => observeDesktopSettingsSelect(), "tokens-core: desktop settings select");
   ctx.effect(() => observeTokensCoworkHeadline(), "tokens-core: hero brand copy");
 
   ctx.slots.inject("settings.general.item", () =>

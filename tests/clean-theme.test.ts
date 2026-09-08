@@ -17,6 +17,10 @@ const themePicker = readFileSync(
   new URL("../src/client/theme/ThemePicker.tsx", import.meta.url),
   "utf8",
 );
+const desktopSelect = readFileSync(
+  new URL("../src/client/theme/desktop-select.ts", import.meta.url),
+  "utf8",
+);
 
 describe("TokensAPI Lake View basic theme", () => {
   it("uses the Lake View palette for both appearances with accessible primary controls", () => {
@@ -50,8 +54,6 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain("var(--theme-glass-panel-fill) !important");
     expect(chrome).toContain('[data-glass-panels="true"] :where(');
     expect(cleanTheme).toContain("--theme-neon-text-shadow:");
-    expect(chrome).toContain('[data-input-backdrop="true"]');
-    expect(chrome).toContain("-webkit-text-fill-color: transparent");
     expect(chrome).toContain('[role="presentation"][data-source="command"]');
     expect(chrome).toContain('[role="option"] > span:first-child');
     expect(chrome).toContain('[role="option"] > span:last-child');
@@ -73,7 +75,58 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain('input[placeholder="搜索模型"]');
     expect(chrome).toContain('input[placeholder="Search models"]');
     expect(chrome).toContain('> button[aria-expanded]');
+    expect(chrome).toContain(
+      'html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]',
+    );
     expect(chrome).toContain('backdrop-filter: blur(var(--clean-menu-blur))');
+  });
+
+  it("delegates shell glass to Desktop and confines optional blur to dialogs and selectors", () => {
+    expect(chrome).toMatch(
+      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopSidebarSurface \{[^}]*backdrop-filter:\s*none !important;/s,
+    );
+    expect(chrome).not.toMatch(
+      /\.dshDesktopSidebarSurface\s*\{[^}]*backdrop-filter:\s*blur/s,
+    );
+    expect(chrome).toMatch(
+      /\[data-glass-panels="true"\] \[role="dialog"\]::before \{[^}]*pointer-events:\s*none;/s,
+    );
+    expect(chrome).not.toMatch(
+      /\[data-glass-panels="true"\] \[role="dialog"\]::before \{[^}]*backdrop-filter:\s*blur/s,
+    );
+    expect(chrome).toMatch(
+      /\[role="presentation"\]:has\(> \[role="dialog"\]\[aria-modal="true"\]\)[^{]*\{[^}]*backdrop-filter:\s*blur\(18px\)/s,
+    );
+    expect(chrome).not.toMatch(
+      /body\[data-dsh-desktop-mode="advanced"\][\s\S]*?\[role="presentation"\]:has\(> \[role="dialog"\]\[aria-modal="true"\]\)[^{]*\{[^}]*backdrop-filter:\s*none/s,
+    );
+    expect(chrome).toMatch(
+      /\[data-glass-panels="true"\] :is\([^)]*select,[^)]*\) \{[^}]*backdrop-filter:\s*blur/s,
+    );
+    expect(chrome).not.toMatch(
+      /\[data-glass-panels="true"\][^{]*\[data-composer-card="true"\]/,
+    );
+    expect(chrome).not.toMatch(
+      /\[data-glass-panels="true"\][^{]*\[data-question-key\]/,
+    );
+  });
+
+  it("keeps enhanced sidebar and settings-modal geometry deterministic", () => {
+    expect(chrome).not.toContain(
+      'html[data-theme="clean"] :where(div):has(> [data-shell-overlay] > *)',
+    );
+    expect(chrome).not.toMatch(
+      /html\[data-theme="clean"\][^{]*\.dshDesktopFrame[^{]*\{[^}]*(?:grid-template-rows|padding-top):/s,
+    );
+    expect(chrome).not.toMatch(
+      /\.dshDesktopSidebarSurface:has\(\[aria-modal="true"\]\)/,
+    );
+    expect(chrome).not.toMatch(
+      /\.dshDesktopSidebarSurface[\s\S]*\[role="presentation"\]:has\(> \[role="dialog"\]\[aria-modal="true"\]\) \{[^}]*width:\s*100vw !important;/,
+    );
+    expect(chrome).toContain('html[data-theme="clean"] select option');
+    expect(chrome).toContain("background-color: #252d29");
+    expect(chrome).toContain("background-color: #f9fcfa");
   });
 
   it("uses a runtime floating-surface marker without broadly styling trees", () => {
@@ -87,29 +140,41 @@ describe("TokensAPI Lake View basic theme", () => {
     );
   });
 
-  it("uses the explicit product-bar grid for every advanced desktop theme", () => {
+  it("reserves the explicit product-bar grid only for the partner theme", () => {
     expect(chrome).toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \{[\s\S]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
+      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \{[^}]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
     );
     expect(chrome).toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \.dshDesktopUpstreamSidebar \{[\s\S]*padding-top:\s*72px !important;/,
+      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \.dshDesktopUpstreamSidebar \{[^}]*padding-top:\s*72px !important;/,
     );
     expect(chrome).not.toContain("revert !important");
     expect(chrome).not.toContain(
       'html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {\n  padding-top: revert',
     );
-    expect(chrome).toContain('html[data-theme="clean"] :where(div):has(> [data-shell-overlay] > *)');
-    expect(chrome).toContain('grid-template-rows: 32px minmax(0, 1fr) !important');
-    expect(chrome).toContain('grid-template-rows: 20px minmax(0, 1fr) !important');
-    expect(chrome).toContain('html[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopUpstreamSidebar');
+    expect(chrome).not.toMatch(
+      /html\[data-theme="clean"\] body\[data-dsh-desktop-mode="advanced"\][^{]*\.dshDesktopFrame[^{]*\{[^}]*grid-template-rows:/,
+    );
+    expect(chrome).not.toMatch(
+      /html\[data-theme="clean"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopUpstreamSidebar/,
+    );
   });
 
-  it("frosts agent question cards without depending on generated classes", () => {
+  it("enhances Desktop's native material select while preserving its change contract", () => {
+    expect(desktopSelect).toContain('select.dshDesktopSettingsSelect');
+    expect(desktopSelect).toContain('tokensDesktopSelectListbox');
+    expect(desktopSelect).toContain('new Event("change", { bubbles: true })');
+    expect(desktopSelect).toContain('setAttribute("role", "listbox")');
+    expect(desktopSelect).toContain('setAttribute("role", "option")');
+    expect(chrome).toContain('select.dshDesktopSettingsSelect.dshTokensNativeSelectBridge');
+    expect(chrome).toContain('.dshTokensDesktopSelectListbox > button[role="option"]');
+  });
+
+  it("styles agent question cards without turning them into filter containing blocks", () => {
     expect(chrome).toContain(
       '[data-question-key] > section[aria-labelledby^="question-"]',
     );
-    expect(chrome).toContain(
-      "backdrop-filter: blur(var(--theme-glass-blur)) saturate(128%) contrast(1.02)",
+    expect(chrome).toMatch(
+      /\[data-question-key\] > section\[aria-labelledby\^="question-"\] \{[^}]*backdrop-filter:\s*none !important;/s,
     );
     expect(chrome).toContain('[data-question-key] [role="radiogroup"] > button[role="radio"]');
     expect(chrome).toContain('[data-question-key] [role="radiogroup"] > div:has(> input[type="text"])');
@@ -162,6 +227,8 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(themePicker).toContain("高级外观选项");
     expect(themePicker).toContain("界面主题 · 基础主题专属");
     expect(themePicker).toContain("玻璃面板");
+    expect(themePicker).toContain("仅增强选择框和设置弹窗");
+    expect(themePicker).toContain("窗口与侧栏使用桌面原生材质");
     expect(themePicker).toContain("getGlassPanelsEnabled");
     expect(themePicker).toContain('theme.id === "clean" && selected');
     expect(themePicker).not.toContain("此选项仅用于基础主题");
