@@ -1227,7 +1227,7 @@ html[data-theme="clean"] :is(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"]
+  button[class*="_selector"][aria-haspopup="listbox"]
 ) {
   border: 1px solid var(--clean-control-border) !important;
   background: transparent !important;
@@ -1281,7 +1281,7 @@ html[data-theme="clean"][data-glass-panels="true"] :is(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"]
+  button[class*="_selector"][aria-haspopup="listbox"]
 ) {
   background: color-mix(in srgb, var(--theme-bg-surface-raised) 58%, transparent) !important;
   backdrop-filter: blur(calc(var(--clean-menu-blur) * .75)) saturate(125%);
@@ -1292,7 +1292,7 @@ html[data-theme="clean"] :is(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"]
+  button[class*="_selector"][aria-haspopup="listbox"]
 ):hover {
   background: var(--clean-control-hover) !important;
   border-color: var(--theme-border-strong) !important;
@@ -1301,7 +1301,7 @@ html[data-theme="clean"] :is(
 html[data-theme="clean"] :is(
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"]
+  button[class*="_selector"][aria-haspopup="listbox"]
 )[aria-expanded="true"] {
   box-shadow:
     inset 0 1px 0 var(--clean-control-inset-top),
@@ -1314,7 +1314,7 @@ html[data-theme="clean"] :is(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"]
+  button[class*="_selector"][aria-haspopup="listbox"]
 ):focus-visible {
   outline: none !important;
   box-shadow:
@@ -1322,6 +1322,27 @@ html[data-theme="clean"] :is(
     0 0 0 1px var(--theme-bg-canvas),
     0 0 0 3px color-mix(in srgb, var(--theme-accent-primary) 24%, transparent),
     0 12px 30px -18px var(--theme-accent-glow) !important;
+}
+
+/* The permission-preset control (PermissionRow's …_selector) also matches the
+ * _selector hook above, but it is NOT a dropdown panel trigger — it is a flat
+ * rounded pill shown inline in the turn footer and composer bar. The glass
+ * treatment (border + big drop shadow) made it bulky and out of place among the
+ * flat toolbar icons. It is the only _selector that opens a menu rather than a
+ * listbox, so key on that to restore the host's clean flat pill. */
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"] {
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 58%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"]:hover:not(:disabled),
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"][aria-expanded="true"] {
+  background: var(--theme-accent-soft) !important;
+  box-shadow: none !important;
 }
 
 /* Chromium delegates a native <select> popup to the OS, so its open panel can
@@ -1476,18 +1497,27 @@ html[data-theme="clean"][data-glass-panels="true"] :is(
   -webkit-backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
 }
 
-/* Some popups (e.g. the composer command menu's PopupSelectView) are a marked
- * surface panel that itself CONTAINS a role=listbox. Both match the frame rule
- * above, so the panel and the inner list each paint a border — two concentric
- * strokes. Strip the frame from a nested list so only the outer surface draws
- * it. The :not() guard leaves a surface that is itself the list alone and lifts
- * specificity above the glass/practical panel-mode variants regardless of order. */
+/* A list inside a MARKED surface: the surface itself paints the full material
+ * (border + fill + shadow), so strip the inner list's frame entirely to avoid a
+ * doubled panel. This is the directly-opened command popup case. The :not()
+ * guard leaves a list that is itself the surface alone. */
 html[data-theme="clean"] [data-tokens-floating-surface] :is([role="listbox"], [role="menu"]):not([data-tokens-floating-surface]) {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* A list nested inside an UNMARKED card panel that our runtime never tags — the
+ * composer InputBar card, or the inline "/" PopupSelectView. Here the card is
+ * NOT a material frame (its fill is transparent in this theme); the LIST paints
+ * the fill. So only drop the redundant border that would otherwise double the
+ * host card's own elevation stroke. Never touch background/blur here — the fill
+ * (bg-surface-raised) is translucent, so forcing it transparent makes the popup
+ * see-through over the composer, which is exactly the bug this replaces. */
+html[data-theme="clean"] [class*="card"] :is([role="listbox"], [role="menu"]):not([data-tokens-floating-surface]) {
+  border: 0 !important;
 }
 
 html[data-theme="clean"] :is([role="option"], [role="menuitem"]):hover,
@@ -1743,7 +1773,7 @@ html[data-theme="clean"]:not([data-color-scheme="light"]) [data-composer-card="t
     select,
     [role="combobox"],
     button[aria-haspopup="listbox"],
-    button[class*="_selector"],
+    button[class*="_selector"][aria-haspopup="listbox"],
     [data-tokens-floating-surface],
     [role="listbox"],
     [role="menu"]
@@ -1790,6 +1820,28 @@ html[data-theme="clean"][data-glass-panels="false"] [role="dialog"]
   -webkit-backdrop-filter: none !important;
 }
 
+/* The context-meter breakdown is a NON-modal role="dialog" popover whose own
+ * fill reads var(--dsw-specific-menu) — which this theme deliberately zeroes to
+ * transparent so DSH's menu shell never paints a square behind a rounded
+ * role=menu. As a non-modal dialog it also skips the modal-mask blur, so it
+ * rendered fully see-through ("not floating"). Give this dialog-panel the same
+ * frosted floating material as the menus. Scoped by the …_panel class so modal
+ * settings dialogs (…_card / …_root) are untouched; it is a leaf popover with no
+ * nested fixed dialog, so the blur containing-block caveat does not apply. */
+html[data-theme="clean"] [role="dialog"][class*="_panel"] {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: blur(var(--clean-menu-blur, 8px)) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(var(--clean-menu-blur, 8px)) saturate(135%) !important;
+  border: 1px solid var(--clean-control-border) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    0 18px 46px -20px var(--clean-control-shadow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"][class*="_panel"]::before {
+  display: none !important;
+}
+
 /* Glass needs its own typography pass. DSH resets text-shadow on controls and
  * nested labels, so target both each material root and every descendant. A
  * fractional stroke adds physical weight; the layered shadow supplies a crisp
@@ -1799,7 +1851,7 @@ html[data-theme="clean"][data-glass-panels="true"] :where(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"],
+  button[class*="_selector"][aria-haspopup="listbox"],
   [data-tokens-floating-surface],
   [role="listbox"],
   [role="menu"]
@@ -1809,7 +1861,7 @@ html[data-theme="clean"][data-glass-panels="true"] :where(
   select,
   [role="combobox"],
   button[aria-haspopup="listbox"],
-  button[class*="_selector"],
+  button[class*="_selector"][aria-haspopup="listbox"],
   [data-tokens-floating-surface],
   [role="listbox"],
   [role="menu"]
