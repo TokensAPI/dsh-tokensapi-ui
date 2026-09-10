@@ -178,6 +178,8 @@ describe("TokensAPI Lake View basic theme", () => {
     );
     expect(chrome).toContain('[data-question-key] [role="radiogroup"] > button[role="radio"]');
     expect(chrome).toContain('[data-question-key] [role="radiogroup"] > div:has(> input[type="text"])');
+    expect(chrome).toContain('[data-question-key] [data-question-scroll="true"] textarea');
+    expect(chrome).toContain('[data-question-key] [data-question-scroll="true"] div:has(> textarea)');
     expect(chrome).toContain('button[role="radio"][aria-checked="true"]');
     expect(chrome).toContain('> footer > div:last-child > button:last-child');
     expect(chrome).toContain('html[data-theme="electrox"] [data-question-key]');

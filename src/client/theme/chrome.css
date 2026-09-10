@@ -357,17 +357,20 @@ html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="questio
   letter-spacing: 0.025em;
 }
 
+/* The edit affordance sits alone in the header. As a bare grey glyph it read as
+ * disabled and out of place, so give it a defined resting surface: a faint chip
+ * that matches the card material and a clearer icon tone. */
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header button[aria-label] {
   display: inline-grid;
   place-items: center;
   width: 32px;
   height: 32px;
   padding: 0 !important;
-  color: var(--theme-fg-secondary) !important;
-  border: 1px solid transparent !important;
+  color: color-mix(in srgb, var(--theme-fg-primary) 68%, var(--theme-fg-secondary)) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-border-default) 70%, transparent) !important;
   border-radius: 10px !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 44%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-glass-highlight) 44%, transparent) !important;
 }
 
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header button[aria-label]:hover:not(:disabled) {
@@ -532,6 +535,97 @@ html[data-theme="clean"] [data-question-key] [role="radiogroup"] input[type="tex
 
 html[data-theme="clean"] [data-question-key] [role="radiogroup"] input[type="text"]::placeholder {
   color: color-mix(in srgb, var(--theme-fg-muted) 82%, transparent) !important;
+}
+
+/* Free-response answers render as a full-width textarea in the question body,
+ * not as a radiogroup option. DSH gives that field its own resting border and,
+ * on focus, a second business-accent border on a wrapping node — two stacked
+ * strokes that read as a bug once the accent remaps to the tenant green. Collapse
+ * them into one calm field that matches the choice text-input treatment. */
+html[data-theme="clean"] [data-question-key] [data-question-scroll="true"] textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 96px;
+  padding: 11px 12px !important;
+  color: var(--theme-fg-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-border-default) 80%, transparent) !important;
+  border-radius: 13px !important;
+  outline: 0 !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 54%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-glass-highlight) 52%, transparent) !important;
+  resize: vertical;
+  transition:
+    border-color 170ms ease,
+    box-shadow 190ms ease,
+    background-color 170ms ease;
+}
+
+html[data-theme="clean"] [data-question-key] [data-question-scroll="true"] textarea:is(:focus, :focus-visible) {
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 58%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 72%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-glass-highlight) 68%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--theme-accent-primary) 10%, transparent),
+    0 14px 30px -28px var(--theme-accent-glow) !important;
+}
+
+html[data-theme="clean"] [data-question-key] [data-question-scroll="true"] textarea::placeholder {
+  color: color-mix(in srgb, var(--theme-fg-muted) 82%, transparent) !important;
+}
+
+/* Whatever node DSH wraps the textarea in carries the second (outer) stroke.
+ * Strip its border, ring and inset so the field owns exactly one border. The
+ * radiogroup's own input wrapper matches on `> input[type="text"]`, so this
+ * textarea-scoped selector never touches it. */
+html[data-theme="clean"] [data-question-key] [data-question-scroll="true"] div:has(> textarea) {
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The custom-answer row precedes the textarea with an edit/checkbox chip that
+ * reuses the option-marker host class, so it defaulted to the same flat grey
+ * pill. Beside the green field that grey read as inert; tint it to the accent
+ * so the pencil looks like the field's edit cue. Hooked on the row's stable
+ * CSS-module localname (…_customRow), never the option letters. */
+html[data-theme="clean"] [data-question-key] [class*="customRow"] > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
+  width: 26px !important;
+  height: 26px !important;
+  margin-top: 5px !important;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 30%, transparent) !important;
+  border-radius: 8px !important;
+  background: var(--theme-accent-soft) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-glass-highlight) 58%, transparent) !important;
+}
+
+/* The "recommended" badge reuses a host token that now maps to the tenant green
+ * for both fill and text, so it read as a dark green-on-green slab; and inside
+ * the wrapping option line a badge with no following description was picked up
+ * by the description rule and stretched to a full-width bar. Pin it back to a
+ * compact, legible accent pill. Hooked on the stable localname (…_badge). */
+html[data-theme="clean"] [data-question-key] [class*="badge"] {
+  flex: 0 0 auto !important;
+  align-self: center;
+  display: inline-flex !important;
+  align-items: center;
+  width: auto !important;
+  min-height: 20px;
+  padding: 0 8px !important;
+  color: color-mix(in srgb, var(--theme-accent-primary) 88%, var(--theme-fg-primary)) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 24%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--theme-accent-primary) 12%, transparent) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1 !important;
 }
 
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > footer {
@@ -714,10 +808,10 @@ html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="ques
   width: 30px;
   height: 30px;
   padding: 0 !important;
-  color: var(--theme-fg-muted) !important;
-  border: 1px solid transparent !important;
+  color: var(--theme-fg-secondary) !important;
+  border: 1px solid var(--theme-border-default) !important;
   border-radius: 0 !important;
-  background: transparent !important;
+  background: var(--theme-bg-canvas) !important;
   box-shadow: none !important;
 }
 
@@ -889,6 +983,80 @@ html[data-theme="electrox"] [data-question-key] [role="radiogroup"] input[type="
 
 html[data-theme="electrox"] [data-question-key] [role="radiogroup"] input[type="text"]::placeholder {
   color: var(--theme-fg-muted) !important;
+}
+
+/* Free-response textarea — same single-border collapse as clean, but in the
+ * square industrial language with the accent edge-bar focus cue. */
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 92px;
+  padding: 10px 11px !important;
+  color: var(--theme-fg-primary) !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: var(--theme-bg-surface) !important;
+  box-shadow: none !important;
+  resize: vertical;
+  transition:
+    border-color 150ms ease,
+    box-shadow 170ms ease;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea:is(:focus, :focus-visible) {
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow:
+    inset 3px 0 0 var(--theme-accent-primary),
+    0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 16%, transparent) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea::placeholder {
+  color: var(--theme-fg-muted) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] div:has(> textarea) {
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Custom-answer edit/checkbox chip — accent-tinted square to match electrox. */
+html[data-theme="electrox"] [data-question-key] [class*="customRow"] > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
+  width: 26px !important;
+  height: 26px !important;
+  margin-top: 5px !important;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 58%, var(--theme-border-strong)) !important;
+  border-radius: 0 !important;
+  background: var(--theme-accent-soft) !important;
+  box-shadow: none !important;
+}
+
+/* "Recommended" badge — compact accent tag, reset the accidental full-width. */
+html[data-theme="electrox"] [data-question-key] [class*="badge"] {
+  flex: 0 0 auto !important;
+  align-self: center;
+  display: inline-flex !important;
+  align-items: center;
+  width: auto !important;
+  min-height: 19px;
+  padding: 0 6px !important;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 34%, transparent) !important;
+  border-radius: 0 !important;
+  background: var(--theme-accent-soft) !important;
+  font-family: var(--theme-font-mono);
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1 !important;
 }
 
 html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer {
@@ -1306,6 +1474,20 @@ html[data-theme="clean"][data-glass-panels="true"] :is(
     var(--theme-glass-panel-fill) !important;
   backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
   -webkit-backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
+}
+
+/* Some popups (e.g. the composer command menu's PopupSelectView) are a marked
+ * surface panel that itself CONTAINS a role=listbox. Both match the frame rule
+ * above, so the panel and the inner list each paint a border — two concentric
+ * strokes. Strip the frame from a nested list so only the outer surface draws
+ * it. The :not() guard leaves a surface that is itself the list alone and lifts
+ * specificity above the glass/practical panel-mode variants regardless of order. */
+html[data-theme="clean"] [data-tokens-floating-surface] :is([role="listbox"], [role="menu"]):not([data-tokens-floating-surface]) {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html[data-theme="clean"] :is([role="option"], [role="menuitem"]):hover,
