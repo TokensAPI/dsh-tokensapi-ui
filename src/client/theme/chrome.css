@@ -320,27 +320,63 @@ html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="questio
  * hook so new questions inherit the same material without source-order-wide
  * selectors leaking into the conversation. */
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
+  position: relative;
+  display: block;
+  --tokens-question-actions-top: 18px;
+  --tokens-question-actions-right: 20px;
+  --tokens-question-actions-clearance: 80px;
+  --tokens-question-title-clearance: 40px;
   padding: 18px 20px 16px !important;
   border-bottom: 1px solid color-mix(in srgb, var(--theme-border-subtle) 78%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-highlight) 24%, transparent), transparent);
 }
 
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header > div:first-child {
+  width: 100%;
   min-width: 0;
-  flex: 1;
+}
+
+/* DSH lays the heading and actions out as permanent flex columns, which wastes
+ * the complete action-column width on every wrapped title line. Float the
+ * controls over the eyebrow row instead so the title below can use the full
+ * card width. A missing eyebrow clears the controls vertically. */
+html:is([data-theme="clean"], [data-theme="electrox"])
+  [data-question-key] > section[aria-labelledby^="question-"] > header
+  > div:last-child:has(> button[aria-expanded]) {
+  position: absolute;
+  top: var(--tokens-question-actions-top);
+  right: var(--tokens-question-actions-right);
+  z-index: 1;
+}
+
+html:is([data-theme="clean"], [data-theme="electrox"])
+  [data-question-key] > section[aria-labelledby^="question-"] > header
+  > div:first-child > div:has(+ h2) {
+  max-inline-size: calc(100% - var(--tokens-question-actions-clearance));
+}
+
+html:is([data-theme="clean"], [data-theme="electrox"])
+  [data-question-key] > section[aria-labelledby^="question-"] > header
+  > div:first-child:not(:has(> div + h2)) > h2 {
+  margin-top: var(--tokens-question-title-clearance) !important;
 }
 
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header h2 {
   margin: 7px 0 0 !important;
+  /* DSH keeps the complete header non-shrinking. Bound only the question copy
+   * so a long prompt cannot consume the card's whole 60vh height budget and
+   * collapse the native option scroll region to a sliver. The full prompt stays
+   * available in its own scrollport; the eyebrow and header actions stay put. */
+  max-block-size: clamp(96px, 24vh, 168px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   color: var(--theme-fg-primary) !important;
   font-size: 18px !important;
   font-weight: 650 !important;
   line-height: 1.35 !important;
   letter-spacing: -0.018em;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header div:has(+ h2) {
@@ -720,6 +756,7 @@ html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="questio
 
 @media (max-width: 700px) {
   html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="question-"] > header {
+    --tokens-question-actions-right: 16px;
     padding-inline: 16px !important;
   }
 
@@ -763,9 +800,12 @@ html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="ques
 }
 
 html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  position: relative;
+  display: block;
+  --tokens-question-actions-top: 17px;
+  --tokens-question-actions-right: 18px;
+  --tokens-question-actions-clearance: 74px;
+  --tokens-question-title-clearance: 38px;
   padding: 17px 18px 14px !important;
   border-bottom: 1px solid var(--theme-border-subtle);
   background:
@@ -774,8 +814,8 @@ html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="ques
 }
 
 html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header > div:first-child {
+  width: 100%;
   min-width: 0;
-  flex: 1;
 }
 
 html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header h2 {
@@ -1153,6 +1193,7 @@ html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="ques
 
 @media (max-width: 700px) {
   html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header {
+    --tokens-question-actions-right: 14px;
     padding-inline: 14px !important;
   }
 

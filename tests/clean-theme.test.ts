@@ -180,6 +180,14 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain('[data-question-key] [role="radiogroup"] > div:has(> input[type="text"])');
     expect(chrome).toContain('[data-question-key] [data-question-scroll="true"] textarea');
     expect(chrome).toContain('[data-question-key] [data-question-scroll="true"] div:has(> textarea)');
+    expect(chrome).toMatch(
+      /\[data-question-key\] > section\[aria-labelledby\^="question-"\] > header h2 \{[^}]*max-block-size:\s*clamp\(96px, 24vh, 168px\);[^}]*overflow-y:\s*auto;/s,
+    );
+    expect(chrome).toContain('html:is([data-theme="clean"], [data-theme="electrox"])');
+    expect(chrome).toMatch(
+      /> div:last-child:has\(> button\[aria-expanded\]\) \{[^}]*position:\s*absolute;[^}]*right:\s*var\(--tokens-question-actions-right\);/s,
+    );
+    expect(chrome).toContain('max-inline-size: calc(100% - var(--tokens-question-actions-clearance))');
     expect(chrome).toContain('button[role="radio"][aria-checked="true"]');
     expect(chrome).toContain('> footer > div:last-child > button:last-child');
     expect(chrome).toContain('html[data-theme="electrox"] [data-question-key]');

@@ -17,6 +17,7 @@ import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
 import { CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { observeTokensCoworkHeadline, TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
+import { observeTurnStatus } from "./shell/turn-status.ts";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
 import { setSkillsRuntime, type SkillsRemote } from "./modules/skills/data.ts";
@@ -44,6 +45,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => observeFloatingSurfaces(), "tokens-core: floating surface theming");
   ctx.effect(() => observeDesktopSettingsSelect(), "tokens-core: desktop settings select");
   ctx.effect(() => observeTokensCoworkHeadline(), "tokens-core: hero brand copy");
+  ctx.effect(() => observeTurnStatus(), "tokens-core: turn status copy");
 
   ctx.slots.inject("settings.general.item", () =>
     ctx.slots.register(
