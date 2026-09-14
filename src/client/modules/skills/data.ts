@@ -14,8 +14,19 @@ import { workspace } from "../../shell/workspace-store.ts";
 
 export type { SkillEntry } from "@deepseek-ai/dsh-api-remotes/client";
 
+export interface SkillsRemote {
+  list(
+    input: { sessionId: SessionId },
+    signal?: AbortSignal,
+  ): Promise<
+    | { ok: true; value: { skills: readonly SkillEntry[] } }
+    | { ok: false; error: { code: string; message: string } }
+  >;
+}
+
 interface SkillsRuntime {
   connection: ConnectionHandle;
+  remoteSkills: SkillsRemote;
   sessions: ISessions;
 }
 
@@ -62,16 +73,17 @@ export function useSkillCatalog(sessionId: SessionId | null): {
       setState({ phase: "no-session" });
       return;
     }
-    const connection = runtime?.connection ?? null;
-    if (connection === null) {
-      setState({ phase: "error", message: "connection unavailable" });
+    const remoteSkills = runtime?.remoteSkills ?? null;
+    if (remoteSkills === null) {
+      setState({ phase: "error", message: "skills remote unavailable" });
       return;
     }
     let cancelled = false;
+    const abort = new AbortController();
     setState({ phase: "loading" });
-    connection.api.skills
-      .list({ sessionId })
-      .then(({ result }) => {
+    remoteSkills
+      .list({ sessionId }, abort.signal)
+      .then((result) => {
         if (cancelled) return;
         if (!result.ok) {
           setState({ phase: "error", message: `${result.error.code}: ${result.error.message}` });
@@ -85,6 +97,7 @@ export function useSkillCatalog(sessionId: SessionId | null): {
       });
     return () => {
       cancelled = true;
+      abort.abort();
     };
   }, [sessionId, nonce, revision]);
 

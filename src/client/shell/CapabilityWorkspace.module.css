@@ -1,3 +1,12 @@
+/* One stable overlay child owns both the product bar and capability page. The
+ * host makes direct overlay children interactive, so explicitly keep the empty
+ * workspace click-through and opt only the visible surfaces back in. */
+.workspace {
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+}
+
 /* Persistent brand + capability nav band. Sits in the strip reserved by the
  * injected frame padding-top (theme/reskin.css). Height MUST match it (72px). */
 .topbar {
@@ -12,6 +21,8 @@
   height: 72px;
   background: var(--theme-bg-shell);
   border-bottom: var(--theme-border-width) solid var(--theme-border-default);
+  color: var(--theme-fg-primary);
+  pointer-events: auto;
 }
 
 /* Keep the web capability chrome out of Windows' native caption controls. */
@@ -292,8 +303,36 @@
   bottom: 0;
   z-index: 4;
   overflow: auto;
+  box-sizing: border-box;
   padding: 28px 32px;
+  color: var(--theme-fg-primary);
   background-color: var(--theme-bg-canvas);
+  isolation: isolate;
+  pointer-events: auto;
+}
+
+.capabilityError {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  min-height: 100%;
+  gap: 12px;
+  padding: 32px;
+  color: var(--theme-fg-secondary);
+  text-align: center;
+}
+
+.capabilityError strong {
+  color: var(--theme-fg-primary);
+  font-size: 18px;
+}
+
+.capabilityError button {
+  padding: 8px 14px;
+  color: var(--theme-fg-on-accent);
+  background: var(--theme-accent-fill);
+  border: 0;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -142,7 +142,6 @@ const host: UserConfig = {
     '@deepseek-ai/dsh-llm',
     '@deepseek-ai/dsh-session',
     '@deepseek-ai/dsh-tools',
-    'electron',
   ],
 }
 

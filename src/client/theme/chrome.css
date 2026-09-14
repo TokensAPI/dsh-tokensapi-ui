@@ -75,10 +75,11 @@
 
 /* Reserve the top strip for our persistent brand + capability nav band. The
  * frame is the element that directly contains the shell.overlay layer; :has
- * selects it without a hashed class. Requiring a mounted child is important:
- * if the host cannot load the overlay slot, do not reserve an empty strip.
+ * selects it without a hashed class. Requiring our live workspace marker is
+ * important: a slot mount node can survive a React render failure, and must not
+ * reserve an empty strip after the product bar itself has disappeared.
  * border-box keeps the padding inside 100vh. Must match the topbar height. */
-html[data-theme="electrox"] :where(div):has(> [data-shell-overlay] > *) {
+html[data-theme="electrox"] :where(div):has(> [data-shell-overlay] [data-tokens-workspace="true"]) {
   box-sizing: border-box;
   padding-top: 72px;
 }
@@ -87,7 +88,7 @@ html[data-theme="electrox"] :where(div):has(> [data-shell-overlay] > *) {
  * that row with the 72px product bar only while the product bar is mounted.
  * Otherwise retain the host's native row and avoid a blank reserved strip. */
 html[data-theme="electrox"] body[data-dsh-desktop-mode="advanced"]
-  .dshDesktopFrame:has(> [data-shell-overlay] > *) {
+  .dshDesktopFrame:has(> [data-shell-overlay] [data-tokens-workspace="true"]) {
   padding-top: 0 !important;
   grid-template-rows: 72px minmax(0, 1fr) !important;
 }
@@ -96,7 +97,7 @@ html[data-theme="electrox"] body[data-dsh-desktop-mode="advanced"]
  * seat lives in the overlay topbar, so keep the upstream sidebar content below
  * that seat without reintroducing padding on the conversation/details frame. */
 html[data-theme="electrox"] body[data-dsh-desktop-mode="advanced"]
-  .dshDesktopFrame:has(> [data-shell-overlay] > *) .dshDesktopUpstreamSidebar {
+  .dshDesktopFrame:has(> [data-shell-overlay] [data-tokens-workspace="true"]) .dshDesktopUpstreamSidebar {
   box-sizing: border-box;
   padding-top: 72px !important;
 }
@@ -1922,14 +1923,6 @@ html[data-theme="clean"][data-glass-panels="true"]
   font-weight: 500 !important;
   -webkit-text-stroke: .05px currentColor !important;
   text-shadow: var(--theme-glass-muted-text-shadow) !important;
-}
-
-/* A capability is a replacement main page, not a transparent layer over the
- * conversation. Keep the Host tree mounted for state preservation, but remove
- * it from painting, hit testing and accessibility while a capability is open. */
-[data-tokens-capability-active] > [data-tokens-host-main="true"] {
-  visibility: hidden !important;
-  pointer-events: none !important;
 }
 
 /* DSH's appearance cubes use a fixed neutral-grey selected border instead of

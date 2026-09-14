@@ -49,29 +49,6 @@ const RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/
 const MAX_UPLOAD_BYTES = 10 << 20
 /** Curated skills shipped beside this plugin (../skills relative to lib/index.js). */
 const BUNDLED_DIR = fileURLToPath(new URL("../skills/", import.meta.url))
-const TRUSTED_TOOL_HOSTS = new Set(["electrox.cloud", "www.electrox.cloud"])
-const TOOL_BROWSER_CSS = `
-  :root { color-scheme: dark; }
-  * { scrollbar-width: thin; scrollbar-color: #4a4a4a #0a0a0a; }
-  *::-webkit-scrollbar { width: 8px; height: 8px; }
-  *::-webkit-scrollbar-track { background: #0a0a0a; }
-  *::-webkit-scrollbar-thumb {
-    min-height: 36px;
-    background: #3c3c3c;
-    border: 2px solid #0a0a0a;
-    border-radius: 999px;
-  }
-  *::-webkit-scrollbar-thumb:hover { background: #d4ff3a; }
-  *::-webkit-scrollbar-corner { background: #0a0a0a; }
-`
-interface NativeWebContents {
-  loadURL(url: string): Promise<void>
-  close(): void
-  on(event: "will-navigate", listener: (event: { preventDefault(): void }, url: string) => void): void
-  on(event: "did-finish-load", listener: () => void): void
-  insertCSS(css: string): Promise<string>
-  setWindowOpenHandler(handler: (details: { url: string }) => { action: "allow" | "deny" }): void
-}
 
 interface SkillCatalogControl {
   invalidate(): void
@@ -95,21 +72,6 @@ interface HostSessionRecord {
 interface HostSessions {
   list(): readonly HostSessionRecord[]
 }
-
-interface NativeWebContentsView {
-  webContents: NativeWebContents
-  setBounds(bounds: { x: number; y: number; width: number; height: number }): void
-}
-
-interface NativeBrowserWindow {
-  isDestroyed(): boolean
-  contentView: {
-    addChildView(view: NativeWebContentsView): void
-    removeChildView(view: NativeWebContentsView): void
-  }
-}
-
-let embeddedToolBrowser: { parent: NativeBrowserWindow; view: NativeWebContentsView; url: string } | undefined
 
 /** The user-root skill directory this plugin writes to. */
 function skillRoot(): string {
@@ -456,103 +418,6 @@ function notifySkillCatalog(ctx: Context, invalidate: () => void): void {
   } catch {}
 }
 
-function trustedToolUrl(raw: unknown): URL | undefined {
-  if (typeof raw !== "string") return undefined
-  try {
-    const url = new URL(raw)
-    if (url.protocol !== "https:" || !TRUSTED_TOOL_HOSTS.has(url.hostname)) return undefined
-    return url
-  } catch {
-    return undefined
-  }
-}
-
-function browserBounds(raw: unknown): { x: number; y: number; width: number; height: number } | undefined {
-  if (raw === null || typeof raw !== "object") return undefined
-  const value = raw as Record<string, unknown>
-  const keys = ["x", "y", "width", "height"] as const
-  if (!keys.every((key) => typeof value[key] === "number" && Number.isFinite(value[key]))) return undefined
-  return {
-    x: Math.max(0, Math.round(value.x as number)),
-    y: Math.max(0, Math.round(value.y as number)),
-    width: Math.max(1, Math.round(value.width as number)),
-    height: Math.max(1, Math.round(value.height as number)),
-  }
-}
-
-function disposeEmbeddedToolBrowser(): void {
-  const browser = embeddedToolBrowser
-  embeddedToolBrowser = undefined
-  if (browser === undefined) return
-  try { browser.parent.contentView.removeChildView(browser.view) } catch {}
-  try { browser.view.webContents.close() } catch {}
-}
-
-/** Open one trusted online tool inside an Electron-owned application window. */
-async function dispatchBrowser(endpoint: string, payload: unknown): Promise<RpcResult> {
-  if (endpoint === "hide") {
-    disposeEmbeddedToolBrowser()
-    return { ok: true, value: { hidden: true } }
-  }
-  const input = payload as { url?: unknown; bounds?: unknown } | null
-  const bounds = browserBounds(input?.bounds)
-  if (endpoint === "bounds") {
-    if (bounds === undefined) return fail("invalid-bounds")
-    embeddedToolBrowser?.view.setBounds(bounds)
-    return { ok: true, value: { updated: embeddedToolBrowser !== undefined } }
-  }
-  if (endpoint !== "mount") return fail(`unknown browser endpoint ${endpoint}`)
-  const url = trustedToolUrl(input?.url)
-  if (url === undefined) return fail("untrusted-url")
-  if (bounds === undefined) return fail("invalid-bounds")
-  try {
-    // Keep the ordinary web composition loadable: Electron is resolved only
-    // when this RPC is actually called inside the desktop main process.
-    const electronModule = "electron"
-    const electron = await import(electronModule) as unknown as {
-      BrowserWindow: {
-        getFocusedWindow(): NativeBrowserWindow | null
-        getAllWindows(): NativeBrowserWindow[]
-      }
-      WebContentsView: new (options: Record<string, unknown>) => NativeWebContentsView
-    }
-    if (embeddedToolBrowser !== undefined && !embeddedToolBrowser.parent.isDestroyed()) {
-      embeddedToolBrowser.view.setBounds(bounds)
-      if (embeddedToolBrowser.url !== url.href) {
-        await embeddedToolBrowser.view.webContents.loadURL(url.href)
-        embeddedToolBrowser.url = url.href
-      }
-      return { ok: true, value: { mounted: true } }
-    }
-    const parent = electron.BrowserWindow.getFocusedWindow()
-      ?? electron.BrowserWindow.getAllWindows().find((window) => !window.isDestroyed())
-    if (parent === undefined || parent === null) return fail("desktop-window-unavailable")
-    const view = new electron.WebContentsView({
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: true,
-        partition: "persist:tokens-electrox-tools",
-      },
-    })
-    const allow = (raw: string): boolean => trustedToolUrl(raw) !== undefined
-    view.webContents.on("will-navigate", (event, target) => {
-      if (!allow(target)) event.preventDefault()
-    })
-    view.webContents.on("did-finish-load", () => {
-      void view.webContents.insertCSS(TOOL_BROWSER_CSS).catch(() => {})
-    })
-    view.webContents.setWindowOpenHandler(({ url: target }) => ({ action: allow(target) ? "allow" : "deny" }))
-    view.setBounds(bounds)
-    parent.contentView.addChildView(view)
-    embeddedToolBrowser = { parent, view, url: url.href }
-    await view.webContents.loadURL(url.href)
-    return { ok: true, value: { mounted: true } }
-  } catch (error) {
-    return fail(error instanceof Error ? error.message : String(error))
-  }
-}
-
 function registerAutomationTools(ctx: Context & { tools: { register(tool: ReturnType<typeof defineTool>): unknown } }, host: AutomationHost): void {
   const output = {
     schema: { type: 'object', properties: { result: { type: 'string', required: true } }, additionalProperties: false } as const,
@@ -651,10 +516,6 @@ export function apply(ctx: Context): void {
     scoped.effect(
       () => connection.rpc.handle("/tokens-skills", dispatchSkills, { authority: "trusted-host" }),
       "tokens-core: skills rpc channel",
-    )
-    scoped.effect(
-      () => connection.rpc.handle("/tokens-browser", dispatchBrowser, { authority: "trusted-host" }),
-      "tokens-core: embedded browser rpc channel",
     )
     const automation = new AutomationHost(new DshAutomationExecutor(scoped), {}, new DshAutomationDelivery(scoped))
     void automation.start().catch((error) => scoped.logger.error(`tokens automation failed to start: ${String(error)}`))

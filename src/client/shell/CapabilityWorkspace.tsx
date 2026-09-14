@@ -1,6 +1,5 @@
-// Persistent capability shell rendered into the `shell.overlay` slot. Two
-// absolutely-positioned pieces (a fragment → both become direct children of the
-// overlay layer, so both get pointer-events):
+// Persistent capability shell rendered into the `shell.overlay` slot. One
+// stable click-through root owns two absolutely positioned surfaces:
 //   - a full-width top nav band, ALWAYS visible. Its left "brand seat" tracks the
 //     live sidebar column width (border aligned to the sidebar edge) so the band
 //     stays seamless whether the sidebar is expanded or collapsed.
@@ -10,7 +9,7 @@
 // 联合品牌: the client brand (粒刻/ELECTRO X) is dominant top-left; the platform
 // (tokensapi) is a small "powered by" mark. The reserved top strip comes from the
 // injected frame padding (theme/reskin.css).
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import clsx from "clsx";
 import { useActiveCapability, workspace } from "./workspace-store.ts";
 import { useCapabilities } from "./capability-registry.ts";
@@ -21,6 +20,41 @@ import lightTokensApiLogo from "./assets/tokensapi-mark-1024.png";
 import styles from "./CapabilityWorkspace.module.css";
 
 let layoutRuntime: ILayout | null = null;
+
+interface CapabilityViewBoundaryProps {
+  children: ReactNode;
+  label: string;
+}
+
+interface CapabilityViewBoundaryState {
+  failed: boolean;
+}
+
+/** Keep a faulty capability view from unmounting the persistent product bar. */
+class CapabilityViewBoundary extends Component<CapabilityViewBoundaryProps, CapabilityViewBoundaryState> {
+  state: CapabilityViewBoundaryState = { failed: false };
+
+  static getDerivedStateFromError(): CapabilityViewBoundaryState {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error(`[dsh-tokensapi-ui] ${this.props.label} capability failed`, error, info);
+  }
+
+  render(): ReactNode {
+    if (this.state.failed) {
+      return (
+        <div className={styles.capabilityError} role="alert">
+          <strong>{this.props.label}暂时无法显示</strong>
+          <span>页面遇到异常，顶部导航仍可继续使用。</span>
+          <button type="button" onClick={() => workspace.close()}>返回对话</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export function setCapabilityWorkspaceLayout(layout: ILayout): void {
   layoutRuntime = layout;
@@ -59,6 +93,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
   const active = useActiveCapability();
   const capabilities = useCapabilities();
   const activeCap = capabilities.find((item) => item.id === active) ?? null;
+  const ActiveView = activeCap?.render ?? null;
   const [barNode, setBarNode] = useState<HTMLElement | null>(null);
   const sidebarWidth = useSidebarWidth(barNode);
   const wide = sidebarWidth === 0 || sidebarWidth > 150;
@@ -95,7 +130,6 @@ export function CapabilityWorkspace(): React.JSX.Element {
       if (hostMain !== null) {
         previousInert = hostMain.inert;
         previousAriaHidden = hostMain.getAttribute("aria-hidden");
-        hostMain.dataset.tokensHostMain = "true";
         hostMain.inert = true;
         hostMain.setAttribute("aria-hidden", "true");
       }
@@ -103,7 +137,6 @@ export function CapabilityWorkspace(): React.JSX.Element {
     return () => {
       frame.removeAttribute("data-tokens-capability-active");
       if (hostMain !== null) {
-        delete hostMain.dataset.tokensHostMain;
         hostMain.inert = previousInert;
         if (previousAriaHidden === null) hostMain.removeAttribute("aria-hidden");
         else hostMain.setAttribute("aria-hidden", previousAriaHidden);
@@ -140,7 +173,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
   }, []);
 
   return (
-    <>
+    <div className={styles.workspace} data-tokens-workspace="true">
       <header ref={setBarNode} className={styles.topbar}>
         <div
           className={styles.brandSeat}
@@ -201,16 +234,18 @@ export function CapabilityWorkspace(): React.JSX.Element {
       </header>
 
 
-      {activeCap !== null ? (
+      {activeCap !== null && ActiveView !== null ? (
         <div
           className={clsx(styles.page, "theme-canvas")}
           style={{ left: `${sidebarWidth}px` }}
           role="region"
           aria-label={activeCap.label}
         >
-          <activeCap.render />
+          <CapabilityViewBoundary key={activeCap.id} label={activeCap.label}>
+            <ActiveView />
+          </CapabilityViewBoundary>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

@@ -142,10 +142,10 @@ describe("TokensAPI Lake View basic theme", () => {
 
   it("reserves the explicit product-bar grid only for the partner theme", () => {
     expect(chrome).toMatch(
-      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \{[^}]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
+      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] \[data-tokens-workspace="true"\]\) \{[^}]*grid-template-rows:\s*72px minmax\(0, 1fr\) !important;/,
     );
     expect(chrome).toMatch(
-      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] > \*\) \.dshDesktopUpstreamSidebar \{[^}]*padding-top:\s*72px !important;/,
+      /html\[data-theme="electrox"\] body\[data-dsh-desktop-mode="advanced"\][\s\S]*\.dshDesktopFrame:has\(> \[data-shell-overlay\] \[data-tokens-workspace="true"\]\) \.dshDesktopUpstreamSidebar \{[^}]*padding-top:\s*72px !important;/,
     );
     expect(chrome).not.toContain("revert !important");
     expect(chrome).not.toContain(

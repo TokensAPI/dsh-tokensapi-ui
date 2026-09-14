@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ONLINE_TOOLS, type OnlineTool } from "./data.ts";
-import { hideToolBrowser, mountToolBrowser, updateToolBrowserBounds } from "./browser.ts";
-import { useNativeViewsSuspended } from "../../shell/surface-hooks.ts";
 import styles from "./ToolsModule.module.css";
 
 const CATEGORIES = ["全部", "金蝶", "吉客云", "数据处理"] as const;
@@ -12,10 +10,6 @@ export function ToolsModule(): React.JSX.Element {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category>("全部");
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
-  const handleBrowserError = useCallback((message: string) => {
-    setNotice({ kind: "error", text: message });
-  }, []);
-
   const tools = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     return ONLINE_TOOLS.filter((tool) => {
@@ -40,7 +34,13 @@ export function ToolsModule(): React.JSX.Element {
             <p className={styles.detailDescription}>{selected.description}</p>
           </div>
         </header>
-        <NativeBrowserSurface tool={selected} onError={handleBrowserError} />
+        {notice !== null ? (
+          <div className={styles.notice} data-kind={notice.kind} role="status">
+            {notice.text}
+            <button type="button" onClick={() => setNotice(null)} aria-label="关闭提示">×</button>
+          </div>
+        ) : null}
+        <ToolFrame tool={selected} onError={(message) => setNotice({ kind: "error", text: message })} />
       </section>
     );
   }
@@ -122,49 +122,23 @@ export function ToolsModule(): React.JSX.Element {
   );
 }
 
-function NativeBrowserSurface({ tool, onError }: { tool: OnlineTool; onError: (message: string) => void }): React.JSX.Element {
-  const surface = useRef<HTMLDivElement | null>(null);
-  const suspended = useNativeViewsSuspended();
-
-  useEffect(() => {
-    const element = surface.current;
-    if (element === null) return;
-    let mounted = false;
-    let frame = 0;
-    const bounds = () => {
-      const rect = element.getBoundingClientRect();
-      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-    };
-    const sync = (): void => {
-      if (suspended) {
-        void hideToolBrowser();
-        mounted = false;
-        return;
-      }
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const next = bounds();
-        if (next.width < 1 || next.height < 1) return;
-        const request = mounted ? updateToolBrowserBounds(next) : mountToolBrowser(tool.runUrl, next);
-        void request.then((result) => {
-          if (!result.ok) onError(`内置页面加载失败：${result.message}`);
-          else mounted = true;
-        });
-      });
-    };
-    const observer = new ResizeObserver(sync);
-    observer.observe(element);
-    window.addEventListener("resize", sync);
-    window.addEventListener("scroll", sync, true);
-    sync();
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("resize", sync);
-      window.removeEventListener("scroll", sync, true);
-      void hideToolBrowser();
-    };
-  }, [onError, suspended, tool.runUrl]);
-
-  return <div ref={surface} className={styles.nativeSurface}>正在挂载客户端内置页面…</div>;
+function ToolFrame({ tool, onError }: { tool: OnlineTool; onError: (message: string) => void }): React.JSX.Element {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={styles.frameShell}>
+      {!loaded ? <div className={styles.frameLoading}>正在加载在线工具…</div> : null}
+      <iframe
+        className={styles.toolFrame}
+        src={tool.runUrl}
+        title={tool.name}
+        sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        referrerPolicy="no-referrer"
+        onLoad={() => setLoaded(true)}
+        onError={() => onError("内嵌页面加载失败，请改用浏览器打开。")}
+      />
+      <a className={styles.externalLink} href={tool.runUrl} target="_blank" rel="noopener noreferrer">
+        在浏览器中打开 ↗
+      </a>
+    </div>
+  );
 }
