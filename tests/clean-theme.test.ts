@@ -65,6 +65,21 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(existsSync(new URL("../src/client/theme/albert-sans.css", import.meta.url))).toBe(true);
   });
 
+  it("keeps the light text shadow disabled so DSH channel rows render cleanly", () => {
+    // DSH's IM "channel" session rows ([data-dsh-im-session-channel]
+    // [data-dsh-im-session-text]) hide their raw title via
+    // `-webkit-text-fill-color: transparent` and re-render it through a ::after
+    // using `content: attr(data-dsh-im-session-text)`. A non-`none` text-shadow
+    // still paints the hidden raw title ("微信 · 你好") with the element colour,
+    // overlapping the ::after copy as a doubled, fringed ghost. Since
+    // dsh-bridge sets `text-shadow: var(--theme-text-shadow)` on :root, the
+    // light skin must keep it `none`. Guard against re-introducing a shadow.
+    const lightValue = cleanTheme.match(
+      /\[data-theme="clean"\]\[data-color-scheme="light"\] \{([\s\S]*?)\n\}/,
+    )?.[1]?.match(/--theme-text-shadow:\s*([^;]*);/)?.[1];
+    expect(lightValue).toBe("none");
+  });
+
   it("keeps settings tabs out of dialog selection and control chrome", () => {
     expect(chrome).toContain('[aria-selected="true"]:not([role="tab"])');
     expect(chrome).toContain('button:not([aria-label], [role="tab"])');

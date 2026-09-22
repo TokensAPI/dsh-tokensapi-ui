@@ -75,9 +75,17 @@
   --theme-fg-secondary: oklch(0.3434 0.05664 163.22);
   --theme-fg-muted: oklch(0.38 0.04 163.22);
   --theme-fg-on-accent: oklch(0 0 0);
-  --theme-text-shadow:
-    0 0 .42px currentColor,
-    0 1px 1px rgb(20 71 48 / 11%);
+  /* No text shadow in the light skin. DSH's IM "channel" session rows
+   * ([data-dsh-im-session-channel][data-dsh-im-session-text]) hide their raw
+   * title with `-webkit-text-fill-color: transparent` and re-render it via a
+   * ::after that uses `content: attr(data-dsh-im-session-text)`. A non-`none`
+   * `text-shadow` still paints the *hidden* raw text (e.g. "微信 · 你好") with
+   * the element colour, overlapping the ::after copy and producing a doubled,
+   * fringed "ghost". `:root` sets `text-shadow: var(--theme-text-shadow)`, so
+   * any shadow here leaks onto those rows in the light appearance. Keep it
+   * `none` so blocked/hidden text renders cleanly and normal text relies on
+   * antialiasing. */
+  --theme-text-shadow: none;
   --theme-border-subtle: rgb(31 86 61 / 14%);
   --theme-border-default: rgb(31 86 61 / 20%);
   --theme-border-strong: rgb(31 86 61 / 30%);

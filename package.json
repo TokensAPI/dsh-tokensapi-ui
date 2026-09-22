@@ -27,7 +27,9 @@
     "prepare": "tsdown",
     "watch": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sync:local": "node scripts/sync-local-override.mjs",
+    "dev:local": "pnpm build && pnpm sync:local"
   },
   "dsh": {
     "client": {
