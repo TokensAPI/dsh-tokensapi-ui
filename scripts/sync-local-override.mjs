@@ -27,8 +27,10 @@
 // Or in one go:
 //   pnpm dev:local                          # build && sync-local-override
 //
-// The script never touches skills/, licenses/, package.json — it only stages
-// the lib/ artifacts into the override, backing up any existing lib/ first.
+// The script never touches skills/, licenses/ — it stages the lib/ artifacts
+// AND the bundle patch (cordis.patch.yml) into the override, backing up any
+// existing lib/ first. The manifest also carries `dsh.bundle.patch` so Cordis
+// applies the override's own patch when the package is installed into a profile.
 //
 // The rewrite helpers are exported as pure functions so the alias contract can
 // be regression-tested (tests/local-override-alias.test.ts) without triggering
@@ -78,6 +80,22 @@ export function rewriteClientModuleId(source) {
   return source.replace(anchor, replacement);
 }
 
+// Bundle patch (cordis.patch.yml): the source package inserts itself under the
+// original id/name. The override must insert itself under the override alias so
+// Cordis wires the renamed module instead of leaving the embedded plugin active.
+// The YAML values are unquoted (`id: dsh-tokensapi-ui`), matching the real file.
+export function rewritePatchName(source) {
+  const before = "dsh-tokensapi-ui";
+  const after = OVERRIDE_NAME;
+  if (before === after) throw new Error("alias invariant");
+  if (!source.includes(`id: ${before}`)) {
+    throw new Error("bundle patch id anchor not found");
+  }
+  return source
+    .replace(`id: ${before}`, `id: ${after}`)
+    .replace(`name: ${before}`, `name: ${after}`);
+}
+
 // Verify the alias landed in both bundles and the client kept its other ids.
 export function verifyOverride(overrideLibDir) {
   const host = readFileSync(join(overrideLibDir, "index.js"), "utf8");
@@ -90,6 +108,12 @@ export function verifyOverride(overrideLibDir) {
   }
   if (!client.includes('tag.dataset.plugin = "dsh-tokensapi-ui"')) {
     throw new Error("client data-plugin markers were unexpectedly rewritten");
+  }
+  // The staged bundle patch must insert the override alias, not the original.
+  const overrideRoot = dirname(overrideLibDir);
+  const patch = readFileSync(join(overrideRoot, "cordis.patch.yml"), "utf8");
+  if (!patch.includes(`id: ${OVERRIDE_NAME}`) || !patch.includes(`name: ${OVERRIDE_NAME}`)) {
+    throw new Error("bundle patch alias not applied in cordis.patch.yml");
   }
 }
 
@@ -117,10 +141,62 @@ function main() {
   }
   cpSync(libDir, overrideDir, { recursive: true });
 
+  // Desktop resolves the override as a package, so the staged directory must
+  // carry its own manifest. Without it, a valid junction and lib/ directory
+  // still produce PackageOverlayNotFoundError after a Desktop restart.
+  // The manifest also needs the full plugin metadata the source package
+  // declares: `dsh.bundle.patch` (so Cordis applies the override's own
+  // cordis.patch.yml when it is installed into a profile) AND `dsh.client`
+  // (platform + inject) so the client bundle loader knows to mount this plugin's
+  // client.js and inject its required client modules. Skipping `dsh.client`
+  // makes the host bundle mount but the client UI never appear, even though
+  // every package resolves.
+  //
+  // The `exports` map MUST be inherited from the source manifest (or at least
+  // include `./package.json`). `client-modules` resolves each loader entry's
+  // manifest through `createRequire(baseUrl).resolve("<pkg>/package.json")`; a
+  // package that defines `exports` without `./(`package.json`")` fails with
+  // ERR_PACKAGE_PATH_NOT_EXPORTED, and the entry is classified as "not a client
+  // row" — the UI never loads even though the bundle resolves. Historically this
+  // script hard-coded a trimmed exports map and dropped `./package.json`, which
+  // made the local override invisible to the client plugin list while the
+  // embedded product plugin loaded fine. Mirror the source manifest so the two
+  // can never drift again.
+  const sourceManifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  writeFileSync(join(root, "dist", "local-profile-override", "package.json"), JSON.stringify({
+    name: OVERRIDE_NAME,
+    version: sourceManifest.version,
+    private: true,
+    type: "module",
+    main: "./lib/index.js",
+    exports: sourceManifest.exports ?? {
+      ".": "./lib/index.js",
+      "./client": "./lib/client.js",
+      "./package.json": "./package.json",
+      "./cordis.patch.yml": "./cordis.patch.yml",
+    },
+    dsh: {
+      ...(sourceManifest.dsh ?? {}),
+      bundle: { patch: "./cordis.patch.yml" },
+    },
+  }, null, 2) + "\n");
+  console.log(`  manifest version : ${sourceManifest.version}`);
+
   const hostSrc = readFileSync(join(overrideDir, "index.js"), "utf8");
   const clientSrc = readFileSync(join(overrideDir, "client.js"), "utf8");
   writeAndReport("index.js", rewriteHostAlias(hostSrc));
   writeAndReport("client.js", rewriteClientModuleId(clientSrc));
+
+  // Stage the bundle patch next to the manifest and rewrite its self-insert id
+  // to the override alias, so Cordis wires the overridden module when the
+  // package is installed into a profile.
+  const patchSrc = join(root, "cordis.patch.yml");
+  if (!existsSync(patchSrc)) {
+    fail(`missing bundle patch cordis.patch.yml at repo root`);
+  }
+  const overridePatch = join(root, "dist", "local-profile-override", "cordis.patch.yml");
+  writeFileSync(overridePatch, rewritePatchName(readFileSync(patchSrc, "utf8")));
+  console.log(`  cordis.patch.yml  (${sha256(overridePatch).slice(0, 16)})`);
 
   // Copy the sourcemaps so the override remains debuggable in the browser.
   for (const file of ["index.js.map", "client.js.map"]) {
