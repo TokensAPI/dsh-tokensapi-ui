@@ -1,3 +1,4 @@
+
 /* Partner mode keeps ELECTRO X's square industrial language, but question
  * cards still need the same semantic hierarchy and wrapping guarantees as the
  * basic theme. Generated module classes are deliberately excluded. */
@@ -434,4 +435,3 @@ html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="ques
     display: none;
   }
 }
-

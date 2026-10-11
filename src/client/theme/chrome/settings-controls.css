@@ -1,3 +1,4 @@
+
 html[data-theme="clean"] [role="dialog"] :is(h1, h2, h3) {
   letter-spacing: -0.012em;
   text-wrap: balance;
@@ -483,4 +484,3 @@ html[data-theme="clean"] *::-webkit-scrollbar-thumb:hover {
     transition-duration: 0.01ms !important;
   }
 }
-

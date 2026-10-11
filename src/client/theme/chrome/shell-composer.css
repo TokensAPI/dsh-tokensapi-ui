@@ -255,4 +255,3 @@ html[data-theme="clean"] [role="dialog"] {
     0 1px 0 color-mix(in srgb, var(--theme-border-strong) 30%, transparent),
     0 30px 90px -38px var(--theme-surface-shadow) !important;
 }
-

@@ -1,3 +1,4 @@
+
 /* Agent question flows render in the composer seat as a labelled section.
  * Keep their material paint, but do not turn this interactive container into
  * another backdrop-filter containing block. */
@@ -476,4 +477,3 @@ html[data-theme="clean"] [data-question-key] > section[aria-labelledby^="questio
     display: none;
   }
 }
-
