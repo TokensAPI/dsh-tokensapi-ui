@@ -23,8 +23,8 @@ import { registerCapability, listCapabilities } from "./shell/capability-registr
 import { setSkillsRuntime, type SkillsRemote } from "./modules/skills/data.ts";
 import { setAutomationRuntime } from "./modules/automation/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
-import { observeFloatingSurfaces } from "./theme/floating-surfaces.ts";
 import { observeDesktopSettingsSelect } from "./theme/desktop-select.ts";
+import { observeFocusModality } from "./theme/focus-modality.ts";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -41,8 +41,8 @@ export function apply(ctx: ClientContext): void {
   setCapabilityWorkspaceLayout(ctx.get("layout") as ILayout);
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
+  ctx.effect(() => observeFocusModality(), "tokens-core: dialog trigger focus");
   ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
-  ctx.effect(() => observeFloatingSurfaces(), "tokens-core: floating surface theming");
   ctx.effect(() => observeDesktopSettingsSelect(), "tokens-core: desktop settings select");
   ctx.effect(() => observeTokensCoworkHeadline(), "tokens-core: hero brand copy");
   ctx.effect(() => observeTurnStatus(), "tokens-core: turn status copy");

@@ -2,12 +2,17 @@
 
 TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供两套产品主题：
 
-- TokensAPI 基础主题：Lake View 深色方案与实验性的 Liquid Glass 浅色方案。
+- TokensAPI 基础主题：Lake View 深色与浅色方案，面板使用不透明背景。
 - ELECTRO X / 粒刻合作方主题。
 
 插件同时提供技能库、工具库和自动化页面。技能库使用真实 `skill.list` 目录，
 支持本地上传、内置精选安装、详情查看和当前任务调用。TokensAPI 账号登录与 AIGC
 入口当前暂不随插件启用。
+
+玻璃面板实验实现保留在 `src/client/theme/disabled/`：`glass-panels.css` 保存
+材质和文字效果，`GlassPanelOptions.tsx` 保存开关、持久化和显式样式注入代码。
+当前主题不导入该模块、不注入这些样式，也不挂载设置入口；旧开关记录不会启用效果。
+为玻璃样式识别浮层的动态 DOM 监控也保留在该目录的 `floating-surfaces.ts`，当前不注册。
 
 普通 DSH（cordis）插件，host + client 两半，随 `dsh web` 与 Desktop 一同加载。
 npm 包名固定为 `tokens-core`（loader 按此名解析），GitHub 仓库名为 `dsh-tokensapi-ui`。

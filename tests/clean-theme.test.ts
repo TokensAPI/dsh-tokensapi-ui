@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { transform } from "lightningcss";
 
 const cleanTheme = readFileSync(
   new URL("../src/client/theme/themes/clean.css", import.meta.url),
@@ -27,11 +28,11 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).toContain("--lake-primary: oklch(0.765 0.177 163.22)");
     expect(cleanTheme).toContain("--lake-secondary: oklch(0.551 0.0899 200.52)");
     expect(cleanTheme).toContain('[data-theme="clean"][data-color-scheme="light"]');
-    expect(cleanTheme).toContain("--theme-bg-shell: rgb(22 27 25 / 84%)");
-    expect(cleanTheme).toContain("--theme-bg-surface: rgb(27 34 31 / 76%)");
+    expect(cleanTheme).toContain("--theme-bg-shell: #161b19");
+    expect(cleanTheme).toContain("--theme-bg-surface: #1b221f");
     expect(cleanTheme).toContain("--theme-accent-soft: rgb(59 128 94 / 20%)");
     expect(cleanTheme).toContain("--theme-fg-secondary: oklch(0.3434 0.05664 163.22)");
-    expect(cleanTheme).toContain("--theme-bg-surface: rgb(255 255 255 / 58%)");
+    expect(cleanTheme).toContain("--theme-bg-surface: #ffffff");
     expect(cleanTheme).toContain("--theme-border-subtle: rgb(31 86 61 / 14%)");
     expect(cleanTheme).toContain("--theme-accent-soft: rgb(56 185 125 / 10%)");
     expect(chrome).toContain('[data-composer-card="true"]::before');
@@ -41,22 +42,6 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(cleanTheme).toMatch(/--theme-fg-on-accent:\s*oklch\(0 0 0\)/);
     expect(cleanTheme).toContain("--theme-accent-fill: var(--lake-primary)");
     expect(cleanTheme).toContain("--theme-text-shadow:");
-    expect(cleanTheme).toContain("--theme-glass-text-shadow:");
-    expect(cleanTheme).toContain("--theme-glass-muted-text-shadow:");
-    expect(cleanTheme).toContain("--theme-glass-panel-fill:");
-    expect(cleanTheme).toContain('[data-theme="clean"][data-glass-panels="false"]');
-    expect(chrome).toContain('html[data-theme="clean"][data-glass-panels="false"]');
-    expect(chrome).toContain("background: var(--theme-bg-surface-raised) !important");
-    expect(chrome).toContain('[data-glass-panels="true"]');
-    expect(chrome).toContain("-webkit-text-stroke: .1px currentColor");
-    expect(chrome).toContain("text-shadow: var(--theme-glass-text-shadow) !important");
-    expect(chrome).toContain("text-shadow: var(--theme-glass-muted-text-shadow) !important");
-    expect(chrome).toContain("var(--theme-glass-panel-fill) !important");
-    expect(chrome).toContain('[data-glass-panels="true"] :where(');
-    expect(cleanTheme).toContain("--theme-neon-text-shadow:");
-    expect(chrome).toContain('[role="presentation"][data-source="command"]');
-    expect(chrome).toContain('[role="option"] > span:first-child');
-    expect(chrome).toContain('[role="option"] > span:last-child');
   });
 
   it("uses a resilient system font stack", () => {
@@ -86,44 +71,42 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).not.toMatch(/\[aria-selected="true"\]\s*\n?\s*\)\s*\{/);
   });
 
-  it("bridges the TokensAPI model manager's custom picker into the glass controls", () => {
+  it("bridges the TokensAPI model manager's custom picker into opaque controls", () => {
     expect(chrome).toContain('input[placeholder="搜索模型"]');
     expect(chrome).toContain('input[placeholder="Search models"]');
     expect(chrome).toContain('> button[aria-expanded]');
-    expect(chrome).toContain(
-      'html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]',
-    );
-    expect(chrome).toContain('backdrop-filter: blur(var(--clean-menu-blur))');
+    expect(chrome).toContain("background: var(--theme-bg-surface-raised) !important");
   });
 
-  it("delegates shell glass to Desktop and confines optional blur to dialogs and selectors", () => {
-    expect(chrome).toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\] \.dshDesktopSidebarSurface \{[^}]*backdrop-filter:\s*none !important;/s,
-    );
-    expect(chrome).not.toMatch(
-      /\.dshDesktopSidebarSurface\s*\{[^}]*backdrop-filter:\s*blur/s,
-    );
-    expect(chrome).toMatch(
-      /\[data-glass-panels="true"\] \[role="dialog"\]::before \{[^}]*pointer-events:\s*none;/s,
-    );
-    expect(chrome).not.toMatch(
-      /\[data-glass-panels="true"\] \[role="dialog"\]::before \{[^}]*backdrop-filter:\s*blur/s,
-    );
-    expect(chrome).toMatch(
-      /\[role="presentation"\]:has\(> \[role="dialog"\]\[aria-modal="true"\]\)[^{]*\{[^}]*backdrop-filter:\s*blur\(18px\)/s,
-    );
-    expect(chrome).not.toMatch(
-      /body\[data-dsh-desktop-mode="advanced"\][\s\S]*?\[role="presentation"\]:has\(> \[role="dialog"\]\[aria-modal="true"\]\)[^{]*\{[^}]*backdrop-filter:\s*none/s,
-    );
-    expect(chrome).toMatch(
-      /\[data-glass-panels="true"\] :is\([^)]*select,[^)]*\) \{[^}]*backdrop-filter:\s*blur/s,
-    );
-    expect(chrome).not.toMatch(
-      /\[data-glass-panels="true"\][^{]*\[data-composer-card="true"\]/,
-    );
-    expect(chrome).not.toMatch(
-      /\[data-glass-panels="true"\][^{]*\[data-question-key\]/,
-    );
+  it("keeps glass rendering disabled and leaves native window material to Desktop", () => {
+    for (const sheet of [cleanTheme, chrome]) {
+      expect(sheet).not.toContain("data-glass-panels");
+      expect(sheet).not.toContain("--theme-glass-");
+      for (const [, value] of sheet.matchAll(/backdrop-filter:([^;]+);/g)) {
+        expect(value.trim()).toMatch(/^none(?: !important)?$/);
+      }
+      expect(sheet).not.toContain("-webkit-text-stroke");
+      expect(sheet).not.toContain("-webkit-font-smoothing");
+    }
+    expect(chrome).not.toMatch(/\[role="dialog"\] \{[^}]*position:/s);
+    const panelSelectors = chrome.match(/\[role="dialog"\]\[class\*="_panel"\][^{]*\{/g) ?? [];
+    expect(panelSelectors.length).toBeGreaterThan(0);
+    for (const selector of panelSelectors) expect(selector).toContain(':not([aria-modal="true"])');
+  });
+
+  it("retains the glass implementation in a separate module without activating it", () => {
+    const archivedCss = readFileSync(new URL("../src/client/theme/disabled/glass-panels.css", import.meta.url));
+    const options = readFileSync(new URL("../src/client/theme/disabled/GlassPanelOptions.tsx", import.meta.url), "utf8");
+    const inject = readFileSync(new URL("../src/client/theme/inject.ts", import.meta.url), "utf8");
+    expect(() => transform({ filename: "glass-panels.css", code: archivedCss })).not.toThrow();
+    expect(archivedCss.toString()).toContain("-webkit-text-stroke");
+    expect(archivedCss.toString()).toContain("backdrop-filter: blur(");
+    expect(options).toContain("getGlassPanelsEnabled");
+    expect(options).toContain("injectGlassPanels");
+    expect(options).toContain("玻璃面板");
+    expect(inject).not.toContain("GlassPanels");
+    expect(inject).not.toContain("disabled/");
+    expect(themePicker).not.toContain("GlassPanelOptions");
   });
 
   it("keeps enhanced sidebar and settings-modal geometry deterministic", () => {
@@ -144,14 +127,16 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain("background-color: #f9fcfa");
   });
 
-  it("uses a runtime floating-surface marker without broadly styling trees", () => {
-    expect(chrome).toContain("[data-tokens-floating-surface]");
+  it("uses semantic popup styles without activating experimental DOM monitoring", () => {
+    const client = readFileSync(new URL("../src/client/index.tsx", import.meta.url), "utf8");
+    expect(client).not.toContain("observeFloatingSurfaces");
+    expect(chrome).not.toContain("[data-tokens-floating-surface]");
     expect(chrome).not.toContain('[role="tree"]');
   });
 
-  it("releases composer clipping for classified and semantic host popups", () => {
+  it("releases composer clipping for semantic host popups", () => {
     expect(chrome).toMatch(
-      /\[data-composer-card="true"\]:has\([\s\S]*\[data-tokens-floating-surface\][\s\S]*\[role="menu"\][\s\S]*\[role="listbox"\][\s\S]*\[role="dialog"\][\s\S]*\)\s*\{\s*overflow:\s*visible;/,
+      /\[data-composer-card="true"\]:has\([\s\S]*\[role="menu"\][\s\S]*\[role="listbox"\][\s\S]*\[role="dialog"\][\s\S]*\)\s*\{\s*overflow:\s*visible;/,
     );
   });
 
@@ -240,22 +225,17 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain("var(--theme-accent-primary) 56%");
   });
 
-  it("completes the directory picker's bare show-hidden toggle as a glass button", () => {
+  it("completes the directory picker's bare show-hidden toggle as an opaque button", () => {
     expect(chrome).toContain('button[class*="_showHiddenToggle"][aria-pressed]');
     expect(chrome).toContain("min-height: 36px");
   });
 
   it("describes and previews the Lake View palette accurately", () => {
-    expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与通透浅色外观");
+    expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与清晰浅色外观");
     expect(themePicker).toContain('["#161b19", "#5fd7a1", "#f8fbf9"]');
     expect(themePicker).not.toContain('["#171717", "#3b82f6", "#f5f5f5"]');
-    expect(themePicker).toContain("高级外观选项");
-    expect(themePicker).toContain("界面主题 · 基础主题专属");
-    expect(themePicker).toContain("玻璃面板");
-    expect(themePicker).toContain("仅增强选择框和设置弹窗");
-    expect(themePicker).toContain("窗口与侧栏使用桌面原生材质");
-    expect(themePicker).toContain("getGlassPanelsEnabled");
-    expect(themePicker).toContain('theme.id === "clean" && selected');
-    expect(themePicker).not.toContain("此选项仅用于基础主题");
+    expect(themePicker).not.toContain("高级外观选项");
+    expect(themePicker).not.toContain("玻璃面板");
+    expect(themePicker).not.toContain("GlassPanels");
   });
 });

@@ -12,9 +12,9 @@
   /* These are the actual Lake View dark-mode mixes, expanded to concrete
    * colours for the Electron build. Keeping the derived chroma explicit
    * avoids both hue drift and translucent green stacking across surfaces. */
-  --theme-bg-shell: rgb(22 27 25 / 84%);
-  --theme-bg-surface: rgb(27 34 31 / 76%);
-  --theme-bg-surface-raised: rgb(37 45 41 / 86%);
+  --theme-bg-shell: #161b19;
+  --theme-bg-surface: #1b221f;
+  --theme-bg-surface-raised: #252d29;
   --theme-bg-overlay: rgb(0 0 0 / 70%);
   --theme-fg-primary: oklch(0.965 0 0);
   --theme-fg-secondary: oklch(0.82 0 0);
@@ -43,33 +43,18 @@
     0 20px 48px -26px rgb(0 0 0 / 82%);
   --theme-shadow-button-hover: 0 8px 22px color-mix(in srgb, var(--lake-primary) 18%, transparent);
   --theme-grid-color: color-mix(in srgb, var(--lake-primary) 5%, transparent);
-  --theme-glass-highlight: rgb(255 255 255 / 10%);
-  --theme-glass-shadow: rgb(0 0 0 / 52%);
-  --theme-glass-blur: 20px;
-  --theme-glass-panel-fill: rgb(25 33 29 / 70%);
-  --theme-glass-text-shadow:
-    0 0 .45px currentColor,
-    0 1px 1px rgb(0 0 0 / 72%),
-    0 0 6px color-mix(in srgb, var(--lake-primary) 24%, transparent);
-  --theme-glass-muted-text-shadow:
-    0 0 .32px currentColor,
-    0 1px .7px rgb(0 0 0 / 58%),
-    0 0 4px color-mix(in srgb, var(--lake-primary) 16%, transparent);
-  --theme-neon-text-shadow:
-    0 0 .55px currentColor,
-    0 0 4px color-mix(in srgb, var(--lake-primary) 32%, transparent),
-    0 0 9px color-mix(in srgb, var(--lake-primary) 18%, transparent);
+  --theme-surface-highlight: rgb(255 255 255 / 10%);
+  --theme-surface-shadow: rgb(0 0 0 / 52%);
 }
 
 [data-theme="clean"][data-color-scheme="light"] {
   color-scheme: light;
   --lake-background: oklch(1 0 0);
-  /* Liquid-glass light material. The desktop frame remains fully opaque;
-   * translucency only reveals the controlled TokensAPI ambient canvas. */
-  --theme-bg-canvas: rgb(248 251 249 / 78%);
-  --theme-bg-shell: rgb(244 250 247 / 72%);
-  --theme-bg-surface: rgb(255 255 255 / 58%);
-  --theme-bg-surface-raised: rgb(255 255 255 / 72%);
+  /* Opaque surfaces keep text contrast stable across desktop materials. */
+  --theme-bg-canvas: #f8fbf9;
+  --theme-bg-shell: #f2f8f5;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #ffffff;
   --theme-bg-overlay: rgb(0 0 0 / 35%);
   --theme-fg-primary: oklch(0.145 0 0);
   --theme-fg-secondary: oklch(0.3434 0.05664 163.22);
@@ -106,41 +91,6 @@
     0 18px 44px -24px rgb(35 86 65 / 26%);
   --theme-shadow-button-hover: 0 8px 20px color-mix(in srgb, var(--lake-primary) 18%, transparent);
   --theme-grid-color: color-mix(in srgb, var(--lake-primary) 6%, transparent);
-  --theme-glass-highlight: rgb(255 255 255 / 72%);
-  --theme-glass-shadow: rgb(29 68 53 / 16%);
-  --theme-glass-blur: 18px;
-  --theme-glass-panel-fill: rgb(248 253 250 / 68%);
-  --theme-glass-text-shadow:
-    0 0 .62px currentColor,
-    -.45px -.55px 0 rgb(255 255 255 / 96%),
-    .58px .78px .55px rgb(18 70 47 / 38%),
-    0 0 4px color-mix(in srgb, var(--lake-primary) 34%, transparent),
-    0 0 10px color-mix(in srgb, var(--lake-primary) 17%, transparent);
-  --theme-glass-muted-text-shadow:
-    0 0 .38px currentColor,
-    -.35px -.4px 0 rgb(255 255 255 / 88%),
-    .48px .64px .45px rgb(18 70 47 / 28%),
-    0 0 4px color-mix(in srgb, var(--lake-primary) 20%, transparent),
-    0 0 8px color-mix(in srgb, var(--lake-primary) 10%, transparent);
-  --theme-neon-text-shadow:
-    0 0 .55px currentColor,
-    0 0 2px rgb(255 255 255 / 32%),
-    0 0 5px color-mix(in srgb, var(--lake-primary) 38%, transparent),
-    0 0 10px color-mix(in srgb, var(--lake-primary) 22%, transparent);
-}
-
-/* Practical mode is intentionally the default: opaque surfaces preserve
- * contrast and predictable rendering. The advanced setting opts back into
- * the original translucent Lake View material. */
-[data-theme="clean"][data-glass-panels="false"] {
-  --theme-bg-shell: #f2f8f5;
-  --theme-bg-surface: #ffffff;
-  --theme-bg-surface-raised: #ffffff;
-  --theme-glass-blur: 0px;
-}
-
-[data-theme="clean"][data-glass-panels="false"]:not([data-color-scheme="light"]) {
-  --theme-bg-shell: #161b19;
-  --theme-bg-surface: #1b221f;
-  --theme-bg-surface-raised: #252d29;
+  --theme-surface-highlight: rgb(255 255 255 / 72%);
+  --theme-surface-shadow: rgb(29 68 53 / 16%);
 }

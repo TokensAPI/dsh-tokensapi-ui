@@ -1,0 +1,247 @@
+/* Retained experimental glass treatment. Not imported or injected by the active theme.
+ * Native Desktop geometry remains host-owned. */
+
+[data-theme="clean"][data-glass-panels="true"] {
+  --theme-bg-canvas: var(--lake-background);
+  --theme-bg-shell: rgb(22 27 25 / 84%);
+  --theme-bg-surface: rgb(27 34 31 / 76%);
+  --theme-bg-surface-raised: rgb(37 45 41 / 86%);
+  --theme-glass-highlight: rgb(255 255 255 / 10%);
+  --theme-glass-shadow: rgb(0 0 0 / 52%);
+  --theme-glass-blur: 20px;
+  --theme-glass-panel-fill: rgb(25 33 29 / 70%);
+  --theme-glass-text-shadow:
+    0 0 .45px currentColor,
+    0 1px 1px rgb(0 0 0 / 72%),
+    0 0 6px color-mix(in srgb, var(--lake-primary) 24%, transparent);
+  --theme-glass-muted-text-shadow:
+    0 0 .32px currentColor,
+    0 1px .7px rgb(0 0 0 / 58%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 16%, transparent);
+  --theme-neon-text-shadow:
+    0 0 .55px currentColor,
+    0 0 4px color-mix(in srgb, var(--lake-primary) 32%, transparent),
+    0 0 9px color-mix(in srgb, var(--lake-primary) 18%, transparent);
+}
+
+[data-theme="clean"][data-color-scheme="light"][data-glass-panels="true"] {
+  --theme-bg-canvas: rgb(248 251 249 / 78%);
+  --theme-bg-shell: rgb(244 250 247 / 72%);
+  --theme-bg-surface: rgb(255 255 255 / 58%);
+  --theme-bg-surface-raised: rgb(255 255 255 / 72%);
+  --theme-glass-highlight: rgb(255 255 255 / 72%);
+  --theme-glass-shadow: rgb(29 68 53 / 16%);
+  --theme-glass-blur: 18px;
+  --theme-glass-panel-fill: rgb(248 253 250 / 68%);
+  --theme-glass-text-shadow:
+    0 0 .62px currentColor,
+    -.45px -.55px 0 rgb(255 255 255 / 96%),
+    .58px .78px .55px rgb(18 70 47 / 38%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 34%, transparent),
+    0 0 10px color-mix(in srgb, var(--lake-primary) 17%, transparent);
+  --theme-glass-muted-text-shadow:
+    0 0 .38px currentColor,
+    -.35px -.4px 0 rgb(255 255 255 / 88%),
+    .48px .64px .45px rgb(18 70 47 / 28%),
+    0 0 4px color-mix(in srgb, var(--lake-primary) 20%, transparent),
+    0 0 8px color-mix(in srgb, var(--lake-primary) 10%, transparent);
+  --theme-neon-text-shadow:
+    0 0 .55px currentColor,
+    0 0 2px rgb(255 255 255 / 32%),
+    0 0 5px color-mix(in srgb, var(--lake-primary) 38%, transparent),
+    0 0 10px color-mix(in srgb, var(--lake-primary) 22%, transparent);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] {
+  --clean-menu-blur: 8px;
+}
+
+html[data-theme="clean"][data-color-scheme="light"][data-glass-panels="true"] {
+  --clean-menu-blur: 6px;
+}
+
+html[data-theme="clean"][data-glass-panels="true"] [role="dialog"] {
+  background: transparent !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--theme-glass-highlight) 30%, transparent),
+      transparent 46%
+    ),
+    var(--theme-glass-panel-fill);
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="presentation"]:has(> [role="dialog"][aria-modal="true"])
+  > [aria-hidden="true"] {
+  backdrop-filter: blur(18px) saturate(118%);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] :is(
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"]
+) {
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 58%, transparent) !important;
+  backdrop-filter: blur(calc(var(--clean-menu-blur) * .75)) saturate(125%);
+  -webkit-backdrop-filter: blur(calc(var(--clean-menu-blur) * .75)) saturate(125%);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--theme-glass-highlight) 34%, transparent),
+      transparent 46%
+    ),
+    var(--theme-glass-panel-fill) !important;
+  backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
+  -webkit-backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]
+  div:has(> div > :is(input[placeholder="搜索模型"], input[placeholder="Search models"]))
+  > button[aria-expanded] {
+  backdrop-filter: blur(calc(var(--clean-menu-blur) * .75)) saturate(125%);
+  -webkit-backdrop-filter: blur(calc(var(--clean-menu-blur) * .75)) saturate(125%);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]
+  div:has(> :is(input[placeholder="搜索模型"], input[placeholder="Search models"])) {
+  backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
+  -webkit-backdrop-filter: blur(var(--clean-menu-blur)) saturate(135%) contrast(1.02);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] [role="dialog"]
+  button[class*="_showHiddenToggle"][aria-pressed] {
+  backdrop-filter: blur(calc(var(--clean-menu-blur) * .6)) saturate(120%);
+  -webkit-backdrop-filter: blur(calc(var(--clean-menu-blur) * .6)) saturate(120%);
+}
+
+html[data-theme="clean"][data-glass-panels="true"] :where(
+  [role="dialog"],
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"],
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+),
+html[data-theme="clean"][data-glass-panels="true"] :where(
+  [role="dialog"],
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"],
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) * {
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-text-stroke: .1px currentColor;
+  text-rendering: geometricPrecision;
+  text-shadow: var(--theme-glass-text-shadow) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="presentation"][data-source="command"] {
+  color: var(--theme-accent-primary) !important;
+  font-weight: 650 !important;
+  -webkit-text-stroke: .1px currentColor;
+  text-shadow: var(--theme-neon-text-shadow) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"] > span:first-child {
+  color: var(--theme-fg-primary) !important;
+  font-weight: 680 !important;
+  -webkit-text-stroke: .1px currentColor;
+  text-shadow: var(--theme-neon-text-shadow) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"][aria-selected="true"] > span:first-child {
+  color: color-mix(in srgb, var(--theme-accent-primary) 82%, var(--theme-fg-primary)) !important;
+}
+
+html[data-theme="clean"][data-glass-panels="true"]
+  [role="listbox"]:has([role="presentation"][data-source="command"])
+  [role="option"] > span:last-child {
+  color: var(--theme-fg-secondary) !important;
+  font-weight: 500 !important;
+  -webkit-text-stroke: .05px currentColor !important;
+  text-shadow: var(--theme-glass-muted-text-shadow) !important;
+}
+
+/* Popup marker rendering used by the disabled floating-surface observer. */
+[data-theme="clean"] [data-composer-card="true"]:has(
+  :is([data-tokens-floating-surface], [role="menu"], [role="listbox"], [role="dialog"])
+) {
+  overflow: visible;
+}
+
+html[data-theme="clean"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
+  border: 1px solid var(--clean-control-border) !important;
+  background: var(--theme-bg-surface-raised) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 18px 46px -20px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 1 !important;
+}
+
+html[data-theme="clean"] [data-tokens-floating-surface] :is([role="listbox"], [role="menu"]):not([data-tokens-floating-surface]) {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"] [class*="card"] :is([role="listbox"], [role="menu"]):not([data-tokens-floating-surface]) {
+  border: 0 !important;
+}
+
+html[data-theme="clean"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
+  transform-origin: top right;
+  animation: clean-menu-enter 150ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+html[data-theme="clean"] :is(
+  [data-tokens-floating-surface],
+  [role="listbox"],
+  [role="menu"]
+) {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

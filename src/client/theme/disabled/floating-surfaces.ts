@@ -1,3 +1,4 @@
+// Experimental glass popup classification; not registered by the active plugin.
 const SURFACE_ATTRIBUTE = "data-tokens-floating-surface";
 const ACTIVE_TRIGGER_SELECTOR =
   '[aria-haspopup]:not([aria-haspopup="false"])[aria-expanded="true"]';

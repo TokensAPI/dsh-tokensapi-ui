@@ -3,7 +3,7 @@ import {
   scoreFloatingSurface,
   supportsFloatingPopupType,
   type FloatingSurfaceFacts,
-} from "../src/client/theme/floating-surfaces.ts";
+} from "../src/client/theme/disabled/floating-surfaces.ts";
 
 const popup = (overrides: Partial<FloatingSurfaceFacts> = {}): FloatingSurfaceFacts => ({
   position: "absolute",
