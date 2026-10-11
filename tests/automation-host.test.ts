@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -111,5 +111,63 @@ describe("AutomationHost", () => {
     const created = await host.dispatch("create", { ...createInput, originSessionId: "chat-1" })
     expect(created.ok && created.value).toMatchObject({ originSessionId: "chat-1", delivery: { mode: "origin_chat" } })
     host.dispose()
+  })
+})
+
+
+describe("automation lifecycle recovery", () => {
+  it("does not arm when disposed during loading and rejects later requests", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "tokens-automation-dispose-")); dirs.push(dir)
+    const timer = vi.spyOn(globalThis, "setTimeout")
+    const host = new AutomationHost(success, { file: join(dir, "ledger.json"), pollIntervalMs: 1234 })
+    try {
+      const starting = host.start()
+      host.dispose()
+      await starting
+      expect(timer.mock.calls.filter((call) => call[1] === 1234)).toHaveLength(0)
+      expect(await host.dispatch("snapshot", {})).toMatchObject({ ok: false, error: { code: "disposed" } })
+    } finally { host.dispose(); timer.mockRestore() }
+  })
+
+  it("finishes an active scheduled run without rearming after disposal", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "tokens-automation-inflight-")); dirs.push(dir)
+    const file = join(dir, "ledger.json")
+    let now = new Date(2026, 7, 22, 8, 0, 0).getTime()
+    let release!: () => void
+    const execute = vi.fn(() => new Promise<{ status: "成功"; result: string }>((resolve) => {
+      release = () => resolve({ status: "成功", result: "finished after disposal" })
+    }))
+    const timer = vi.spyOn(globalThis, "setTimeout")
+    const host = new AutomationHost({ execute }, { file, now: () => now, pollIntervalMs: 5 })
+    try {
+      await host.start()
+      await host.dispatch("create", { ...createInput, time: "08:01" })
+      now += 61_000
+      await vi.waitFor(() => expect(execute).toHaveBeenCalledOnce())
+      host.dispose()
+      const count = timer.mock.calls.filter((call) => call[1] === 5).length
+      release()
+      await vi.waitFor(async () => expect(JSON.parse(await readFile(file, "utf8")).runs[0].status).toBe("成功"))
+      await new Promise<void>((resolve) => setImmediate(resolve))
+      expect(timer.mock.calls.filter((call) => call[1] === 5)).toHaveLength(count)
+    } finally { host.dispose(); release?.(); timer.mockRestore() }
+  })
+
+  it("recovers its write queue and busy state after an initial run commit fails", async () => {
+    const execute = vi.fn(success.execute)
+    const { host, file } = await harness({ execute })
+    try {
+      const created = await host.dispatch("create", createInput)
+      const id = created.ok ? (created.value as AutomationTask).id : ""
+      await rm(file)
+      await mkdir(file)
+      expect((await host.dispatch("run-now", { id })).ok).toBe(false)
+      expect(execute).not.toHaveBeenCalled()
+      await rm(file, { recursive: true })
+      expect(await host.dispatch("run-now", { id })).toMatchObject({ ok: true, value: { status: "成功" } })
+      expect(execute).toHaveBeenCalledOnce()
+      const ledger = JSON.parse(await readFile(file, "utf8"))
+      expect(ledger.runs.map((run: { status: string }) => run.status)).toEqual(["成功", "失败"])
+    } finally { host.dispose() }
   })
 })

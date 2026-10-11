@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import { readCss } from "../scripts/read-css.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { TokensBrandMark, TokensBrandName } from "../src/client/shell/BrandSlots.tsx";
@@ -15,7 +17,7 @@ describe("sidebar branding contract", () => {
   it("uses declared brand slots and never takes ownership of the native toggle", () => {
     const client = readFileSync(new URL("../src/client/index.tsx", import.meta.url), "utf8");
     const workspace = readFileSync(new URL("../src/client/shell/CapabilityWorkspace.tsx", import.meta.url), "utf8");
-    const chrome = readFileSync(new URL("../src/client/theme/chrome.css", import.meta.url), "utf8");
+    const chrome = readCss(fileURLToPath(new URL("../src/client/theme/chrome.css", import.meta.url)));
     const bridge = readFileSync(new URL("../src/client/theme/dsh-bridge.css", import.meta.url), "utf8");
 
     expect(client).toContain('ctx.slots.inject("sidebar.brand.mark"');

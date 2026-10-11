@@ -517,7 +517,7 @@ export function apply(ctx: Context): void {
       () => connection.rpc.handle("/tokens-skills", dispatchSkills, { authority: "trusted-host" }),
       "tokens-core: skills rpc channel",
     )
-    const automation = new AutomationHost(new DshAutomationExecutor(scoped), {}, new DshAutomationDelivery(scoped))
+    const automation = new AutomationHost(new DshAutomationExecutor(scoped), { onError: (error) => scoped.logger.error(`tokens automation tick failed: ${String(error)}`) }, new DshAutomationDelivery(scoped))
     void automation.start().catch((error) => scoped.logger.error(`tokens automation failed to start: ${String(error)}`))
     scoped.effect(
       () => connection.rpc.handle("/tokens-automation", (endpoint, payload) => automation.dispatch(endpoint, payload), { authority: "trusted-host" }),

@@ -1,0 +1,87 @@
+/* Dialogs and selection surfaces always use opaque fills. */
+html[data-theme="clean"] [role="dialog"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--theme-bg-surface-raised) !important;
+}
+
+html[data-theme="clean"] :is(
+  [role="listbox"],
+  [role="menu"]
+) {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"] [role="dialog"]
+  div:has(> div > :is(input[placeholder="搜索模型"], input[placeholder="Search models"]))
+  > button[aria-expanded],
+html[data-theme="clean"] [role="dialog"]
+  div:has(> :is(input[placeholder="搜索模型"], input[placeholder="Search models"])),
+html[data-theme="clean"] [role="dialog"]
+  button[class*="_showHiddenToggle"][aria-pressed] {
+  background: var(--theme-bg-surface-raised) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Context-meter popovers are non-modal. Keep modal settings geometry host-owned. */
+html[data-theme="clean"] [role="dialog"][class*="_panel"]:not([aria-modal="true"]) {
+  /* Preserve the host popover anchor. */
+  position: absolute !important;
+  isolation: auto !important;
+  border: 1px solid var(--clean-control-border) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    0 18px 46px -20px var(--clean-control-shadow) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Opaque fill per appearance. */
+html[data-theme="clean"][data-color-scheme="light"] [role="dialog"][class*="_panel"]:not([aria-modal="true"]) {
+  background: #ffffff !important;
+}
+html[data-theme="clean"]:not([data-color-scheme="light"]) [role="dialog"][class*="_panel"]:not([aria-modal="true"]) {
+  background: #252d29 !important;
+}
+
+/* DSH's appearance cubes use a fixed neutral-grey selected border instead of
+ * an alias token. Restore a clear tenant selection signal without depending
+ * on the component's generated class name. */
+[role="dialog"] button[aria-pressed="true"] {
+  color: var(--theme-accent-primary) !important;
+  background: var(--theme-accent-soft) !important;
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 28%, transparent),
+    0 8px 24px -18px var(--theme-accent-glow) !important;
+}
+
+/* Agent preset cards put the actual selected border on the parent list item,
+ * while aria-pressed lives on the card-body button. Theme that outer shell as
+ * well so the active preset does not retain DSH's fixed white outline. */
+html[data-theme="clean"] [role="dialog"] li:has(> button[aria-pressed]) {
+  border-color: var(--theme-border-default) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 38%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 46%, transparent);
+}
+
+html[data-theme="clean"] [role="dialog"]
+  li:has(> button[aria-pressed="false"]):hover {
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 34%, var(--theme-border-default)) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 52%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 62%, transparent),
+    0 14px 34px -28px var(--theme-accent-glow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] li:has(> button[aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 56%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 52%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 70%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 14%, transparent),
+    0 16px 38px -28px var(--theme-accent-glow) !important;
+}

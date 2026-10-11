@@ -1,14 +1,5 @@
-// Persistent capability shell rendered into the `shell.overlay` slot. One
-// stable click-through root owns two absolutely positioned surfaces:
-//   - a full-width top nav band, ALWAYS visible. Its left "brand seat" tracks the
-//     live sidebar column width (border aligned to the sidebar edge) so the band
-//     stays seamless whether the sidebar is expanded or collapsed.
-//   - a capability page that covers the main content area (offset by the sidebar
-//     width) only while a capability is selected; otherwise the DSH conversation
-//     shows through.
-// 联合品牌: the client brand (粒刻/ELECTRO X) is dominant top-left; the platform
-// (tokensapi) is a small "powered by" mark. The reserved top strip comes from the
-// injected frame padding (theme/reskin.css).
+// Capability shell in shell.overlay. The partner theme mounts the product bar;
+// clean keeps host geometry. Capability pages cover the main content on demand.
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import clsx from "clsx";
 import { useActiveCapability, workspace } from "./workspace-store.ts";
@@ -56,8 +47,16 @@ class CapabilityViewBoundary extends Component<CapabilityViewBoundaryProps, Capa
   }
 }
 
-export function setCapabilityWorkspaceLayout(layout: ILayout): void {
+let runtimeOwner: symbol | undefined;
+export function setCapabilityWorkspaceLayout(layout: ILayout): () => void {
+  const owner = Symbol();
+  runtimeOwner = owner;
   layoutRuntime = layout;
+  return () => {
+    if (runtimeOwner !== owner) return;
+    layoutRuntime = null;
+    runtimeOwner = undefined;
+  };
 }
 
 /** Measure the sidebar column width from the enclosing frame's grid tracks. */

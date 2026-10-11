@@ -33,8 +33,16 @@ interface SkillsRuntime {
 let runtime: SkillsRuntime | null = null;
 
 /** Capture the connection + sessions services at plugin apply. */
-export function setSkillsRuntime(next: SkillsRuntime): void {
+let runtimeOwner: symbol | undefined;
+export function setSkillsRuntime(next: SkillsRuntime): () => void {
+  const owner = Symbol();
+  runtimeOwner = owner;
   runtime = next;
+  return () => {
+    if (runtimeOwner !== owner) return;
+    runtime = null;
+    runtimeOwner = undefined;
+  };
 }
 
 /** Subscribe to the current (selected) session id; null when no session is open. */

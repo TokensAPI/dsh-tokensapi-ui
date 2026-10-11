@@ -36,7 +36,7 @@ export function AutomationModule(): React.JSX.Element {
     let active = true;
     const refresh = async (): Promise<void> => {
       try {
-        const snapshot = await automationCall<AutomationSnapshot>("snapshot");
+        const snapshot = await automationCall("snapshot");
         if (active) { setStore(snapshot); setError(null); }
       } catch (reason) {
         if (active) setError(reason instanceof Error ? reason.message : String(reason));
@@ -47,7 +47,7 @@ export function AutomationModule(): React.JSX.Element {
     return () => { active = false; window.clearInterval(timer); };
   }, []);
 
-  const refresh = async (): Promise<void> => setStore(await automationCall<AutomationSnapshot>("snapshot"));
+  const refresh = async (): Promise<void> => setStore(await automationCall("snapshot"));
 
   const openCreate = (): void => {
     setDraft(EMPTY_DRAFT);
@@ -56,7 +56,7 @@ export function AutomationModule(): React.JSX.Element {
 
   const saveTask = async (next: Draft): Promise<void> => {
     try {
-      const task = await automationCall<AutomationTask>("create", next);
+      const task = await automationCall("create", next);
       await refresh(); setPage("list"); setView("tasks"); setError(null);
       setNotice(`“${task.name}”已保存并交由 Host 调度。`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }

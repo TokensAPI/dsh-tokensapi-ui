@@ -10,6 +10,7 @@
 // (resolved from the loader's runtime require table) and `*.module.css` is
 // compiled with lightningcss into a class map + an auto-injected <style> tag.
 import { existsSync, readFileSync } from 'node:fs'
+import { readCss } from './scripts/read-css.mjs'
 import { createRequire } from 'node:module'
 import { basename, dirname, resolve as resolvePath } from 'node:path'
 import { transform } from 'lightningcss'
@@ -92,7 +93,7 @@ const rawCssPlugin = {
     if (!id.startsWith(RAW_CSS_PREFIX)) return null
     const file = id.slice(RAW_CSS_PREFIX.length, -RAW_CSS_SUFFIX.length)
     this.addWatchFile(file)
-    let css = existsSync(file) ? readFileSync(file, 'utf8') : ''
+    let css = readCss(file, (input: string) => this.addWatchFile(input))
     if (css.includes('@fontsource-variable') && css !== '') {
       css = css.replace(/url\((['"]?)(@fontsource-variable\/[^'")]+)\1\)/g, (_match, _quote, assetSpecifier: string) => {
         const assetPath = require.resolve(assetSpecifier)

@@ -1,6 +1,6 @@
 {
   "name": "dsh-tokensapi-ui",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "TokensAPI UI plugin for DeepSeek Harness — themeable skins + skills",
   "license": "MIT",
   "type": "module",
@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "sync:local": "node scripts/sync-local-override.mjs",
+    "doctor:local": "node scripts/doctor-local.mjs",
     "dev:local": "pnpm build && pnpm sync:local"
   },
   "dsh": {

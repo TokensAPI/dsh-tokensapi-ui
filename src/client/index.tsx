@@ -1,10 +1,5 @@
-// tokens-core browser half. Ordinary DSH web-client plugin (loads under `dsh
-// web`, not Desktop-only). Reshapes the DSH web UI in place:
-//   - re-skins the whole app to the ELECTRO X look by overriding DSH's --dsw-*
-//     tokens (theme/reskin.css)
-//   - adds a persistent top capability nav + full-page capability views via the
-//     `shell.overlay` slot (DSH exposes no frame-level nav slot; the nav band
-//     rides a reserved top strip, the pages cover the main content area)
+// DSH web/Desktop client: skin injection, host adapters and capability slots.
+// Clean uses host geometry; the partner shell reserves space only while mounted.
 import type { ClientContext, ISessions } from "@deepseek-ai/dsh-client-runtime/client";
 import type { ConnectionHandle } from "@deepseek-ai/dsh-api-remotes/client";
 // Type-only slot-map merge for shell.overlay.
@@ -38,7 +33,7 @@ export interface TokensWorkspaceApi {
 }
 
 export function apply(ctx: ClientContext): void {
-  setCapabilityWorkspaceLayout(ctx.get("layout") as ILayout);
+  ctx.effect(() => setCapabilityWorkspaceLayout(ctx.get("layout") as ILayout), "tokens-core: layout runtime");
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
   ctx.effect(() => observeFocusModality(), "tokens-core: dialog trigger focus");
@@ -84,16 +79,16 @@ export function apply(ctx: ClientContext): void {
   // Hand the skills module its data plane: the root-context connection (for the
   // official skill.list RPC) + the sessions feed (current session id). Captured
   // once here so module components never read services off a per-call argument.
-  setSkillsRuntime({
+  ctx.effect(() => setSkillsRuntime({
     connection: ctx.get("connection") as ConnectionHandle,
     remoteSkills: (ctx as unknown as { remote: { skills: SkillsRemote } }).remote.skills,
     sessions: ctx.get("sessions") as unknown as ISessions,
-  });
-  setAutomationRuntime(ctx.get("connection") as ConnectionHandle);
+  }), "tokens-core: skills runtime");
+  ctx.effect(() => setAutomationRuntime(ctx.get("connection") as ConnectionHandle), "tokens-core: automation runtime");
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.
-  registerBuiltinCapabilities();
+  ctx.effect(() => registerBuiltinCapabilities(), "tokens-core: built-in capabilities");
   const api: TokensWorkspaceApi = { registerCapability, listCapabilities };
   (ctx as { provide?: (key: string, value: unknown) => void }).provide?.("tokensWorkspace", api);
 

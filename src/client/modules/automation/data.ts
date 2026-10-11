@@ -1,24 +1,24 @@
 import type { ConnectionHandle } from "@deepseek-ai/dsh-api-remotes/client";
 
-export interface AutomationTask {
-  id: string; name: string; description: string; frequency: "仅一次" | "每天" | "每周" | "每月";
-  time: string; agent: string; skill: string; enabled: boolean; createdAt: string; updatedAt: string; nextRunAt?: string; originSessionId?: string;
-  delivery: { mode: "origin_chat" | "new_chat" | "inbox" | "silent"; desktopNotification: boolean; notifyOnSuccess: boolean; notifyOnFailure: boolean };
-}
-export interface AutomationRun {
-  id: string; taskId: string; taskName: string; ranAt: string; status: "运行中" | "成功" | "失败";
-  result: string; trigger: "schedule" | "manual";
-  executionStatus: "running" | "succeeded" | "failed"; deliveryStatus: "pending" | "delivered" | "failed" | "skipped";
-  deliveredSessionId?: string; deliveredMessageId?: string; deliveryError?: string;
-}
-export interface AutomationSnapshot { version: 1; revision: number; tasks: AutomationTask[]; runs: AutomationRun[] }
+import type { AutomationResponses } from "../../../shared/automation-contract.ts";
+export type { AutomationTask, AutomationRun, AutomationSnapshot } from "../../../shared/automation-contract.ts";
 
 let connection: ConnectionHandle | null = null;
-export function setAutomationRuntime(next: ConnectionHandle): void { connection = next; }
+let runtimeOwner: symbol | undefined;
+export function setAutomationRuntime(next: ConnectionHandle): () => void {
+  const owner = Symbol();
+  runtimeOwner = owner;
+  connection = next;
+  return () => {
+    if (runtimeOwner !== owner) return;
+    connection = null;
+    runtimeOwner = undefined;
+  };
+}
 
-export async function automationCall<T>(endpoint: string, payload: unknown = {}): Promise<T> {
+export async function automationCall<E extends keyof AutomationResponses>(endpoint: E, payload: unknown = {}): Promise<AutomationResponses[E]> {
   if (connection === null) throw new Error("connection-unavailable");
   const result = await connection.rpc.call("/tokens-automation", endpoint, payload);
   if (!result.ok) throw new Error(result.error.message);
-  return result.value as T;
+  return result.value as AutomationResponses[E];
 }

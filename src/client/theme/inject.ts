@@ -1,10 +1,10 @@
-// Decoupled skin theming. This package ships MULTIPLE skins; electrox is just
+// Decoupled skin theming. This package ships MULTIPLE skins; clean is
 // the default — new skins get added here, not baked into components. Layers, in
 // cascade order:
 //   1. theme-contract.css   platform-owned --theme-* contract + recipe classes
 //   2. themes/<id>.css       EVERY registered skin, each scoped to [data-theme=<id>]
 //   3. dsh-bridge.css        maps DSH's --dsw-* onto --theme-* (re-skins DSH)
-//   4. chrome.css            structural DSH adjustments (no colors)
+//   4. chrome.css            ordered host adapters (including theme-specific paint)
 // All skins are injected once; the active skin is a single `data-theme="<id>"`
 // on <html>, so SWITCHING a skin is just an attribute swap — no re-injection.
 // Add a skin: create themes/<id>.css (`[data-theme="<id>"] { --theme-*: … }`) and

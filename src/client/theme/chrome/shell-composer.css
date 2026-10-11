@@ -1,0 +1,258 @@
+/* Structural DSH adjustments — tenant-agnostic (colors, when needed, come only
+ * from --theme-* tokens, never literals — so this stays tenant-neutral). These
+ * reshape the DSH shell to host our brand band and capability nav, strip upstream
+ * branding, and fix a couple of DSH surfaces the token bridge alone can't reach. */
+
+/* Partner mode owns branding in the global product bar. Keep DSH's native
+ * sidebar header and toggle lifecycle, but suppress its redundant wide brand
+ * shortcut. Only that sibling button is hidden; the row and native collapse
+ * control remain mounted and interactive. */
+[data-theme="electrox"] :is(div):has(> button[aria-label="收起侧边栏"], > button[aria-label="Collapse sidebar"]):has(> button:not([aria-label="收起侧边栏"]):not([aria-label="Collapse sidebar"])) > button {
+  display: none !important;
+}
+
+/* Once the redundant wide brand shortcut is gone, collapse its 60px host row
+ * and lift the still-native toggle into the product bar. The row remains the
+ * positioning anchor, so no node is reparented and DSH keeps full ownership of
+ * state, animation and click handling. */
+[data-theme="electrox"] :is(div):has(> button[aria-label="收起侧边栏"], > button[aria-label="Collapse sidebar"]):has(> button:not([aria-label="收起侧边栏"]):not([aria-label="Collapse sidebar"])) {
+  position: relative;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+/* In the partner rail the product mark is already directly above in the
+ * global bar, so the first rail control should communicate its action at rest
+ * instead of repeating the logo. DSH still owns the button and click handler. */
+[data-theme="electrox"] button:is([aria-label="打开侧边栏"], [aria-label="Open sidebar"]) > span {
+  display: none !important;
+}
+[data-theme="electrox"] button:is([aria-label="打开侧边栏"], [aria-label="Open sidebar"]) > svg {
+  display: inline !important;
+}
+
+/* Community marketplace is shipped by Desktop and uses the generic DSH
+ * Button/Pill primitives rather than our theme recipe classes. Adapt that
+ * explicit host surface to the same industrial control language. */
+[data-theme="electrox"] .dshMarketViewSwitch button,
+[data-theme="electrox"] .dshMarketCurrentSource {
+  box-sizing: border-box;
+  border: var(--theme-border-width) solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+[data-theme="electrox"] .dshMarketViewSwitch button[aria-pressed="true"] {
+  color: var(--theme-accent-primary) !important;
+  background: var(--theme-accent-soft) !important;
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="electrox"] .dshMarketEmpty > button,
+[data-theme="electrox"] .dshMarketToolbar > button[type="submit"] {
+  color: var(--theme-fg-on-accent) !important;
+  background: var(--theme-accent-fill) !important;
+  border: var(--theme-border-width) solid var(--theme-accent-fill) !important;
+  border-radius: 0 !important;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  box-shadow: none !important;
+}
+
+[data-theme="electrox"] .dshMarketEmpty > button :is(span, svg),
+[data-theme="electrox"] .dshMarketToolbar > button[type="submit"] :is(span, svg) {
+  color: var(--theme-fg-on-accent) !important;
+}
+
+[data-theme="electrox"] .dshMarketEmpty > button:hover:not(:disabled),
+[data-theme="electrox"] .dshMarketToolbar > button[type="submit"]:hover:not(:disabled) {
+  background: var(--theme-accent-fill-hover) !important;
+  border-color: var(--theme-accent-fill-hover) !important;
+  filter: brightness(1.04);
+}
+
+/* Reserve the top strip for our persistent brand + capability nav band. The
+ * frame is the element that directly contains the shell.overlay layer; :has
+ * selects it without a hashed class. Requiring our live workspace marker is
+ * important: a slot mount node can survive a React render failure, and must not
+ * reserve an empty strip after the product bar itself has disappeared.
+ * border-box keeps the padding inside 100vh. Must match the topbar height. */
+html[data-theme="electrox"] :where(div):has(> [data-shell-overlay] [data-tokens-workspace="true"]) {
+  box-sizing: border-box;
+  padding-top: 72px;
+}
+
+/* Advanced Desktop already owns a native Windows/macOS caption row. Replace
+ * that row with the 72px product bar only while the product bar is mounted.
+ * Otherwise retain the host's native row and avoid a blank reserved strip. */
+html[data-theme="electrox"] body[data-dsh-desktop-mode="advanced"]
+  .dshDesktopFrame:has(> [data-shell-overlay] [data-tokens-workspace="true"]) {
+  padding-top: 0 !important;
+  grid-template-rows: 72px minmax(0, 1fr) !important;
+}
+
+/* The advanced sidebar deliberately spans both grid rows. Its product brand
+ * seat lives in the overlay topbar, so keep the upstream sidebar content below
+ * that seat without reintroducing padding on the conversation/details frame. */
+html[data-theme="electrox"] body[data-dsh-desktop-mode="advanced"]
+  .dshDesktopFrame:has(> [data-shell-overlay] [data-tokens-workspace="true"]) .dshDesktopUpstreamSidebar {
+  box-sizing: border-box;
+  padding-top: 72px !important;
+}
+
+/* New-chat ("hero" / empty) surface: match the capability pages by sharing their
+ * electrox grid texture over the canvas — one background language across chat and
+ * module pages. Active conversations intentionally remain a calm solid canvas. */
+[data-theme="electrox"] [data-phase="hero"] {
+  background-color: var(--theme-bg-canvas);
+  background-image:
+    linear-gradient(var(--theme-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--theme-grid-color) 1px, transparent 1px);
+  background-size:
+    var(--theme-grid-size, 32px) var(--theme-grid-size, 32px),
+    var(--theme-grid-size, 32px) var(--theme-grid-size, 32px);
+}
+
+/* Recolour DSH's hero "empty-glow" from DeepSeek blue (#6187D8) to the tenant
+ * accent, so the new-chat glow reads as brand light instead of a grey-blue halo.
+ * Targeted via the stable empty-glow filter id (the SVG's class is hashed). */
+[data-theme="electrox"] svg:has(filter[id^="empty-glow"]) ellipse {
+  fill: var(--theme-accent-primary) !important;
+}
+
+/* Composer card: square it and reuse the tenant card border, so the input box
+ * reads like the capability pages' cards (skills etc.) instead of DSH's 22px
+ * pill. data-composer-card is DSH's stable hook. */
+[data-composer-card="true"] {
+  border-radius: var(--theme-radius-card, 0px) !important;
+  border: var(--theme-border-width, 1px) solid var(--theme-border-default) !important;
+}
+
+/* No-workspace is already represented by DSH's dashed ::after stroke. Its
+ * textarea becomes a readonly menu trigger, which is a stable semantic hook;
+ * keep our normal card border transparent in that state so the two strokes do
+ * not stack. */
+[data-composer-card="true"]:has(textarea[aria-haspopup="menu"][readonly]) {
+  border-color: transparent !important;
+}
+
+/* Send button (composer submit). The accent fill is light, so DSH's white arrow
+ * has poor contrast → recolor the glyph to the on-accent foreground. And keep the
+ * disabled (empty composer) state legibly green instead of DSH's 40% dim, which
+ * reads as grey on the new-chat page. */
+button[aria-label="发送消息"] svg {
+  color: var(--theme-fg-on-accent) !important;
+}
+button[aria-label="发送消息"] svg :is(path, polygon, polyline) {
+  fill: var(--theme-fg-on-accent) !important;
+}
+button[aria-label="发送消息"]:disabled {
+  opacity: 0.85 !important;
+}
+
+/* Desktop owns the native sidebar material (macOS vibrancy / Windows Mica).
+ * The theme only tints that material. Never put a backdrop filter on this
+ * layout ancestor: the upstream settings dialog lives inside the sidebar and
+ * relies on position: fixed remaining relative to the window viewport. */
+body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
+  --dsw-specific-sidebar-fill: var(--theme-bg-shell) !important;
+  background: var(--theme-bg-shell) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Do not alter Desktop's grid rows, sidebar inset, overflow or modal geometry.
+ * Once this ancestor no longer creates a backdrop-filter containing block,
+ * Desktop's own fixed overlay keeps its native viewport layout and hit-test
+ * coordinates on Windows and macOS. */
+
+[data-theme="clean"] body[data-dsh-desktop-mode="advanced"] .dshDesktopSidebarSurface {
+  border-right: 1px solid var(--theme-border-subtle);
+  box-shadow:
+    inset -1px 0 0 color-mix(in srgb, var(--theme-surface-highlight) 30%, transparent),
+    14px 0 40px -34px var(--theme-surface-shadow) !important;
+}
+
+[data-theme="clean"] [data-composer-card="true"] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+/* Composer menus are anchored inside the card and may open upward. Keep the
+ * card clipped at rest for its paint layer, then release that clip for
+ * semantic host popups. The semantic fallback
+ * covers both selection controls and the context meter's click-open dialog. */
+[data-theme="clean"] [data-composer-card="true"]:has(
+  :is([role="menu"], [role="listbox"], [role="dialog"])
+) {
+  overflow: visible;
+}
+
+[data-theme="clean"] [data-composer-card="true"]:focus-within {
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 42%, var(--theme-border-default)) !important;
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-highlight),
+    0 0 0 3px color-mix(in srgb, var(--theme-accent-primary) 9%, transparent),
+    0 22px 56px -32px var(--theme-accent-glow) !important;
+  transform: translateY(-1px);
+}
+
+[data-theme="clean"] [data-composer-card="true"] textarea::placeholder {
+  color: color-mix(in srgb, var(--theme-fg-muted) 82%, transparent) !important;
+}
+[data-theme="clean"] [data-composer-card="true"] > div {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* A controlled ambient canvas for the basic theme. */
+html[data-theme="clean"][data-color-scheme="light"],
+html[data-theme="clean"][data-color-scheme="light"] body {
+  background:
+    radial-gradient(circle at 12% 8%, rgb(105 224 166 / 22%), transparent 34%),
+    radial-gradient(circle at 88% 18%, rgb(112 190 220 / 16%), transparent 31%),
+    radial-gradient(circle at 58% 96%, rgb(169 142 235 / 12%), transparent 38%),
+    linear-gradient(135deg, #edf7f2 0%, #f7faf9 46%, #edf5f7 100%) !important;
+}
+
+html[data-theme="clean"]:not([data-color-scheme="light"]),
+html[data-theme="clean"]:not([data-color-scheme="light"]) body {
+  background:
+    radial-gradient(circle at 14% 4%, rgb(53 153 108 / 9%), transparent 34%),
+    radial-gradient(circle at 92% 16%, rgb(50 117 142 / 7%), transparent 30%),
+    radial-gradient(circle at 62% 102%, rgb(104 74 148 / 6%), transparent 38%),
+    linear-gradient(145deg, #111412 0%, #171b19 48%, #111614 100%) !important;
+}
+
+html[data-theme="clean"][data-color-scheme="light"] body[data-dsh-desktop-mode="advanced"] .dshDesktopFrame {
+  background: transparent !important;
+}
+
+html[data-theme="clean"] :is(
+  .dshDesktopSidebarSurface,
+  [data-composer-card="true"],
+  [role="dialog"]
+) {
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-highlight),
+    0 16px 42px -28px var(--theme-surface-shadow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] {
+  border: 1px solid var(--theme-border-subtle) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-highlight),
+    0 1px 0 color-mix(in srgb, var(--theme-border-strong) 30%, transparent),
+    0 30px 90px -38px var(--theme-surface-shadow) !important;
+}
+

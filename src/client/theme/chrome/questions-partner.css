@@ -1,0 +1,437 @@
+/* Partner mode keeps ELECTRO X's square industrial language, but question
+ * cards still need the same semantic hierarchy and wrapping guarantees as the
+ * basic theme. Generated module classes are deliberately excluded. */
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--theme-fg-primary) !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  background: var(--theme-bg-surface) !important;
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, var(--theme-accent-primary) 68%, transparent),
+    0 22px 58px -40px rgb(0 0 0 / 86%) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"]::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, var(--theme-accent-primary), transparent 56%);
+  opacity: 0.78;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header {
+  position: relative;
+  display: block;
+  --tokens-question-actions-top: 17px;
+  --tokens-question-actions-right: 18px;
+  --tokens-question-actions-clearance: 74px;
+  --tokens-question-title-clearance: 38px;
+  padding: 17px 18px 14px !important;
+  border-bottom: 1px solid var(--theme-border-subtle);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--theme-accent-primary) 5%, transparent), transparent 42%),
+    var(--theme-bg-shell);
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header > div:first-child {
+  width: 100%;
+  min-width: 0;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header h2 {
+  margin: 7px 0 0 !important;
+  color: var(--theme-fg-primary) !important;
+  font-size: 17px !important;
+  font-weight: 680 !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header div:has(+ h2) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 7px;
+  color: var(--theme-accent-primary) !important;
+  border-left: 2px solid var(--theme-accent-primary);
+  background: var(--theme-accent-soft);
+  font-family: var(--theme-font-mono);
+  font-size: 11px !important;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0.055em;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header button[aria-label] {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  color: var(--theme-fg-secondary) !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  background: var(--theme-bg-canvas) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header button[aria-label]:hover:not(:disabled) {
+  color: var(--theme-accent-primary) !important;
+  border-color: var(--theme-border-strong) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] {
+  padding: 13px 14px 15px !important;
+  background: var(--theme-bg-canvas);
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] {
+  display: grid;
+  gap: 8px;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding: 10px 11px !important;
+  overflow: visible !important;
+  color: var(--theme-fg-primary) !important;
+  text-align: left;
+  white-space: normal !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 72%, var(--theme-bg-surface)) !important;
+  box-shadow: none !important;
+  transition:
+    color 130ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 170ms ease,
+    transform 170ms ease;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"]:hover {
+  border-color: var(--theme-border-strong) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 88%, var(--theme-accent-soft)) !important;
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--theme-accent-primary) 48%, transparent) !important;
+  transform: translateX(1px);
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"][aria-checked="true"] {
+  border-color: var(--theme-accent-primary) !important;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--theme-accent-primary) 12%, transparent), transparent 58%),
+    var(--theme-bg-surface-raised) !important;
+  box-shadow:
+    inset 3px 0 0 var(--theme-accent-primary),
+    0 0 24px -16px var(--theme-accent-glow) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:first-child,
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > div:has(> input[type="text"]) > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  color: var(--theme-fg-secondary) !important;
+  border: 1px solid var(--theme-border-strong);
+  border-radius: 0 !important;
+  background: var(--theme-bg-canvas) !important;
+  font-family: var(--theme-font-mono);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"][aria-checked="true"] > span:first-child {
+  color: var(--theme-accent-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 58%, var(--theme-border-strong)) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) {
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) > span {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  column-gap: 8px;
+  row-gap: 4px;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) > span > span:first-child {
+  color: var(--theme-fg-primary) !important;
+  font-size: 14px !important;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) > span:has(> span:nth-child(3)) > span:nth-child(2) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  padding: 0 6px;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 34%, transparent);
+  border-radius: 0 !important;
+  background: var(--theme-accent-soft) !important;
+  font-family: var(--theme-font-mono);
+  font-size: 10px !important;
+  font-weight: 750;
+  line-height: 1;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > button[role="radio"] > span:nth-child(2) > span > span:last-child:not(:first-child) {
+  display: block !important;
+  flex-basis: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible !important;
+  color: var(--theme-fg-secondary) !important;
+  font-size: 13px !important;
+  line-height: 1.58 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  text-overflow: clip !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > div:has(> input[type="text"]) {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 7px 9px !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  background: var(--theme-bg-surface) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] > div:has(> input[type="text"]):focus-within {
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow:
+    inset 3px 0 0 var(--theme-accent-primary),
+    0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 16%, transparent) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] input[type="text"] {
+  min-width: 0;
+  width: 100%;
+  height: 31px;
+  padding: 0 !important;
+  color: var(--theme-fg-primary) !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [role="radiogroup"] input[type="text"]::placeholder {
+  color: var(--theme-fg-muted) !important;
+}
+
+/* Free-response textarea — same single-border collapse as clean, but in the
+ * square industrial language with the accent edge-bar focus cue. */
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 92px;
+  padding: 10px 11px !important;
+  color: var(--theme-fg-primary) !important;
+  border: 1px solid var(--theme-border-default) !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: var(--theme-bg-surface) !important;
+  box-shadow: none !important;
+  resize: vertical;
+  transition:
+    border-color 150ms ease,
+    box-shadow 170ms ease;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea:is(:focus, :focus-visible) {
+  border-color: var(--theme-accent-primary) !important;
+  box-shadow:
+    inset 3px 0 0 var(--theme-accent-primary),
+    0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 16%, transparent) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] textarea::placeholder {
+  color: var(--theme-fg-muted) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] div:has(> textarea) {
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Custom-answer edit/checkbox chip — accent-tinted square to match electrox. */
+html[data-theme="electrox"] [data-question-key] [class*="customRow"] > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
+  width: 26px !important;
+  height: 26px !important;
+  margin-top: 5px !important;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 58%, var(--theme-border-strong)) !important;
+  border-radius: 0 !important;
+  background: var(--theme-accent-soft) !important;
+  box-shadow: none !important;
+}
+
+/* "Recommended" badge — compact accent tag, reset the accidental full-width. */
+html[data-theme="electrox"] [data-question-key] [class*="badge"] {
+  flex: 0 0 auto !important;
+  align-self: center;
+  display: inline-flex !important;
+  align-items: center;
+  width: auto !important;
+  min-height: 19px;
+  padding: 0 6px !important;
+  color: var(--theme-accent-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-accent-primary) 34%, transparent) !important;
+  border-radius: 0 !important;
+  background: var(--theme-accent-soft) !important;
+  font-family: var(--theme-font-mono);
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1 !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 11px 14px !important;
+  border-top: 1px solid var(--theme-border-default);
+  background: var(--theme-bg-shell);
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--theme-fg-secondary) !important;
+  font-family: var(--theme-font-mono);
+  font-size: 12px;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer button[aria-label] {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  color: var(--theme-fg-muted) !important;
+  border: 1px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer button[aria-label]:hover:not(:disabled) {
+  color: var(--theme-accent-primary) !important;
+  border-color: var(--theme-border-strong) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer button[aria-label]:disabled {
+  opacity: 0.32;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button {
+  min-height: 36px;
+  padding-inline: 14px !important;
+  border-radius: 0 !important;
+  font-weight: 650;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button:first-child {
+  color: var(--theme-fg-primary) !important;
+  border-color: var(--theme-border-strong) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button:first-child:hover:not(:disabled) {
+  color: var(--theme-accent-primary) !important;
+  border-color: var(--theme-accent-primary) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button:last-child {
+  color: var(--theme-fg-on-accent) !important;
+  border-color: var(--theme-accent-fill) !important;
+  background: var(--theme-accent-fill) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button:last-child:hover:not(:disabled) {
+  border-color: var(--theme-accent-fill-hover) !important;
+  background: var(--theme-accent-fill-hover) !important;
+  box-shadow: var(--theme-shadow-button-hover) !important;
+}
+
+html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:last-child > button:last-child:disabled {
+  color: color-mix(in srgb, var(--theme-fg-on-accent) 64%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-fill) 28%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-accent-fill) 28%, transparent) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 700px) {
+  html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > header {
+    --tokens-question-actions-right: 14px;
+    padding-inline: 14px !important;
+  }
+
+  html[data-theme="electrox"] [data-question-key] [data-question-scroll="true"] {
+    padding-inline: 10px !important;
+  }
+
+  html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer {
+    grid-template-columns: 1fr auto;
+  }
+
+  html[data-theme="electrox"] [data-question-key] > section[aria-labelledby^="question-"] > footer > div:nth-child(2) {
+    display: none;
+  }
+}
+

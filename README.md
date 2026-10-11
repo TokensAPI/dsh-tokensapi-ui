@@ -1,4 +1,4 @@
-# dsh-tokensapi-ui (`tokens-core`)
+# dsh-tokensapi-ui
 
 TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供两套产品主题：
 
@@ -15,21 +15,38 @@ TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供两�
 为玻璃样式识别浮层的动态 DOM 监控也保留在该目录的 `floating-surfaces.ts`，当前不注册。
 
 普通 DSH（cordis）插件，host + client 两半，随 `dsh web` 与 Desktop 一同加载。
-npm 包名固定为 `tokens-core`（loader 按此名解析），GitHub 仓库名为 `dsh-tokensapi-ui`。
+包名和注册名均为 `dsh-tokensapi-ui`。本机 Desktop 覆盖包使用独立别名
+`dsh-tokensapi-ui-local`，host 与 client 必须使用相同别名。
 
 ## 开发
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
+pnpm test
 pnpm build       # tsdown → lib/index.js (host) + lib/client.js (client)
 pnpm typecheck
 pnpm watch       # 改 src 自动重建
 ```
 
-在 TokensHarness 主项目里，`plugins/tokens-core` 以 submodule 指向本仓库；
-主项目的 `scripts/dev.sh` 驱动 dev web / 同步到桌面 `.build` 预览。
+产品源码以本仓库为准，不要修改 TokensHarness 中的只读副本。
+`pnpm build` / `pnpm watch` 只更新 `lib/`，不会更新客户端使用的覆盖包。
+
+```bash
+pnpm dev:local      # 构建并同步 dist/local-profile-override，保留旧 lib 备份
+pnpm doctor:local   # 只读检查 profile 的解析路径、别名、exports 和产物哈希
+```
+
+本机 profile 需已安装并启用 `dsh-tokensapi-ui-local`，关闭内置同名产品插件；
+同步脚本不会替你修改 profile。默认检查 `~/.dsh/profiles/desktop`，其他 profile
+可运行 `pnpm doctor:local -- <profile目录>`。同步后退出并重新打开 Desktop。
+诊断证明磁盘加载链路一致，不能证明正在运行的进程已经重新加载。
+
+样式职责、拆分等价性证明和实机验收范围见 [架构与验证约定](docs/architecture.md)。
 
 ## 发布（GitHub Releases 交付）
+
+发布前在本地运行 `pnpm test`、`pnpm typecheck`、`pnpm build` 和 `git diff --check`。
+CI 保持仅构建和打包，以缩短发布耗时。
 
 打一个与 `package.json` `version` 匹配的 `v*` 标签即触发 `.github/workflows/release.yml`：
 
@@ -52,7 +69,7 @@ CI 会：`pnpm build` → `node scripts/make-release.mjs` 打出
   "tarballSha256": "…",   // 下载完整性校验
   "clientSha256": "…",    // lib/client.js 哈希
   "hostSha256": "…",      // lib/index.js 哈希：与本地不同 → 需重启；相同 → 客户端静默热更
-  "minHarness": "0.1.0-rc.6",
+  "minHarness": "0.1.1-rc.2",
   "yanked": false,        // 急停开关
   "publishedAt": "…"
 }

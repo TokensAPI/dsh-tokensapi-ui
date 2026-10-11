@@ -35,9 +35,11 @@ function emit(): void {
 
 /** Register (or replace, by id) a capability tab. Returns a disposer. */
 export function registerCapability(input: CapabilityInput): () => void {
-  registry.set(input.id, { tag: input.label, order: 100, ...input });
+  const capability: Capability = { tag: input.label, order: 100, ...input };
+  registry.set(input.id, capability);
   emit();
   return () => {
+    if (registry.get(input.id) !== capability) return;
     registry.delete(input.id);
     emit();
   };

@@ -2,46 +2,8 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
-export interface AutomationTask {
-  id: string
-  name: string
-  description: string
-  frequency: "仅一次" | "每天" | "每周" | "每月"
-  time: string
-  agent: string
-  skill: string
-  enabled: boolean
-  createdAt: string
-  updatedAt: string
-  nextRunAt?: string
-  projectPath?: string
-  originSessionId?: string
-  delivery: AutomationDeliveryOptions
-}
-
-export type AutomationDeliveryMode = "origin_chat" | "new_chat" | "inbox" | "silent"
-export interface AutomationDeliveryOptions {
-  mode: AutomationDeliveryMode
-  desktopNotification: boolean
-  notifyOnSuccess: boolean
-  notifyOnFailure: boolean
-}
-
-export interface AutomationRun {
-  id: string
-  taskId: string
-  taskName: string
-  ranAt: string
-  status: "运行中" | "成功" | "失败"
-  result: string
-  trigger: "schedule" | "manual"
-  sessionId?: string
-  executionStatus: "running" | "succeeded" | "failed"
-  deliveryStatus: "pending" | "delivered" | "failed" | "skipped"
-  deliveredSessionId?: string
-  deliveredMessageId?: string
-  deliveryError?: string
-}
+import type { AutomationTask, AutomationRun, AutomationDeliveryMode, AutomationSnapshot } from "./shared/automation-contract.ts"
+export type { AutomationTask, AutomationRun, AutomationDeliveryMode, AutomationDeliveryOptions } from "./shared/automation-contract.ts"
 
 export interface AutomationExecutor {
   execute(task: AutomationTask): Promise<{ status: "成功" | "失败"; result: string; sessionId?: string }>
@@ -56,7 +18,7 @@ export interface AutomationDelivery {
   }>
 }
 
-interface Ledger { version: 1; revision: number; tasks: AutomationTask[]; runs: AutomationRun[] }
+type Ledger = AutomationSnapshot
 type Result<T = unknown> = { ok: true; value: T } | { ok: false; error: { code: string; message: string; details: Record<string, unknown> } }
 
 const EMPTY: Ledger = { version: 1, revision: 0, tasks: [], runs: [] }
@@ -92,17 +54,21 @@ export class AutomationHost {
   private startPromise: Promise<void> | undefined
   private readonly file: string
   private readonly inFlight = new Set<string>()
+  private disposed = false
 
   private readonly now: () => number
   private readonly pollIntervalMs: number
+  private readonly onError: (error: unknown) => void
 
-  constructor(private readonly executor: AutomationExecutor, options: { file?: string; now?: () => number; pollIntervalMs?: number } = {}, private readonly delivery?: AutomationDelivery) {
+  constructor(private readonly executor: AutomationExecutor, options: { file?: string; now?: () => number; pollIntervalMs?: number; onError?: (error: unknown) => void } = {}, private readonly delivery?: AutomationDelivery) {
     this.file = options.file ?? join(automationDir(), "ledger-v1.json")
     this.now = options.now ?? Date.now
     this.pollIntervalMs = options.pollIntervalMs ?? 15_000
+    this.onError = options.onError ?? ((error) => console.error("[dsh-tokensapi-ui] automation tick failed", error))
   }
 
   start(): Promise<void> {
+    if (this.disposed) return Promise.reject(Object.assign(new Error("自动化调度器已停止。"), { code: "disposed" }))
     this.startPromise ??= this.load()
     return this.startPromise
   }
@@ -137,27 +103,36 @@ export class AutomationHost {
     this.arm()
   }
 
-  dispose(): void { if (this.timer !== undefined) clearTimeout(this.timer) }
+  dispose(): void {
+    this.disposed = true
+    if (this.timer !== undefined) clearTimeout(this.timer)
+    this.timer = undefined
+  }
 
   private arm(): void {
-    this.timer = setTimeout(() => { void this.tick().finally(() => this.arm()) }, this.pollIntervalMs)
+    if (this.disposed) return
+    this.timer = setTimeout(() => { void this.tick().catch(this.onError).finally(() => this.arm()) }, this.pollIntervalMs)
     this.timer.unref?.()
   }
 
   private async tick(): Promise<void> {
     const now = this.now()
     const due = this.ledger.tasks.filter((task) => task.enabled && task.nextRunAt !== undefined && Date.parse(task.nextRunAt) <= now)
-    for (const task of due) await this.run(task, "schedule")
+    for (const task of due) {
+      if (this.disposed) break
+      await this.run(task, "schedule")
+    }
   }
 
   private persist(): Promise<void> {
     const body = JSON.stringify(this.ledger, null, 2)
-    this.writeChain = this.writeChain.then(async () => {
+    const write = this.writeChain.then(async () => {
       const temp = `${this.file}.${process.pid}.tmp`
       await writeFile(temp, body, { encoding: "utf8", mode: 0o600 })
       await rename(temp, this.file)
     })
-    return this.writeChain
+    this.writeChain = write.catch(() => {})
+    return write
   }
 
   private snapshot() { return structuredClone(this.ledger) }
@@ -181,7 +156,16 @@ export class AutomationHost {
     if (task.frequency === "仅一次") { task.enabled = false; task.nextRunAt = undefined }
     else task.nextRunAt = nextRun(task, new Date(this.now() + 1_000))
     task.updatedAt = ranAt
-    await this.commit()
+    try {
+      await this.commit()
+    } catch (error) {
+      this.inFlight.delete(task.id)
+      run.status = "失败"
+      run.executionStatus = "failed"
+      run.deliveryStatus = "skipped"
+      run.result = error instanceof Error ? error.message : String(error)
+      throw error
+    }
     try {
       const outcome = await this.executor.execute(structuredClone(task))
       run.status = outcome.status

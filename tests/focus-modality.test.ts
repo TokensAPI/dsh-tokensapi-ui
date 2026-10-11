@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { readCss } from "../scripts/read-css.mjs";
 import { afterEach, describe, expect, it } from "vitest";
 import { observeFocusModality } from "../src/client/theme/focus-modality.ts";
 
-const chrome = readFileSync(resolve("src/client/theme/chrome.css"), "utf8");
+const chrome = readCss(resolve("src/client/theme/chrome.css"));
 const suppression = chrome.match(/(html\[data-theme\]\[data-tokens-input="pointer"\][^{]+)\{([^}]+)\}/)!;
 let dispose: (() => void) | undefined;
 afterEach(() => {

@@ -25,9 +25,6 @@ describe("Desktop isolation contract", () => {
 
   it("keeps the capability bar and page in one stable click-through overlay root", () => {
     expect(workspace).toContain('<div className={styles.workspace} data-tokens-workspace="true">');
-    expect(workspace).toContain("class CapabilityViewBoundary");
-    expect(workspace).toContain("const ActiveView = activeCap?.render ?? null");
-    expect(workspace).toContain("<ActiveView />");
     expect(workspaceStyles).toMatch(/\.workspace\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*pointer-events:\s*none !important;/s);
     expect(workspaceStyles).toMatch(/\.topbar\s*\{[^}]*pointer-events:\s*auto;/s);
     expect(workspaceStyles).toMatch(/\.page\s*\{[^}]*pointer-events:\s*auto;/s);

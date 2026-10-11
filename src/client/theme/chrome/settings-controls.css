@@ -1,0 +1,486 @@
+html[data-theme="clean"] [role="dialog"] :is(h1, h2, h3) {
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+html[data-theme="clean"] [role="dialog"] :is(
+  [aria-current="page"],
+  [aria-selected="true"]:not([role="tab"])
+) {
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 14%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-accent-primary) 9%, transparent) !important;
+  box-shadow:
+    inset 2px 0 0 color-mix(in srgb, var(--theme-accent-primary) 68%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] button[aria-pressed] {
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    0 10px 26px -22px var(--clean-control-shadow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] button[aria-pressed="true"] {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 86%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 26%, transparent),
+    0 14px 32px -22px var(--theme-accent-glow) !important;
+}
+
+/* Global light-theme selection controls. This covers native selects, ARIA
+ * comboboxes/listbox anchors and DSH's menu-backed selector buttons. */
+html[data-theme="clean"] {
+  /* DSH paints the floating menu shell outside the node carrying role=menu.
+   * Override its source tokens as well as the semantic nodes below. */
+  --dsw-specific-menu: transparent !important;
+  --dsw-specific-selector: transparent !important;
+  --dsw-alias-bg-module-platform: transparent !important;
+  --clean-control-border: var(--theme-border-default);
+  --clean-control-hover: rgb(255 255 255 / 7%);
+  --clean-control-inset-top: rgb(255 255 255 / 14%);
+  --clean-control-inset-bottom: rgb(0 0 0 / 15%);
+  --clean-control-shadow: rgb(0 0 0 / 38%);
+  --clean-open-ring: rgb(105 224 166 / 18%);
+}
+
+html[data-theme="clean"][data-color-scheme="light"] {
+  --clean-control-border: rgb(70 112 92 / 22%);
+  --clean-control-inset-top: rgb(255 255 255 / 92%);
+  --clean-control-inset-bottom: rgb(31 86 61 / 9%);
+  --clean-control-shadow: rgb(29 68 53 / 34%);
+  --clean-open-ring: rgb(50 132 94 / 12%);
+}
+
+html[data-theme="clean"] :is(
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"]
+) {
+  border: 1px solid var(--clean-control-border) !important;
+  background: transparent !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 1px 2px color-mix(in srgb, var(--clean-control-shadow) 22%, transparent),
+    0 10px 28px -18px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 1 !important;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* Native select menus are painted by Chromium/Windows outside our floating
+ * menu surface. Give their option rows an explicit opaque palette; alpha
+ * colours otherwise fall back to the system's white/blue menu. */
+html[data-theme="clean"] select {
+  color-scheme: dark;
+}
+
+html[data-theme="clean"] select option {
+  color: #edf6f1;
+  background-color: #252d29;
+}
+
+html[data-theme="clean"] select option:disabled {
+  color: #829089;
+}
+
+html[data-theme="clean"][data-color-scheme="light"] select {
+  color-scheme: light;
+}
+
+html[data-theme="clean"][data-color-scheme="light"] select option {
+  color: #173328;
+  background-color: #f9fcfa;
+}
+
+html[data-theme="clean"][data-color-scheme="light"] select option:disabled {
+  color: #82958c;
+}
+
+html[data-theme="clean"] :is(
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"]
+):hover {
+  background: var(--clean-control-hover) !important;
+  border-color: var(--theme-border-strong) !important;
+}
+
+html[data-theme="clean"] :is(
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"]
+)[aria-expanded="true"] {
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 0 0 2px var(--clean-open-ring),
+    0 14px 34px -18px var(--clean-control-shadow) !important;
+}
+
+html[data-theme="clean"] :is(
+  select,
+  [role="combobox"],
+  button[aria-haspopup="listbox"],
+  button[class*="_selector"][aria-haspopup="listbox"]
+):focus-visible {
+  outline: none !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 94%),
+    0 0 0 1px var(--theme-bg-canvas),
+    0 0 0 3px color-mix(in srgb, var(--theme-accent-primary) 24%, transparent),
+    0 12px 30px -18px var(--theme-accent-glow) !important;
+}
+
+/* The permission-preset control (PermissionRow's …_selector) also matches the
+ * _selector hook above, but it is NOT a dropdown panel trigger — it is a flat
+ * rounded pill shown inline in the turn footer and composer bar. The raised
+ * treatment (border + big drop shadow) made it bulky and out of place among the
+ * flat toolbar icons. It is the only _selector that opens a menu rather than a
+ * listbox, so key on that to restore the host's clean flat pill. */
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"] {
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 58%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"]:hover:not(:disabled),
+html[data-theme="clean"] button[class*="_selector"][aria-haspopup="menu"][aria-expanded="true"] {
+  background: var(--theme-accent-soft) !important;
+  box-shadow: none !important;
+}
+
+/* Chromium delegates a native <select> popup to the OS, so its open panel can
+ * never match DSH's themed listboxes. The runtime enhancer keeps this select
+ * as the controlled state bridge and exposes an equivalent ARIA listbox. */
+select.dshDesktopSettingsSelect.dshTokensNativeSelectBridge {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+button.dshTokensDesktopSelectTrigger {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 150px;
+  min-height: 36px;
+  padding: 7px 34px 7px 12px !important;
+  color: var(--theme-fg-primary) !important;
+  font: inherit;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.dshTokensDesktopSelectTrigger::after {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: "";
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+button.dshTokensDesktopSelectTrigger[aria-expanded="true"]::after {
+  transform: translateY(-25%) rotate(225deg);
+}
+
+.dshTokensDesktopSelectListbox {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  display: grid;
+  gap: 3px;
+  box-sizing: border-box;
+  min-width: 150px;
+  padding: 6px;
+  overflow: auto;
+  border-radius: max(12px, var(--theme-radius-control)) !important;
+  color: var(--theme-fg-primary) !important;
+}
+
+.dshTokensDesktopSelectListbox > button[role="option"] {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid transparent !important;
+  border-radius: max(8px, var(--theme-radius-control)) !important;
+  color: var(--theme-fg-primary) !important;
+  background: transparent !important;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dshTokensDesktopSelectListbox > button[role="option"]:is(:hover, :focus-visible) {
+  outline: none;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 22%, transparent) !important;
+  background: color-mix(in srgb, var(--theme-accent-primary) 10%, transparent) !important;
+}
+
+.dshTokensDesktopSelectListbox > button[role="option"][aria-selected="true"] {
+  color: var(--theme-accent-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 34%, transparent) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+/* The composer's lower-left command trigger also opens a listbox, but it is a
+ * compact plus-icon tool rather than a selection control. Keep it out of the
+ * global selector treatment and ensure its glyph remains visible. */
+html[data-theme="clean"] [data-composer-card] button:is(
+  [aria-label="命令"],
+  [aria-label="Commands"]
+)[aria-haspopup="listbox"] {
+  position: relative;
+  z-index: 2;
+  color: var(--theme-fg-primary) !important;
+  border-color: var(--theme-border-default) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 78%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 52%, transparent),
+    0 5px 14px -10px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="clean"] [data-composer-card] button:is(
+  [aria-label="命令"],
+  [aria-label="Commands"]
+)[aria-haspopup="listbox"]:hover:not(:disabled) {
+  color: var(--theme-fg-primary) !important;
+  background: var(--theme-accent-soft) !important;
+}
+
+/* Standard menu and listbox roles share an opaque surface treatment. */
+html[data-theme="clean"] :is(
+  [role="listbox"],
+  [role="menu"]
+) {
+  border: 1px solid var(--clean-control-border) !important;
+  background: var(--theme-bg-surface-raised) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 18px 46px -20px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 1 !important;
+}
+
+/* Nested lists paint their own fill; omit the redundant card border. */
+html[data-theme="clean"] [class*="card"] :is([role="listbox"], [role="menu"]) {
+  border: 0 !important;
+}
+
+html[data-theme="clean"] :is([role="option"], [role="menuitem"]):hover,
+html[data-theme="clean"] :is([role="option"], [role="menuitem"])[data-highlighted] {
+  background: color-mix(in srgb, var(--theme-accent-primary) 10%, transparent) !important;
+}
+
+/* The TokensAPI model manager currently renders its picker as unclassed,
+ * inline-styled div/button/input nodes rather than a native select or an ARIA
+ * listbox. Anchor the compatibility treatment to its localized search input
+ * so both Main model and Vision model inherit the same controls without
+ * coupling the theme to generated source order or hashed component classes. */
+html[data-theme="clean"] [role="dialog"]
+  div:has(> div > :is(input[placeholder="搜索模型"], input[placeholder="Search models"]))
+  > button[aria-expanded] {
+  border: 1px solid var(--clean-control-border) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 48%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 10px 28px -18px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="clean"] [role="dialog"]
+  div:has(> div > :is(input[placeholder="搜索模型"], input[placeholder="Search models"]))
+  > button[aria-expanded="true"] {
+  border-color: var(--theme-border-strong) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 0 0 2px var(--clean-open-ring),
+    0 14px 34px -18px var(--clean-control-shadow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"]
+  div:has(> :is(input[placeholder="搜索模型"], input[placeholder="Search models"])) {
+  border: 1px solid var(--clean-control-border) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 66%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 var(--clean-control-inset-top),
+    inset 0 -1px 0 var(--clean-control-inset-bottom),
+    0 18px 46px -20px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: hidden !important;
+}
+
+html[data-theme="clean"] [role="dialog"]
+  :is(input[placeholder="搜索模型"], input[placeholder="Search models"]) {
+  background: color-mix(in srgb, var(--theme-bg-surface) 58%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 55%, transparent) !important;
+}
+
+/* DirectoryBrowser ships the show-hidden toggle as a bare text button. Our
+ * dialog pressed-state shadow otherwise floats around text with no visible
+ * control shell, so complete it as the compact sibling of New folder. */
+html[data-theme="clean"] [role="dialog"] button[class*="_showHiddenToggle"][aria-pressed] {
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 12px !important;
+  border: 1px solid var(--clean-control-border) !important;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 42%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 48%, transparent),
+    0 8px 22px -18px var(--clean-control-shadow) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="clean"] [role="dialog"] button[class*="_showHiddenToggle"][aria-pressed="false"]:hover:not(:disabled) {
+  color: var(--theme-fg-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 34%, var(--theme-border-default)) !important;
+  background: color-mix(in srgb, var(--theme-bg-surface-raised) 56%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 62%, transparent),
+    0 12px 28px -20px var(--theme-accent-glow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] button[class*="_showHiddenToggle"][aria-pressed="true"] {
+  color: var(--theme-accent-primary) !important;
+  border-color: color-mix(in srgb, var(--theme-accent-primary) 52%, transparent) !important;
+  background: var(--theme-accent-soft) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--theme-surface-highlight) 64%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-primary) 16%, transparent),
+    0 12px 28px -20px var(--theme-accent-glow) !important;
+}
+
+html[data-theme="clean"] [role="dialog"] :is(button, [role="tab"]) {
+  transition:
+    color 150ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+html[data-theme="clean"] [role="dialog"] button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+/* DSH occasionally paints the pressed/focus shadow on a rectangular button
+ * box even when a rounded child supplies the visible surface. Make the actual
+ * interactive node own the radius so every shadow follows the same curve. */
+html[data-theme="clean"][data-color-scheme="light"] [role="dialog"] button:not([aria-label], [role="tab"]),
+html[data-theme="clean"][data-color-scheme="light"] [role="dialog"] [role="button"] {
+  border-radius: max(10px, var(--theme-radius-control)) !important;
+  background-clip: padding-box !important;
+  isolation: isolate;
+}
+
+html[data-theme="clean"] :is(button, a, [role="button"]):focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--theme-bg-canvas) 88%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--theme-accent-primary) 28%, transparent),
+    0 12px 30px -20px var(--theme-accent-glow) !important;
+}
+
+/* Settings restores focus to its trigger after closing. Pointer-driven restores
+ * should not paint a ring; keyboard restores retain the normal focus indicator.
+ * The modal owns focus while open, so its background trigger needs no ring. */
+html[data-theme][data-tokens-input="pointer"] button[class*="_trigger"][aria-haspopup="dialog"]:focus,
+html[data-theme] button[class*="_trigger"][aria-haspopup="dialog"][aria-expanded="true"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="clean"] :is(
+  [role="listbox"],
+  [role="menu"]
+) {
+  transform-origin: top right;
+  animation: clean-menu-enter 150ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+html[data-theme="clean"] * {
+  scrollbar-color: color-mix(in srgb, var(--theme-fg-muted) 28%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-theme="clean"] *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html[data-theme="clean"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme="clean"] *::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-fg-muted) 26%, transparent);
+  background-clip: content-box;
+}
+
+html[data-theme="clean"] *::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--theme-fg-secondary) 42%, transparent);
+  background-clip: content-box;
+}
+
+@keyframes clean-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="clean"] *,
+  html[data-theme="clean"] *::before,
+  html[data-theme="clean"] *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

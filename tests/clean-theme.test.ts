@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { transform } from "lightningcss";
+import { fileURLToPath } from "node:url";
+import { readCss } from "../scripts/read-css.mjs";
 
 const cleanTheme = readFileSync(
   new URL("../src/client/theme/themes/clean.css", import.meta.url),
@@ -10,10 +12,7 @@ const bridge = readFileSync(
   new URL("../src/client/theme/dsh-bridge.css", import.meta.url),
   "utf8",
 );
-const chrome = readFileSync(
-  new URL("../src/client/theme/chrome.css", import.meta.url),
-  "utf8",
-);
+const chrome = readCss(fileURLToPath(new URL("../src/client/theme/chrome.css", import.meta.url)));
 const themePicker = readFileSync(
   new URL("../src/client/theme/ThemePicker.tsx", import.meta.url),
   "utf8",
