@@ -6,7 +6,7 @@
 //   3. dsh-bridge.css        maps DSH's --dsw-* onto --theme-* (re-skins DSH)
 //   4. chrome.css            ordered host adapters (including theme-specific paint)
 // All skins are injected once; the active skin is a single `data-theme="<id>"`
-// on <html>, so SWITCHING a skin is just an attribute swap — no re-injection.
+// on <html>, so an organization change is just an attribute swap — no re-injection.
 // Add a skin: create themes/<id>.css (`[data-theme="<id>"] { --theme-*: … }`) and
 // register it in SKINS below. Components never change.
 import contract from "./theme-contract.css";
@@ -14,17 +14,15 @@ import clean from "./themes/clean.css";
 import electrox from "./themes/electrox.css";
 import bridge from "./dsh-bridge.css";
 import chrome from "./chrome.css";
+import { DEFAULT_SKIN, type SkinId } from "../../shared/organization-theme.ts";
+import { resolveLocalTheme } from "./local-preview.ts";
 
 /** Registered skins (id → its [data-theme="<id>"]-scoped --theme-* sheet). */
-const SKINS: Record<string, string> = {
+const SKINS: Record<SkinId, string> = {
   clean,
   electrox,
 };
 
-/** Default skin when none is stored. */
-export const DEFAULT_SKIN = "clean";
-
-const STORAGE_KEY = "dsh-tokensapi-ui-skin";
 const STYLE_TAG = "dsh-tokensapi-ui-theme";
 
 type ColorScheme = "light" | "dark";
@@ -40,38 +38,21 @@ function syncColorScheme(): void {
   document.documentElement.dataset.colorScheme = getDshColorScheme();
 }
 
-/** All registered skin ids (drives a skin picker). */
-export function listSkins(): readonly string[] {
-  return Object.keys(SKINS);
-}
-
-/** The active skin id (persisted; falls back to DEFAULT_SKIN). */
-export function getActiveSkin(): string {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored !== null && stored in SKINS) return stored;
-  } catch {
-    // storage unavailable
+/** Apply the Host-selected skin; user preferences do not select branding. */
+export function setActiveSkin(id: SkinId): void {
+  if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__) {
+    id = resolveLocalTheme(id);
   }
-  return DEFAULT_SKIN;
-}
-
-/** Switch the active skin — a single <html> data-theme swap; persists the choice. */
-export function setActiveSkin(id: string): void {
-  if (!(id in SKINS)) return;
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // storage unavailable — still apply for this session
+  if (typeof document !== "undefined" && document.documentElement.dataset.theme !== id) {
+    document.documentElement.dataset.theme = id;
   }
-  if (typeof document !== "undefined") document.documentElement.dataset.theme = id;
 }
 
-/** Inject all skin layers once and activate the stored (or default) skin. */
+/** Inject all skin layers once; use the default until the Host resolves identity. */
 export function injectTheme(): () => void {
   if (typeof document === "undefined") return () => {};
   const root = document.documentElement;
-  root.dataset.theme = getActiveSkin();
+  root.dataset.theme = DEFAULT_SKIN;
 
   syncColorScheme();
   const observer = new MutationObserver(syncColorScheme);

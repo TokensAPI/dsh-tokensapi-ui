@@ -9,13 +9,13 @@ const sha256 = (source: string | Uint8Array) => createHash("sha256").update(sour
 const baseline = JSON.parse(readFileSync(new URL("./fixtures/chrome-baseline.json", import.meta.url), "utf8"));
 const entry = fileURLToPath(new URL("../src/client/theme/chrome.css", import.meta.url));
 
-describe("mechanical CSS split equivalence", () => {
+describe("theme CSS baseline", () => {
   it("preserves every selector, declaration and source-order position", () => {
     const source = readCss(entry).replace(/\r\n/g, "\n");
     expect(sha256(source)).toBe(baseline.sourceSha256);
   });
 
-  it("produces the same compiled stylesheet as the pre-split baseline", () => {
+  it("produces the approved compiled stylesheet", () => {
     const source = readCss(entry);
     const { code } = transform({ filename: "chrome.css", code: Buffer.from(source), minify: true });
     expect(sha256(code)).toBe(baseline.compiledSha256);

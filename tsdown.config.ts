@@ -157,6 +157,7 @@ const client: UserConfig = {
   sourcemap: true,
   external: [...CLIENT_EXTERNALS],
   define: {
+    '__TOKENS_LOCAL_THEME_PREVIEW__': JSON.stringify(!process.env.CI && !process.env.GITHUB_ACTIONS),
     'process.env.NODE_ENV': JSON.stringify(mode),
     'import.meta.env.MODE': JSON.stringify(mode),
     'import.meta.env': JSON.stringify({ MODE: mode }),

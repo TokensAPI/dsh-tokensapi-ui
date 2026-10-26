@@ -299,6 +299,15 @@ html[data-theme="clean"] [class*="card"] :is([role="listbox"], [role="menu"]) {
   border: 0 !important;
 }
 
+/* Newer model pickers put a scrollable menu inside MenuSurface. The outer
+ * material owns the surface; the inner menu is only a list of options. */
+html[data-theme="clean"] [data-menu-material] :is([role="listbox"], [role="menu"]):not([data-menu-material]) {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  animation: none !important;
+}
+
 html[data-theme="clean"] :is([role="option"], [role="menuitem"]):hover,
 html[data-theme="clean"] :is([role="option"], [role="menuitem"])[data-highlighted] {
   background: color-mix(in srgb, var(--theme-accent-primary) 10%, transparent) !important;

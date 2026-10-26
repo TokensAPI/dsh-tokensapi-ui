@@ -31,6 +31,7 @@ export function TokensBrandName(): React.JSX.Element {
 const HERO_HEADLINES = new Set([
   "探索未至之境",
   "Explore the unknown",
+  "Into the Unknown",
   "Smart Spaces. Unified Access.",
 ]);
 
@@ -59,6 +60,6 @@ function syncHeroHeadline(): void {
 export function observeTokensCoworkHeadline(): () => void {
   syncHeroHeadline();
   const observer = new MutationObserver(syncHeroHeadline);
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, characterData: true, subtree: true });
   return () => observer.disconnect();
 }

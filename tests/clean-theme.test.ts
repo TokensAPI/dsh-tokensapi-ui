@@ -13,8 +13,8 @@ const bridge = readFileSync(
   "utf8",
 );
 const chrome = readCss(fileURLToPath(new URL("../src/client/theme/chrome.css", import.meta.url)));
-const themePicker = readFileSync(
-  new URL("../src/client/theme/ThemePicker.tsx", import.meta.url),
+const client = readFileSync(
+  new URL("../src/client/index.tsx", import.meta.url),
   "utf8",
 );
 const desktopSelect = readFileSync(
@@ -105,7 +105,7 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(options).toContain("玻璃面板");
     expect(inject).not.toContain("GlassPanels");
     expect(inject).not.toContain("disabled/");
-    expect(themePicker).not.toContain("GlassPanelOptions");
+    expect(client).not.toContain("GlassPanelOptions");
   });
 
   it("keeps enhanced sidebar and settings-modal geometry deterministic", () => {
@@ -229,12 +229,9 @@ describe("TokensAPI Lake View basic theme", () => {
     expect(chrome).toContain("min-height: 36px");
   });
 
-  it("describes and previews the Lake View palette accurately", () => {
-    expect(themePicker).toContain("TokensAPI Lake View，湖绿色交互与清晰浅色外观");
-    expect(themePicker).toContain('["#161b19", "#5fd7a1", "#f8fbf9"]');
-    expect(themePicker).not.toContain('["#171717", "#3b82f6", "#f5f5f5"]');
-    expect(themePicker).not.toContain("高级外观选项");
-    expect(themePicker).not.toContain("玻璃面板");
-    expect(themePicker).not.toContain("GlassPanels");
+  it("does not offer manual product theme selection", () => {
+    expect(client).not.toContain("ThemePicker");
+    expect(client).not.toContain("tokens-theme-picker");
+    expect(client).toMatch(/if \(typeof __TOKENS_LOCAL_THEME_PREVIEW__[^}]+ctx\.slots\.inject\("settings\.general\.item"/s);
   });
 });

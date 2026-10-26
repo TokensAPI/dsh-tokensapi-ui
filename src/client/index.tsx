@@ -6,9 +6,9 @@ import type { ConnectionHandle } from "@deepseek-ai/dsh-api-remotes/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
-import { injectTheme } from "./theme/inject.ts";
-import { ThemePicker } from "./theme/ThemePicker.tsx";
-import type {} from "@deepseek-ai/dsh-client-ui-settings/client";
+import { injectTheme, setActiveSkin } from "./theme/inject.ts";
+import { observeOrganizationTheme } from "./theme/organization-theme.ts";
+import { THEME_CHANNEL } from "../shared/organization-theme.ts";
 import { CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { observeTokensCoworkHeadline, TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
@@ -20,6 +20,7 @@ import { setAutomationRuntime } from "./modules/automation/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
 import { observeDesktopSettingsSelect } from "./theme/desktop-select.ts";
 import { observeFocusModality } from "./theme/focus-modality.ts";
+import { LocalThemePreview } from "./theme/LocalThemePreview.tsx";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -33,21 +34,30 @@ export interface TokensWorkspaceApi {
 }
 
 export function apply(ctx: ClientContext): void {
+  if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__) {
+    ctx.slots.inject("settings.general.item", () => ctx.slots.register(
+      { name: "settings.general.item", id: "tokens-local-theme-preview", order: 90 },
+      LocalThemePreview,
+    ));
+  }
   ctx.effect(() => setCapabilityWorkspaceLayout(ctx.get("layout") as ILayout), "tokens-core: layout runtime");
   // Global theme: active tenant skin + DSH bridge (see theme/inject.ts).
   ctx.effect(() => injectTheme(), "tokens-core: theme");
+  ctx.effect(() => observeOrganizationTheme({
+    read: async () => {
+      const connection = ctx.get("connection") as ConnectionHandle;
+      const result = await connection.rpc.call(THEME_CHANNEL, "snapshot", {});
+      if (!result.ok) throw new Error("organization theme unavailable");
+      return result.value;
+    },
+    onCredentialChange: (listener) => ctx.remote.$on("credentials/reference-updated", listener),
+    onConnectionReset: (listener) => ctx.on("connection/reset", listener),
+  }, setActiveSkin), "tokens-core: organization theme");
   ctx.effect(() => observeFocusModality(), "tokens-core: dialog trigger focus");
   ctx.effect(() => observeStartupGate(), "tokens-core: startup loading");
   ctx.effect(() => observeDesktopSettingsSelect(), "tokens-core: desktop settings select");
   ctx.effect(() => observeTokensCoworkHeadline(), "tokens-core: hero brand copy");
   ctx.effect(() => observeTurnStatus(), "tokens-core: turn status copy");
-
-  ctx.slots.inject("settings.general.item", () =>
-    ctx.slots.register(
-      { name: "settings.general.item", id: "tokens-theme-picker", order: 20 },
-      ThemePicker,
-    ),
-  );
 
   // Use the shell's declared branding seats. In particular, the collapsed
   // mark remains inside DSH's native expand button, so its click lifecycle,
@@ -57,7 +67,7 @@ export function apply(ctx: ClientContext): void {
       return ctx.slots.register({ name: "sidebar.brand.mark" }, TokensBrandMark);
     } catch {
       // A host-provided single occupant must never prevent the rest of this
-      // plugin (including the theme picker) from mounting.
+      // plugin from mounting.
       return () => {};
     }
   });

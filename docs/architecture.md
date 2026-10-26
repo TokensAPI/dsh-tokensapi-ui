@@ -14,6 +14,15 @@
 
 ## 样式层次
 
+组织主题由 `src/organization-theme-host.ts` 查询和缓存，跨端只传递
+`src/shared/organization-theme.ts` 的主题快照。Host 从凭据服务解析当前 Key，
+只对 TokensAPI 固定组织接口发出请求；组织 3 使用 electrox，其他情况使用 clean。
+客户端启动、Key 变更或连接重建时请求 `/tokens-theme` 的 `snapshot`，共享同一 Key
+的查询。Key 切换会取消旧请求，客户端通过请求序号阻止过期结果覆盖新状态。
+查询期间和 RPC 断线时保留当前主题，仅在收到新快照且皮肤改变时更新 DOM，避免重复通知造成闪动。
+组织接口的临时失败对同一 Key 缓存 30 秒，冷却结束后的新事件才允许重试；不设置轮询任务。
+皮肤不再读取或写入本地选择，不再注册主题选择设置项。
+
 注入顺序固定：`theme-contract.css` → 已注册 skin → `dsh-bridge.css` →
 `chrome.css`。前者定义语义 token 和 recipe，skin 提供产品值，bridge 对接
 宿主 token。模块自己的布局放在相应 `*.module.css`。

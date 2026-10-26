@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN" style="color-scheme: dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>组织主题验证</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 36px; background: var(--theme-bg-canvas); color: var(--theme-fg-primary); font: 15px/1.7 system-ui,sans-serif; }
+  main { max-width: 1000px; margin: auto; }
+  h1 { margin: 0; font-size: 30px; }
+  p { color: var(--theme-fg-secondary); }
+  .card { margin: 24px 0; padding: 24px; background: var(--theme-bg-surface); border: 1px solid var(--theme-border-default); border-radius: var(--theme-radius-panel); }
+  .brand { color: var(--theme-accent-primary); font-size: 28px; font-weight: 800; }
+  .metrics { display: flex; gap: 40px; flex-wrap: wrap; }
+  .metrics strong { display: block; font-size: 32px; color: var(--theme-accent-primary); }
+  button { cursor: pointer; padding: 10px 15px; margin: 4px; border: 1px solid var(--theme-border-strong); border-radius: var(--theme-radius-control); background: var(--theme-bg-surface-raised); color: var(--theme-fg-primary); font: inherit; }
+  button:disabled { opacity: .5; cursor: wait; }
+  button.primary { background: var(--theme-accent-fill); color: var(--theme-fg-on-accent); }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 10px; border-bottom: 1px solid var(--theme-border-default); }
+  #status { min-height: 26px; color: var(--theme-accent-primary); }
+  #history { font-family: monospace; overflow-wrap: anywhere; }
+</style>
+<main>
+  <h1>组织主题验证</h1>
+  <p>隔离模拟：复用实际 Host 查询器、客户端主题监听器及主题 CSS。所有 Key 和组织响应均为本地虚构数据。</p>
+  <div class="card">
+    <div class="brand" id="brand">TokensAPI</div>
+    <p id="selection">未配置 Key</p>
+    <div class="metrics">
+      <div>模拟组织 API 请求<strong id="queries">0</strong></div>
+      <div>主题快照调用<strong id="reads">0</strong></div>
+      <div>实际 DOM 主题切换<strong id="changes">0</strong></div>
+    </div>
+    <div id="history">clean</div>
+  </div>
+  <div class="card">
+    <button data-id="partner">组织 3</button>
+    <button data-id="partner2">另一个组织 3 Key</button>
+    <button data-id="other">其他组织</button>
+    <button data-id="none">移除 Key</button>
+    <button data-id="failure">组织查询失败</button>
+    <br>
+    <button id="burst">重复通知 ×100</button>
+    <button id="reconnect">断线后重连</button>
+    <button id="run" class="primary">运行全部验证场景</button>
+    <p id="status" role="status">就绪。手动切换的模拟接口延迟为 400ms。</p>
+  </div>
+  <table><thead><tr><th>场景</th><th>新增组织请求</th><th>新增主题切换</th><th>结果</th></tr></thead><tbody id="results"></tbody></table>
+  <p>此页验证查询次数、异步竞态和实际 DOM 切换；完整 Desktop 的窗口材质、布局及命中行为仍需在 Electron 客户端验证。</p>
+</main>
+<script type="module">
+  import { injectTheme, setActiveSkin } from "/src/client/theme/inject.ts";
+  import { observeOrganizationTheme } from "/src/client/theme/organization-theme.ts";
+  injectTheme();
+  const $ = (id) => document.getElementById(id);
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const credentials = new Set();
+  const resets = new Set();
+  let queryCount = 0, reads = 0, pending = 0, offline = false;
+  let history = [document.documentElement.dataset.theme];
+  const theme = () => document.documentElement.dataset.theme;
+  function render() {
+    $("brand").textContent = theme() === "electrox" ? "ELECTRO X / 粒刻" : "TokensAPI";
+    $("queries").textContent = queryCount;
+    $("reads").textContent = reads;
+    $("changes").textContent = history.length - 1;
+    $("history").textContent = history.join(" → ");
+  }
+  new MutationObserver((records) => {
+    // Attribute old values preserve every transition even within one delivery.
+    history.push(...records.slice(1).map((record) => record.oldValue), theme());
+    render();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"], attributeOldValue: true });
+  observeOrganizationTheme({
+    async read() {
+      reads++; pending++; render();
+      try {
+        if (offline) throw new Error("simulated RPC disconnect");
+        const response = await fetch("/snapshot");
+        if (!response.ok) throw new Error("snapshot unavailable");
+        const result = await response.json();
+        queryCount = Math.max(queryCount, result.queryCount);
+        return result.theme;
+      } finally { pending--; render(); }
+    },
+    onCredentialChange(listener) { credentials.add(listener); return () => credentials.delete(listener); },
+    onConnectionReset(listener) { resets.add(listener); return () => resets.delete(listener); },
+  }, setActiveSkin);
+  const change = () => { for (const listener of credentials) listener("TOKENSAPI_API_KEY"); };
+  const reset = () => { for (const listener of resets) listener(); };
+  async function idle() {
+    const deadline = Date.now() + 10_000;
+    while (pending && Date.now() < deadline) await sleep(10);
+    if (pending) throw new Error("等待快照超时");
+    await sleep(10); // Let DOM observers and promise continuations settle.
+  }
+  async function select(id, delay = 400) {
+    const response = await fetch(`/identity?id=${id}&delay=${delay}`, { method: "POST" });
+    if (!response.ok) throw new Error("模拟身份设置失败");
+    $("selection").textContent = `模拟 Key：${id} · 接口延迟 ${delay}ms`;
+    change();
+  }
+  async function queryStarted(expected) {
+    const deadline = Date.now() + 5_000;
+    while (Date.now() < deadline) {
+      const stats = await (await fetch("/stats")).json();
+      queryCount = stats.queryCount; render();
+      if (queryCount >= expected) return;
+      await sleep(10);
+    }
+    throw new Error("模拟组织查询未开始");
+  }
+  async function burst() {
+    for (let index = 0; index < 100; index++) {
+      if (index % 2 === 0) change(); else reset();
+      await idle();
+    }
+  }
+  async function reconnect() {
+    offline = true; reset(); await idle();
+    offline = false; reset(); await idle();
+  }
+  function check(condition, message) { if (!condition) throw new Error(message); }
+  async function action(task) {
+    document.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+    $("status").textContent = "验证中…";
+    try { await task(); await idle(); $("status").textContent = "完成"; }
+    catch (error) { $("status").textContent = `失败：${error.message}`; throw error; }
+    finally { document.querySelectorAll("button").forEach((button) => { button.disabled = false; }); }
+  }
+  async function runAll() {
+    await idle();
+    await fetch("/reset", { method: "POST" });
+    queryCount = 0; change(); await idle();
+    history = [theme()]; render();
+    $("results").replaceChildren();
+    const report = [];
+    async function scenario(name, task, expectedQueries, expectedChanges) {
+      const queriesBefore = queryCount, changesBefore = history.length;
+      await task(); await idle();
+      const row = { name, queries: queryCount - queriesBefore, changes: history.length - changesBefore };
+      const tr = document.createElement("tr");
+      for (const value of [name, row.queries, row.changes, "通过"]) {
+        const td = document.createElement("td"); td.textContent = value; tr.append(td);
+      }
+      check(row.queries === expectedQueries, `${name}：组织请求次数为 ${row.queries}，预期 ${expectedQueries}`);
+      check(row.changes === expectedChanges, `${name}：主题切换次数为 ${row.changes}，预期 ${expectedChanges}`);
+      report.push(row); $("results").append(tr);
+    }
+    await scenario("首次识别组织 3", () => select("partner", 60), 1, 1);
+    await scenario("同 Key 重复通知和重连 ×100", burst, 0, 0);
+    await scenario("换为另一个组织 3 Key（慢响应）", async () => {
+      await select("partner2", 200); await sleep(30);
+      check(theme() === "electrox", "查询期间主题发生变化");
+      for (let index = 0; index < 20; index++) reset();
+    }, 1, 0);
+    await scenario("换为其他组织（慢响应）", async () => {
+      await select("other", 120); await sleep(30);
+      check(theme() === "electrox", "结果返回前提前切换主题");
+    }, 1, 1);
+    await scenario("快速换 Key，旧响应晚到", async () => {
+      const before = queryCount;
+      await select("partner2", 1_000); await queryStarted(before + 1);
+      await select("other", 1_000); await queryStarted(before + 2);
+      await select("partner", 20);
+    }, 3, 1);
+    await scenario("RPC 断线后恢复", reconnect, 0, 0);
+    await scenario("查询失败后重复通知 ×100", async () => {
+      await select("failure", 20); await idle(); await burst();
+    }, 1, 1);
+    await scenario("失败冷却期间换成新 Key", () => select("partner", 20), 1, 1);
+    await scenario("移除 Key", () => select("none", 0), 0, 1);
+    return report;
+  }
+  document.querySelectorAll("button[data-id]").forEach((button) => {
+    button.onclick = () => action(() => select(button.dataset.id));
+  });
+  $("burst").onclick = () => action(burst);
+  $("reconnect").onclick = () => action(reconnect);
+  $("run").onclick = () => action(async () => {
+    window.themeLab.report = await runAll();
+    $("status").textContent = "全部 9 个场景通过";
+  }).then(() => { $("status").textContent = "全部 9 个场景通过"; });
+  window.themeLab = { runAll, idle, select, burst, reconnect, get history() { return [...history]; } };
+</script>
+</html>

@@ -5,6 +5,23 @@ TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供两�
 - TokensAPI 基础主题：Lake View 深色与浅色方案，面板使用不透明背景。
 - ELECTRO X / 粒刻合作方主题。
 
+主题根据当前 `TOKENSAPI_API_KEY` 所属组织自动应用：组织 ID 为 **3** 时使用
+ELECTRO X，其余组织、个人 Key、未配置 Key 或查询失败时使用基础主题。
+设置中不再提供主题选择，旧的本地主题选择记录也不再生效。
+
+客户端启动及收到 `credentials/reference-updated` 的 Key 变更通知时，通过现有
+连接向本插件 Host 请求主题快照。Host 使用凭据服务中的 Key 查询
+`https://tokensapi.ai/api/current/organization`；同一 Key 的并发和重复请求共用内存结果。
+Key 切换后重新查询，查询期间保留当前主题，结果明确后才切换，旧请求不能覆盖新 Key 的主题。
+RPC 断线时保留已确认主题；组织查询失败则使用基础主题，并对同一 Key 冷却 30 秒，
+之后遇到 Key 通知或连接重建才重试，不轮询。服务端单独调整组织归属需要重启应用后刷新。
+Key 不发送给客户端，组织查询缓存不写入磁盘。未挂载凭据服务时使用基础主题。
+
+无需真实组织 Key 即可验证：Node.js 24 下运行 `pnpm dev:theme-lab`，打开输出的本地地址，
+点击“运行全部验证场景”。验证页复用实际 Host 和主题代码，使用虚构 Key 及模拟组织响应，
+记录组织请求次数与 DOM 主题切换次数，覆盖重复通知、慢响应、快速换 Key、断线与失败冷却。
+此页不会接触真实凭据或请求 TokensAPI；Desktop 原生窗口效果仍须在实际客户端验证。
+
 插件同时提供技能库、工具库和自动化页面。技能库使用真实 `skill.list` 目录，
 支持本地上传、内置精选安装、详情查看和当前任务调用。TokensAPI 账号登录与 AIGC
 入口当前暂不随插件启用。
@@ -40,6 +57,11 @@ pnpm doctor:local   # 只读检查 profile 的解析路径、别名、exports �
 同步脚本不会替你修改 profile。默认检查 `~/.dsh/profiles/desktop`，其他 profile
 可运行 `pnpm doctor:local -- <profile目录>`。同步后退出并重新打开 Desktop。
 诊断证明磁盘加载链路一致，不能证明正在运行的进程已经重新加载。
+
+本地构建在「设置 → 通用」提供「本地主题预览」：自动（按组织）、基础主题、
+合作方主题。选择仅保存在此客户端，重启后保留；切回自动立即恢复最新组织主题。
+只要构建环境存在 `CI` 或 `GITHUB_ACTIONS` 标记，该入口和覆盖逻辑就会被编译移除，
+旧的本地预览记录不影响 CI 包。发布流程额外检查最终 bundle，防止误带调试入口。
 
 样式职责、拆分等价性证明和实机验收范围见 [架构与验证约定](docs/architecture.md)。
 

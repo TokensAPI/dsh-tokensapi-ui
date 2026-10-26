@@ -21,6 +21,8 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import { AutomationHost } from './automation-host.ts'
 import { DshAutomationExecutor } from './automation-executor.ts'
 import { DshAutomationDelivery } from './automation-delivery.ts'
+import { OrganizationThemeHost } from './organization-theme-host.ts'
+import { API_KEY_REF, THEME_CHANNEL } from './shared/organization-theme.ts'
 
 export const name = 'dsh-tokensapi-ui'
 export const inject = ['connection', 'skills', 'tools', 'agents', 'sessions', 'agentPresets', 'agentDefaultModel']
@@ -494,6 +496,22 @@ function registerAutomationTools(ctx: Context & { tools: { register(tool: Return
 
 export function apply(ctx: Context): void {
   ctx.logger.info("[dsh-tokensapi-ui] host loaded")
+  ctx.inject(["connection", "credentials"], (scoped) => {
+    const host = scoped as unknown as {
+      connection: HostConnection
+      credentials: { resolve(ref: string): Promise<{ value: string } | undefined> }
+    }
+    const theme = new OrganizationThemeHost(async () => (await host.credentials.resolve(API_KEY_REF))?.value ?? "", {
+      onError: () => scoped.logger.warn("TokensAPI organization lookup unavailable; using the default theme"),
+    })
+    scoped.effect(
+      () => host.connection.rpc.handle(THEME_CHANNEL, async (endpoint) => endpoint === "snapshot"
+        ? { ok: true, value: await theme.snapshot() }
+        : fail("unknown theme endpoint"), { authority: "trusted-host" }),
+      "tokens-core: organization theme rpc",
+    )
+    scoped.effect(() => () => theme.dispose(), "tokens-core: organization theme lifecycle")
+  })
   // Mount the channel only when the Connection service is present (headless
   // compositions load the plugin but expose no transport).
   ctx.inject(["connection", "skills", "tools", "agents", "sessions", "agentPresets", "agentDefaultModel"], (scoped) => {
