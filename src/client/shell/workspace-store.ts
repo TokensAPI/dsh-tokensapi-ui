@@ -6,12 +6,28 @@ import { useSyncExternalStore } from "react";
 
 let active: string | null = null;
 const listeners = new Set<() => void>();
+interface Navigation {
+  select(id: string): void;
+  close(): void;
+}
+let navigation: Navigation | undefined;
+
+export function bindWorkspaceNavigation(next: Navigation): { sync(id: string | null): void; dispose(): void } {
+  navigation = next;
+  active = null;
+  emit();
+  return {
+    sync(id) { if (navigation === next && active !== id) { active = id; emit(); } },
+    dispose() { if (navigation === next) { navigation = undefined; active = null; emit(); } },
+  };
+}
 
 function emit(): void {
   for (const listener of listeners) listener();
 }
 
 export const workspace = {
+  native(): boolean { return navigation !== undefined; },
   subscribe(listener: () => void): () => void {
     listeners.add(listener);
     return () => listeners.delete(listener);
@@ -21,11 +37,14 @@ export const workspace = {
   },
   /** Toggle a capability page (clicking the active tab returns to chat). */
   select(id: string): void {
+    if (navigation) { navigation.select(id); return; }
     active = active === id ? null : id;
     emit();
   },
   /** Return to the conversation. */
   close(): void {
+    if (navigation) { navigation.close(); return; }
+    if (active === null) return;
     active = null;
     emit();
   },

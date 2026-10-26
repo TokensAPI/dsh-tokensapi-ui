@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 import { CapabilityWorkspace } from "../src/client/shell/CapabilityWorkspace.tsx";
 import { registerCapability } from "../src/client/shell/capability-registry.ts";
-import { workspace } from "../src/client/shell/workspace-store.ts";
+import { bindWorkspaceNavigation, workspace } from "../src/client/shell/workspace-store.ts";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -16,6 +16,26 @@ class ImmediateResizeObserver {
 }
 
 describe("capability workspace", () => {
+  it("highlights host-selected capabilities without mounting an overlay page", async () => {
+    globalThis.ResizeObserver = ImmediateResizeObserver as unknown as typeof ResizeObserver;
+    document.documentElement.dataset.theme = "electrox";
+    document.body.innerHTML = '<div><main id="host-main"></main><div data-shell-overlay><div id="mount"></div></div></div>';
+    const release = registerCapability({ id: "native-skills", label: "技能库", render: () => <div>must render only in main</div> });
+    const binding = bindWorkspaceNavigation({ select: id => binding.sync(id), close: () => binding.sync(null) });
+    const root = createRoot(document.getElementById("mount")!);
+    try {
+      await act(async () => { root.render(<CapabilityWorkspace />); workspace.select("native-skills"); });
+      expect(document.querySelector('nav [aria-current="page"]')?.textContent).toContain("技能库");
+      expect(document.querySelector('[role="region"]')).toBeNull();
+      expect(document.querySelector('[data-tokens-capability-active]')).toBeNull();
+      expect(document.getElementById("host-main")?.hasAttribute("inert")).toBe(false);
+      await act(async () => { binding.sync(null); });
+      expect(document.querySelector('nav [aria-current="page"]')).toBeNull();
+    } finally {
+      await act(async () => { root.unmount(); });
+      binding.dispose(); release();
+    }
+  });
   afterEach(() => {
     workspace.close();
     document.body.replaceChildren();

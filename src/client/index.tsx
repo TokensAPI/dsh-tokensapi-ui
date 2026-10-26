@@ -9,18 +9,19 @@ import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
 import { injectTheme, setActiveSkin } from "./theme/inject.ts";
 import { observeOrganizationTheme } from "./theme/organization-theme.ts";
 import { THEME_CHANNEL } from "../shared/organization-theme.ts";
-import { CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
+import { CapabilityPanel, CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
+import { installCapabilityNavigation } from "./shell/native-capability-navigation.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { observeTokensCoworkHeadline, TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
 import { observeTurnStatus } from "./shell/turn-status.ts";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
 import { setSkillsRuntime, type SkillsRemote } from "./modules/skills/data.ts";
-import { setAutomationRuntime } from "./modules/automation/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
 import { observeDesktopSettingsSelect } from "./theme/desktop-select.ts";
 import { observeFocusModality } from "./theme/focus-modality.ts";
 import { LocalThemePreview } from "./theme/LocalThemePreview.tsx";
+import { setNativeScheduleLayout } from "./modules/automation/native-schedule.ts";
 
 export const name = "dsh-tokensapi-ui";
 // 'connection' + 'sessions' back the skills module's real catalog (skill.list
@@ -34,6 +35,8 @@ export interface TokensWorkspaceApi {
 }
 
 export function apply(ctx: ClientContext): void {
+  ctx.effect(() => setNativeScheduleLayout(ctx.get("layout")), "tokens-core: native automation navigation");
+
   if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__) {
     ctx.slots.inject("settings.general.item", () => ctx.slots.register(
       { name: "settings.general.item", id: "tokens-local-theme-preview", order: 90 },
@@ -94,11 +97,20 @@ export function apply(ctx: ClientContext): void {
     remoteSkills: (ctx as unknown as { remote: { skills: SkillsRemote } }).remote.skills,
     sessions: ctx.get("sessions") as unknown as ISessions,
   }), "tokens-core: skills runtime");
-  ctx.effect(() => setAutomationRuntime(ctx.get("connection") as ConnectionHandle), "tokens-core: automation runtime");
 
   // Capability registry: register the built-ins, and expose the API so
   // third-party plugins can add their own capability tabs.
   ctx.effect(() => registerBuiltinCapabilities(), "tokens-core: built-in capabilities");
+  // DSH 0.2 public keyed main seat; the bundled development SDK is still 0.1.
+  const mainSlots = ctx.slots as unknown as {
+    inject(name: "main", setup: () => () => void): void;
+    register(options: { name: "main"; key: string }, view: () => React.JSX.Element): () => void;
+  };
+  if (typeof (ctx.get("layout") as { selectPanel?: unknown }).selectPanel === "function") {
+    mainSlots.inject("main", () => installCapabilityNavigation(ctx.get("layout"), (id, capability) =>
+      mainSlots.register({ name: "main", key: id }, () => <CapabilityPanel capability={capability} />),
+    ));
+  }
   const api: TokensWorkspaceApi = { registerCapability, listCapabilities };
   (ctx as { provide?: (key: string, value: unknown) => void }).provide?.("tokensWorkspace", api);
 

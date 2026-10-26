@@ -16,6 +16,8 @@ export interface Capability {
   order: number;
   /** The full-page view rendered when this capability is active. */
   render: ComponentType;
+  /** Existing host panel to open instead of registering a product page. */
+  nativePanel?: string;
 }
 
 export type CapabilityInput = Partial<Capability> & Pick<Capability, "id" | "label" | "render">;
@@ -47,6 +49,11 @@ export function registerCapability(input: CapabilityInput): () => void {
 
 export function listCapabilities(): Capability[] {
   return snapshot;
+}
+
+export function subscribeCapabilities(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
 }
 
 /** Subscribe a component to the registered capabilities. */

@@ -296,6 +296,16 @@
 }
 
 /* Capability page: covers the main content area, leaves the sidebar exposed. */
+.nativePage {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 28px 32px;
+  color: var(--theme-fg-primary);
+  background-color: var(--theme-bg-canvas);
+}
+
 .page {
   position: absolute;
   top: 72px;

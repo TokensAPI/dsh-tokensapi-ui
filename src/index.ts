@@ -17,15 +17,12 @@ import { dirname, join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { unzipSync } from 'fflate'
 import type { Context } from '@deepseek-ai/cordis'
-import { defineTool } from '@deepseek-ai/dsh-tools'
-import { AutomationHost } from './automation-host.ts'
-import { DshAutomationExecutor } from './automation-executor.ts'
-import { DshAutomationDelivery } from './automation-delivery.ts'
+import { installAutomationMigration } from './automation-migration-host.ts'
 import { OrganizationThemeHost } from './organization-theme-host.ts'
 import { API_KEY_REF, THEME_CHANNEL } from './shared/organization-theme.ts'
 
 export const name = 'dsh-tokensapi-ui'
-export const inject = ['connection', 'skills', 'tools', 'agents', 'sessions', 'agentPresets', 'agentDefaultModel']
+export const inject = ['connection', 'skills']
 
 /** RpcResult shape the Connection transport expects (subset we produce). */
 type RpcResult<T = unknown> =
@@ -420,81 +417,8 @@ function notifySkillCatalog(ctx: Context, invalidate: () => void): void {
   } catch {}
 }
 
-function registerAutomationTools(ctx: Context & { tools: { register(tool: ReturnType<typeof defineTool>): unknown } }, host: AutomationHost): void {
-  const output = {
-    schema: { type: 'object', properties: { result: { type: 'string', required: true } }, additionalProperties: false } as const,
-    render: (_args: unknown, value: { result: string }) => [{ type: 'text' as const, text: value.result }],
-  }
-  const invoke = async (endpoint: string, payload: unknown): Promise<{ result: string }> => {
-    const response = await host.dispatch(endpoint, payload)
-    if (!response.ok) throw Object.assign(new Error(response.error.message), { code: response.error.code })
-    return { result: JSON.stringify(response.value, null, 2) }
-  }
-  ctx.tools.register(defineTool({
-    name: 'automation_list',
-    description: 'List all persistent automation tasks and their run history. Use this whenever the user asks about scheduled tasks, reminders, next runs, or past automation results.',
-    parameters: {}, output,
-    execute: () => invoke('snapshot', {}),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_get',
-    description: 'Get one automation task by id.',
-    parameters: { id: { type: 'string', required: true } }, output,
-    execute: (args) => invoke('get', args),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_create',
-    description: 'Create and immediately enable a persistent local automation task. Use only when the user clearly asks to create or schedule future work. State the schedule and local-computer limitation in the response.',
-    parameters: {
-      name: { type: 'string', required: true },
-      description: { type: 'string', required: true, description: 'Complete prompt the future Agent should execute.' },
-      frequency: { type: 'string', required: true, enum: ['仅一次', '每天', '每周', '每月'] },
-      time: { type: 'string', required: true, description: 'Local Host time in HH:mm format.' },
-      agent: { type: 'string', description: 'Display label; defaults to 当前 Agent.' },
-      skill: { type: 'string', description: 'Optional skill display label.' },
-      delivery_mode: { type: 'string', enum: ['origin_chat', 'new_chat', 'inbox', 'silent'], description: 'Where completed results should be delivered. Defaults to the current chat.' },
-      desktop_notification: { type: 'boolean', description: 'Whether the client should also show a desktop notification.' },
-    }, output,
-    execute: (args, exec) => invoke('create', {
-      ...args,
-      projectPath: exec.agent?.session.header.cwd,
-      originSessionId: exec.agent?.session.id,
-      deliveryMode: args.delivery_mode,
-      desktopNotification: args.desktop_notification,
-      agent: args.agent ?? '当前 Agent', skill: args.skill ?? '暂不选择',
-    }),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_update',
-    description: 'Update an existing automation task. Use only after the user has clearly requested the change.',
-    parameters: {
-      id: { type: 'string', required: true }, name: { type: 'string' }, description: { type: 'string' },
-      frequency: { type: 'string', enum: ['仅一次', '每天', '每周', '每月'] }, time: { type: 'string' },
-    }, output,
-    execute: (args) => invoke('update', args),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_set_enabled',
-    description: 'Pause or resume an automation task.',
-    parameters: { id: { type: 'string', required: true }, enabled: { type: 'boolean', required: true } }, output,
-    execute: (args) => invoke('toggle', args),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_run_now',
-    description: 'Run an automation task immediately. This consumes model resources; use only when the user explicitly requests an immediate run.',
-    parameters: { id: { type: 'string', required: true } }, output,
-    timeoutMs: 6 * 60_000,
-    execute: (args) => invoke('run-now', args),
-  }))
-  ctx.tools.register(defineTool({
-    name: 'automation_delete',
-    description: 'Permanently delete an automation task. Call only after the user explicitly confirms deletion.',
-    parameters: { id: { type: 'string', required: true } }, output,
-    execute: (args) => invoke('delete', args),
-  }))
-}
-
 export function apply(ctx: Context): void {
+  installAutomationMigration(ctx)
   ctx.logger.info("[dsh-tokensapi-ui] host loaded")
   ctx.inject(["connection", "credentials"], (scoped) => {
     const host = scoped as unknown as {
@@ -514,7 +438,7 @@ export function apply(ctx: Context): void {
   })
   // Mount the channel only when the Connection service is present (headless
   // compositions load the plugin but expose no transport).
-  ctx.inject(["connection", "skills", "tools", "agents", "sessions", "agentPresets", "agentDefaultModel"], (scoped) => {
+  ctx.inject(["connection", "skills"], (scoped) => {
     const connection = (scoped as unknown as { connection: HostConnection }).connection
     const skills = (scoped as unknown as { skills: HostSkills }).skills
     let invalidateSkills = (): void => {}
@@ -535,13 +459,6 @@ export function apply(ctx: Context): void {
       () => connection.rpc.handle("/tokens-skills", dispatchSkills, { authority: "trusted-host" }),
       "tokens-core: skills rpc channel",
     )
-    const automation = new AutomationHost(new DshAutomationExecutor(scoped), { onError: (error) => scoped.logger.error(`tokens automation tick failed: ${String(error)}`) }, new DshAutomationDelivery(scoped))
-    void automation.start().catch((error) => scoped.logger.error(`tokens automation failed to start: ${String(error)}`))
-    scoped.effect(
-      () => connection.rpc.handle("/tokens-automation", (endpoint, payload) => automation.dispatch(endpoint, payload), { authority: "trusted-host" }),
-      "tokens-core: automation rpc channel",
-    )
-    scoped.effect(() => () => automation.dispose(), "tokens-core: automation scheduler")
-    registerAutomationTools(scoped as Context & { tools: { register(tool: ReturnType<typeof defineTool>): unknown } }, automation)
+
   })
 }

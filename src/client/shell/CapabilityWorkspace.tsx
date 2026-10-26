@@ -9,6 +9,7 @@ import { BRAND_LOGO } from "./brand-logo.ts";
 import darkTokensApiLogo from "./assets/tokens-cowork-dark-mark-96.png";
 import lightTokensApiLogo from "./assets/tokensapi-mark-1024.png";
 import styles from "./CapabilityWorkspace.module.css";
+import type { Capability } from "./capability-registry.ts";
 
 let layoutRuntime: ILayout | null = null;
 
@@ -91,7 +92,7 @@ function useSidebarWidth(node: HTMLElement | null): number {
 export function CapabilityWorkspace(): React.JSX.Element {
   const active = useActiveCapability();
   const capabilities = useCapabilities();
-  const activeCap = capabilities.find((item) => item.id === active) ?? null;
+  const activeCap = workspace.native() ? null : capabilities.find((item) => item.id === active) ?? null;
   const ActiveView = activeCap?.render ?? null;
   const [barNode, setBarNode] = useState<HTMLElement | null>(null);
   const sidebarWidth = useSidebarWidth(barNode);
@@ -158,6 +159,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
   // excluded because capture runs before their stopPropagation handlers.
   useEffect(() => {
     const onClick = (event: MouseEvent): void => {
+      if (workspace.native()) return;
       if (workspace.snapshot() === null) return;
       const target = event.target as Element | null;
       if (target === null) return;
@@ -247,4 +249,12 @@ export function CapabilityWorkspace(): React.JSX.Element {
       ) : null}
     </div>
   );
+}
+
+/** Host main-slot page: no absolute overlay or host inert manipulation. */
+export function CapabilityPanel({ capability }: { capability: Capability }): React.JSX.Element {
+  const View = capability.render;
+  return <section className={clsx(styles.nativePage, "theme-canvas")} aria-label={capability.label}>
+    <CapabilityViewBoundary key={capability.id} label={capability.label}><View /></CapabilityViewBoundary>
+  </section>;
 }

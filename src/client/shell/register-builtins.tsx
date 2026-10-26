@@ -3,7 +3,7 @@
 // registerCapability call, not a change to CapabilityWorkspace.
 import { registerCapability } from "./capability-registry.ts";
 import { SkillsModule } from "../modules/skills/SkillsModule.tsx";
-import { AutomationModule } from "../modules/automation/AutomationModule.tsx";
+import { NativeAutomation } from "../modules/automation/NativeAutomation.tsx";
 import { ToolsModule } from "../modules/tools/ToolsModule.tsx";
 import { ModulePlaceholder } from "../modules/ModulePlaceholder.tsx";
 
@@ -14,7 +14,7 @@ export function registerBuiltinCapabilities(): () => void {
   const releases = [
     registerCapability({ id: "skills", label: "技能库", tag: "SKILLS", order: 10, render: SkillsModule }),
     registerCapability({ id: "knowledge", label: "知识库", tag: "KNOWLEDGE", order: 20, render: KnowledgeView }),
-    registerCapability({ id: "automation", label: "自动化", tag: "AUTOMATION", order: 30, render: AutomationModule }),
+    registerCapability({ id: "automation", label: "自动化", tag: "AUTOMATION", order: 30, render: NativeAutomation, nativePanel: "schedules" }),
     registerCapability({ id: "tools", label: "工具库", tag: "TOOLS", order: 40, render: ToolsModule }),
   ];
   return () => { for (const release of releases) release(); };
