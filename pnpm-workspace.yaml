@@ -1,2 +1,8 @@
 allowBuilds:
   esbuild: true
+  # The optional DSH compatibility peer is not executed by this UI build.
+  '@deepseek-ai/dsh-subprocess-local': false
+  '@google/genai': false
+  koffi: false
+  node-pty: false
+  protobufjs: false
