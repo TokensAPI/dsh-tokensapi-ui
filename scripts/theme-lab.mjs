@@ -7,7 +7,7 @@ import { OrganizationThemeHost } from "../src/organization-theme-host.ts";
 import { readCss } from "./read-css.mjs";
 
 const root = new URL("../", import.meta.url);
-const identities = { partner: 3, partner2: 3, other: 9, failure: 9, none: null };
+const identities = { partner: 3, partner2: 3, unififi: 4, other: 9, failure: 9, none: null };
 let identity = "none";
 let delayMs = 400;
 let queryCount = 0;
@@ -37,6 +37,10 @@ const modules = new Set([
   "src/client/theme/inject.ts",
   "src/client/theme/theme-contract.css",
   "src/client/theme/themes/clean.css",
+  "src/client/theme/themes/unififi.css",
+  "src/client/theme/base-skins.ts",
+  "src/client/theme/local-preview.ts",
+  "src/client/theme/debug-preview.ts",
   "src/client/theme/themes/electrox.css",
   "src/client/theme/dsh-bridge.css",
   "src/client/theme/chrome.css",

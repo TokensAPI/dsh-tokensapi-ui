@@ -63,12 +63,12 @@ const cssModulesPlugin = {
     return [
       `const css = ${JSON.stringify(code.toString())};`,
       `const tagId = ${JSON.stringify(tagId)};`,
-      `if (typeof document !== 'undefined' && document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') === null) {`,
-      `  const tag = document.createElement('style');`,
+      `if (typeof document !== 'undefined') {`,
+      `  const tag = document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') ?? document.createElement('style');`,
       `  tag.dataset.plugin = 'dsh-tokensapi-ui';`,
       `  tag.dataset.pluginCss = tagId;`,
       `  tag.textContent = css;`,
-      `  document.head.appendChild(tag);`,
+      `  if (!tag.isConnected) document.head.appendChild(tag);`,
       `}`,
       `export default ${JSON.stringify(classMap)};`,
     ].join('\n')
@@ -110,7 +110,7 @@ const PNG_PREFIX = '\0inline-png:'
 const pngPlugin = {
   name: 'tokens-core-inline-png',
   resolveId(source: string, importer: string | undefined): string | null {
-    if (!source.endsWith('.png')) return null
+    if (!/\.(png|svg)$/.test(source)) return null
     const abs = importer !== undefined ? resolvePath(dirname(importer), source) : source
     return PNG_PREFIX + abs
   },
@@ -119,7 +119,8 @@ const pngPlugin = {
     const file = id.slice(PNG_PREFIX.length)
     this.addWatchFile(file)
     const encoded = readFileSync(file).toString('base64')
-    return `export default ${JSON.stringify(`data:image/png;base64,${encoded}`)}`
+    const mime = file.endsWith('.svg') ? 'image/svg+xml' : 'image/png'
+    return `export default ${JSON.stringify(`data:${mime};base64,${encoded}`)}`
   },
 }
 

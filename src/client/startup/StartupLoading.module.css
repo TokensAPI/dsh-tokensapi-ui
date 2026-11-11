@@ -281,3 +281,7 @@
   .title { font-size: 24px; }
   .formTitle { font-size: 24px !important; }
 }
+
+:global(html:not([data-color-scheme="light"])) .footer img {
+  filter: invert(1);
+}

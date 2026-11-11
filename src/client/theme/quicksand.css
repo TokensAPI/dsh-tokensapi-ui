@@ -1,0 +1,8 @@
+/* Official Quicksand variable font (SIL OFL); inlined for offline Desktop use. */
+@font-face {
+  font-family: "Quicksand";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url("./assets/Quicksand-VariableFont_wght.ttf") format("truetype");
+}

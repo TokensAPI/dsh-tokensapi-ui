@@ -44,9 +44,9 @@ describe("TokensAPI Lake View basic theme", () => {
   });
 
   it("uses a resilient system font stack", () => {
-    expect(cleanTheme).toContain('"Albert Sans Variable"');
+    expect(cleanTheme).toContain('"Quicksand"');
     expect(bridge).toContain("--dsw-font-family: var(--theme-font-sans)");
-    expect(existsSync(new URL("../src/client/theme/albert-sans.css", import.meta.url))).toBe(true);
+    expect(existsSync(new URL("../src/client/theme/quicksand.css", import.meta.url))).toBe(true);
   });
 
   it("keeps the light text shadow disabled so DSH channel rows render cleanly", () => {

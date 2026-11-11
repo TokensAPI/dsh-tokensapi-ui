@@ -1,0 +1,43 @@
+/* UNIFIFI 由你飞飞 — clean foundation with the official website's blue.
+ * Brand source: https://business.unififi.com/zh/home (2026-11-11).
+ * Layout, controls and typography inherit clean; no additional product bar. */
+[data-theme="unififi"] {
+  --lake-primary: #1890ea;
+  --lake-secondary: #2a8dc9;
+  --theme-bg-canvas: #171b20;
+  --theme-bg-shell: #171e26;
+  --theme-bg-surface: #1c2630;
+  --theme-bg-surface-raised: #26323f;
+  --theme-accent-primary: #70bfff;
+  --theme-accent-primary-hover: #98d1ff;
+  --theme-accent-fill: #1890ea;
+  --theme-accent-fill-hover: #46a8f2;
+  --theme-fg-on-accent: #071c2e;
+  --theme-accent-soft: rgb(24 144 234 / 16%);
+  --theme-border-subtle: rgb(133 174 207 / 15%);
+  --theme-border-default: rgb(133 174 207 / 24%);
+  --theme-border-strong: rgb(133 174 207 / 36%);
+  --theme-border-focus: #70bfff;
+  --clean-open-ring: rgb(24 144 234 / 20%);
+}
+
+[data-theme="unififi"][data-color-scheme="light"] {
+  --theme-bg-canvas: #f8fafc;
+  --theme-bg-shell: #f0f5fa;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #ffffff;
+  --theme-fg-secondary: #40556b;
+  --theme-fg-muted: #52677b;
+  --theme-accent-primary: #086bb4;
+  --theme-accent-primary-hover: #07558f;
+  --theme-accent-fill: #086bb4;
+  --theme-accent-fill-hover: #07558f;
+  --theme-fg-on-accent: #ffffff;
+  --theme-accent-soft: rgb(24 144 234 / 9%);
+  --theme-border-subtle: rgb(40 86 125 / 14%);
+  --theme-border-default: rgb(40 86 125 / 21%);
+  --theme-border-strong: rgb(40 86 125 / 32%);
+  --theme-border-focus: #086bb4;
+  --theme-shadow-card-hover: inset 0 1px 0 rgb(255 255 255 / 82%), 0 18px 44px -24px rgb(35 65 86 / 26%);
+  --theme-surface-shadow: rgb(29 53 68 / 16%);
+}

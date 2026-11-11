@@ -4,9 +4,9 @@
   --lake-primary: oklch(0.765 0.177 163.22);
   --lake-secondary: oklch(0.551 0.0899 200.52);
   --lake-background: oklch(0.185 0 0);
-  --theme-font-sans: "Albert Sans Variable", "Albert Sans", system-ui, sans-serif;
+  --theme-font-sans: "Quicksand", system-ui, sans-serif;
   --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --theme-font-display: "Albert Sans Variable", "Albert Sans", system-ui, sans-serif;
+  --theme-font-display: "Quicksand", system-ui, sans-serif;
   --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
   --theme-bg-canvas: var(--lake-background);
   /* These are the actual Lake View dark-mode mixes, expanded to concrete

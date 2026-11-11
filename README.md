@@ -1,13 +1,17 @@
 # dsh-tokensapi-ui
 
-TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供两套产品主题：
+TokensHarness 的核心 DSH 插件：为 DeepSeek Harness Web/Desktop 提供三套产品主题：
 
 - TokensAPI 基础主题：Lake View 深色与浅色方案，面板使用不透明背景。
 - ELECTRO X / 粒刻合作方主题。
+- UNIFIFI 由你飞飞主题：复用基础布局，采用官网蓝色与官方 LOGO，支持浅色与深色。
 
 主题根据当前 `TOKENSAPI_API_KEY` 所属组织自动应用：组织 ID 为 **3** 时使用
-ELECTRO X，其余组织、个人 Key、未配置 Key 或查询失败时使用基础主题。
-设置中不再提供主题选择，旧的本地主题选择记录也不再生效。
+ELECTRO X，组织 ID 为 **4** 时使用 UNIFIFI 由你飞飞，其余组织、个人 Key、未配置 Key 或查询失败时使用基础主题。
+普通用户不显示主题选择。用户 ID **3、63** 可在“设置 → 通用 → 主题调试”切换当前
+全部产品主题，或选择“自动（按组织）”。Host 根据组织接口返回的 `data.user.id` 核验，
+与组织 ID 无关；个人 Key 也可使用。选择按用户 ID 保存在当前客户端，重启后重新
+核验身份才恢复，换 Key 时立即撤销旧调试权限。旧的通用主题选择记录不再生效。
 
 客户端启动及收到 `credentials/reference-updated` 的 Key 变更通知时，通过现有
 连接向本插件 Host 请求主题快照。Host 使用凭据服务中的 Key 查询
@@ -94,9 +98,10 @@ pnpm doctor:local   # 只读检查 profile 的解析路径、别名、exports �
 诊断证明磁盘加载链路一致，不能证明正在运行的进程已经重新加载。
 
 本地构建在「设置 → 通用」提供「本地主题预览」：自动（按组织）、基础主题、
-合作方主题。选择仅保存在此客户端，重启后保留；切回自动立即恢复最新组织主题。
+合作方主题、UNIFIFI 由你飞飞。选择仅保存在此客户端，重启后保留；切回自动立即恢复最新组织主题。
 只要构建环境存在 `CI` 或 `GITHUB_ACTIONS` 标记，该入口和覆盖逻辑就会被编译移除，
-旧的本地预览记录不影响 CI 包。发布流程额外检查最终 bundle，防止误带调试入口。
+旧的本地预览记录不影响 CI 包。发布流程检查最终 bundle，防止误带无权限限制的
+本地预览入口；上述用户白名单的“主题调试”会随正式包提供。
 
 样式职责、拆分等价性证明和实机验收范围见 [架构与验证约定](docs/architecture.md)。
 

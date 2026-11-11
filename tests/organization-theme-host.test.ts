@@ -19,6 +19,27 @@ afterEach(() => {
 });
 
 describe("organization-selected theme Host", () => {
+  it.each([3, 63])("allows theme debugging for user %s, including personal Keys", async (id) => {
+    const host = mount(async () => "sk-debug-test", vi.fn(async () => Response.json({
+      success: true, data: { organization: null, user: { id, quota: 999 } },
+    })));
+    expect(await host.snapshot()).toEqual({ ...clean, themeDebugUserId: id });
+  });
+
+  it.each([undefined, "63", 4, 12, null])("does not grant access from organization ID or invalid user %s", async (id) => {
+    const host = mount(async () => "sk-normal-test", vi.fn(async () => Response.json({
+      success: true, data: { organization: { id: 3, status: 1 }, user: { id } },
+    })));
+    expect(await host.snapshot()).toEqual(partner);
+  });
+
+  it("selects UNIFIFI for organization 4 and falls back after key removal", async () => {
+    let key = "sk-unififi-test";
+    const host = mount(async () => key, vi.fn(async () => identity({ id: 4, status: 1 })));
+    expect(await host.snapshot()).toEqual({ skin: "unififi", organizationId: 4 });
+    key = "";
+    expect(await host.snapshot()).toEqual(clean);
+  });
   it("uses the current Key to select organization 3 without exposing credential or user data", async () => {
     const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json({
       success: true,

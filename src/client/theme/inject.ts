@@ -12,14 +12,18 @@
 import contract from "./theme-contract.css";
 import clean from "./themes/clean.css";
 import electrox from "./themes/electrox.css";
+import unififi from "./themes/unififi.css";
+import { includeBaseSkins } from "./base-skins.ts";
 import bridge from "./dsh-bridge.css";
 import chrome from "./chrome.css";
 import { DEFAULT_SKIN, type SkinId } from "../../shared/organization-theme.ts";
+import { resolveDebugTheme, getDebugThemeState } from "./debug-preview.ts";
 import { resolveLocalTheme } from "./local-preview.ts";
 
 /** Registered skins (id → its [data-theme="<id>"]-scoped --theme-* sheet). */
 const SKINS: Record<SkinId, string> = {
-  clean,
+  clean: includeBaseSkins(clean),
+  unififi,
   electrox,
 };
 
@@ -38,9 +42,10 @@ function syncColorScheme(): void {
   document.documentElement.dataset.colorScheme = getDshColorScheme();
 }
 
-/** Apply the Host-selected skin; user preferences do not select branding. */
+/** Apply organization branding, with a server-authorized debug override. */
 export function setActiveSkin(id: SkinId): void {
-  if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__) {
+  id = resolveDebugTheme(id);
+  if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__ && getDebugThemeState().userId === null) {
     id = resolveLocalTheme(id);
   }
   if (typeof document !== "undefined" && document.documentElement.dataset.theme !== id) {
@@ -62,7 +67,7 @@ export function injectTheme(): () => void {
   }
 
   const skinSheets = Object.values(SKINS).join("\n");
-  const cssText = `${contract}\n${skinSheets}\n${bridge}\n${chrome}`;
+  const cssText = `${contract}\n${skinSheets}\n${bridge}\n${includeBaseSkins(chrome)}`;
   const existing = document.head.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_TAG}"]`);
   if (existing !== null) {
     // Watch/HMR reloads the module while the previous style element remains in

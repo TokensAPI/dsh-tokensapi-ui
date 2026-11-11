@@ -1,5 +1,7 @@
 import { API_KEY_REF, DEFAULT_SKIN, type SkinId } from "../../shared/organization-theme.ts";
 
+import { getDebugThemeState, setThemeDebugUser } from "./debug-preview.ts";
+
 export interface OrganizationThemeRuntime {
   read(): Promise<unknown>;
   onCredentialChange(listener: (ref: string) => void): () => void;
@@ -17,6 +19,7 @@ export function observeOrganizationTheme(
   activeOwner = owner;
   let disposed = false;
   let revision = 0;
+  let organizationSkin: SkinId = DEFAULT_SKIN;
   const current = (): boolean => !disposed && activeOwner === owner;
   const refresh = (): void => {
     if (!current()) return;
@@ -26,16 +29,25 @@ export function observeOrganizationTheme(
     void runtime.read().then((value) => {
       if (!current() || request !== revision) return;
       const skin = (value as { skin?: unknown } | null)?.skin;
-      applySkin(skin === "electrox" ? "electrox" : DEFAULT_SKIN);
+      organizationSkin = skin === "electrox" || skin === "unififi" ? skin : DEFAULT_SKIN;
+      setThemeDebugUser((value as { themeDebugUserId?: unknown } | null)?.themeDebugUserId);
+      applySkin(organizationSkin);
     }).catch(() => {
       // A lost RPC connection is not a new identity. Keep the last result until
       // the Host can answer again; startup still uses the default.
     });
   };
   const stopCredentials = runtime.onCredentialChange((ref) => {
-    if (ref === API_KEY_REF) refresh();
+    if (ref !== API_KEY_REF || !current()) return;
+    // A new credential must not inherit the previous account's debug access.
+    if (getDebugThemeState().userId !== null) {
+      setThemeDebugUser(null);
+      applySkin(organizationSkin);
+    }
+    refresh();
   });
   const stopConnection = runtime.onConnectionReset(refresh);
+  setThemeDebugUser(null);
   applySkin(DEFAULT_SKIN);
   refresh();
   return () => {
@@ -46,6 +58,7 @@ export function observeOrganizationTheme(
     stopConnection();
     if (activeOwner !== owner) return;
     activeOwner = undefined;
+    setThemeDebugUser(null);
     applySkin(DEFAULT_SKIN);
   };
 }

@@ -1,9 +1,11 @@
 /** Public theme state; credential values never cross this channel. */
-export type SkinId = "clean" | "electrox";
+export type SkinId = "clean" | "electrox" | "unififi";
 
 export interface OrganizationTheme {
   readonly skin: SkinId;
   readonly organizationId: number | null;
+  /** Only allowlisted accounts receive a debug identity; never an API Key. */
+  readonly themeDebugUserId?: number;
 }
 
 export const DEFAULT_SKIN: SkinId = "clean";

@@ -9,7 +9,7 @@ export function getLocalThemeMode(): LocalThemeMode {
   if (mode !== undefined) return mode;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    mode = saved === "clean" || saved === "electrox" ? saved : "auto";
+    mode = saved === "clean" || saved === "electrox" || saved === "unififi" ? saved : "auto";
   } catch { mode = "auto"; }
   return mode;
 }

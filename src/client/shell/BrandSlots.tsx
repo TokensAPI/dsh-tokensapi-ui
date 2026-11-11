@@ -1,10 +1,17 @@
-import darkLogoUrl from "./assets/tokens-cowork-dark-mark-96.png";
-import lightLogoUrl from "./assets/tokensapi-mark-1024.png";
+import darkLogoUrl from "./assets/tokensapi-quicksand-mark.svg";
+import lightLogoUrl from "./assets/tokensapi-quicksand-mark.svg";
+import unififiLogo from "./assets/unififi-mark.svg";
+import { PartnerBrandMark, PartnerBrandText } from "./PartnerBrand.tsx";
 import css from "./BrandSlots.module.css";
 
 export interface TokensBrandMarkProps {
   size: number;
   className?: string;
+}
+
+/** Keep the host's hit area while matching the designer's compact lockup mark. */
+export function TokensSidebarBrandMark(props: TokensBrandMarkProps): React.JSX.Element {
+  return <TokensBrandMark {...props} className={[props.className, css.sidebarMark].filter(Boolean).join(" ")} />;
 }
 
 /** Official shell brand occupant. The host continues to own all button behavior. */
@@ -19,13 +26,21 @@ export function TokensBrandMark({ size, className }: TokensBrandMarkProps): Reac
         height={size}
       />
       <img aria-hidden="true" className={css.darkMark} src={darkLogoUrl} width={size} height={size} />
+      <span className={css.unififiMark}><PartnerBrandMark logo={unififiLogo} name="UNIFIFI / 由你飞飞" size={size} contained /></span>
     </span>
   );
 }
 
 /** Expanded-sidebar wordmark occupant. */
 export function TokensBrandName(): React.JSX.Element {
-  return <span className={css.name}><span>Tokens</span> <span className={css.cowork}>Cowork</span></span>;
+  return (
+    <span className={css.name}>
+      <span className={css.tokensName}><span>Tokens</span> <span className={css.cowork}>Cowork</span></span>
+      <span className={css.unififiName}>
+        <PartnerBrandText name="UNIFIFI" />
+      </span>
+    </span>
+  );
 }
 
 const HERO_HEADLINES = new Set([

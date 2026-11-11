@@ -6,7 +6,14 @@ export function readCss(file, onFile = () => {}, ancestors = []) {
   const absolute = resolve(file);
   if (ancestors.includes(absolute)) throw new Error(`Cyclic CSS import: ${absolute}`);
   onFile(absolute);
-  const source = readFileSync(absolute, "utf8");
+  const source = readFileSync(absolute, "utf8").replace(
+    /url\((["']?)(\.[^"')]+\.ttf)\1\)/g,
+    (_url, _quote, relative) => {
+      const asset = resolve(dirname(absolute), relative);
+      onFile(asset);
+      return `url("data:font/ttf;base64,${readFileSync(asset).toString("base64")}")`;
+    },
+  );
   return source.replace(/^[ \t]*@import ["'](\.[^"']+\.css)["'];[ \t]*(?:\r?\n|$)/gm, (_rule, relative) =>
     readCss(resolve(dirname(absolute), relative), onFile, [...ancestors, absolute]),
   );

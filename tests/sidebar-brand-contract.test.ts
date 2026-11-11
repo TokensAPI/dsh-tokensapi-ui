@@ -25,7 +25,7 @@ describe("sidebar branding contract", () => {
     expect(client).toContain('ctx.slots.inject("conversation.hero.brand.mark"');
     expect(workspace).not.toMatch(/document\.querySelector|\.click\(\)/);
     expect(workspace).toContain("layoutRuntime?.toggleSidebar()");
-    expect(workspace).toContain('<span className={styles.poweredName}>TokensAPI</span>');
+    expect(workspace).toContain('<PartnerBrandText name="ELECTRO X" localName="粒刻" />');
     expect(workspace).toContain("'[role=\"treeitem\"][aria-selected]'");
     expect(workspace).not.toContain('target.closest("[data-shell-overlay]") === null');
     expect(chrome).not.toMatch(/data-tokens-sidebar|viewBox="0 0 23\.16 17\.04"/);
@@ -46,10 +46,10 @@ describe("sidebar branding contract", () => {
     expect(mark.type).toBe("span");
     expect(mark.props.style).toEqual({ width: 24, height: 24 });
     expect(mark.props.className).toContain("host-mark");
-    expect(mark.props.children).toHaveLength(2);
+    expect(mark.props.children).toHaveLength(3);
     expect(mark.props.children[0].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
     expect(mark.props.children[1].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
-    expect(TokensBrandName().props.children).toHaveLength(3);
+    expect(TokensBrandName().props.children).toHaveLength(2);
   });
 
   it("keeps the capability header seam aligned and strengthens light branding", () => {
@@ -63,6 +63,6 @@ describe("sidebar branding contract", () => {
     expect(brandStyles).not.toContain("scale(1.1)");
     expect(brandStyles).toMatch(/\.name\s*\{[^}]*font-size:\s*16px/s);
     expect(brandStyles).not.toContain("contrast(1.1)");
-    expect(existsSync(new URL("../src/client/shell/assets/tokensapi-mark-1024.png", import.meta.url))).toBe(true);
+    expect(existsSync(new URL("../src/client/shell/assets/tokensapi-quicksand-mark.svg", import.meta.url))).toBe(true);
   });
 });

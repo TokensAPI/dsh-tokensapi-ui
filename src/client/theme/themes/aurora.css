@@ -1,7 +1,7 @@
 [data-theme="aurora"] {
   color-scheme: dark;
-  --theme-font-sans: Inter, system-ui, sans-serif; --theme-font-cn: "PingFang SC", "Microsoft YaHei", sans-serif;
-  --theme-font-display: Inter, system-ui, sans-serif; --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --theme-font-sans: "Quicksand", system-ui, sans-serif; --theme-font-cn: "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-font-display: "Quicksand", system-ui, sans-serif; --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
   --theme-bg-canvas: transparent; --theme-bg-shell: rgb(12 14 35 / var(--tokens-glass-alpha, .62));
   --theme-bg-surface: rgb(24 27 58 / var(--tokens-glass-alpha, .54)); --theme-bg-surface-raised: rgb(42 45 82 / var(--tokens-glass-alpha, .64));
   --theme-bg-overlay: rgb(3 4 16 / 72%); --theme-fg-primary: #f8f7ff; --theme-fg-secondary: #d7d4ef; --theme-fg-muted: #9996b8; --theme-fg-on-accent: #fff;

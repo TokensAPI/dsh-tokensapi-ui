@@ -12,7 +12,7 @@ import { THEME_CHANNEL } from "../shared/organization-theme.ts";
 import { CapabilityPanel, CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
 import { installCapabilityNavigation } from "./shell/native-capability-navigation.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
-import { observeTokensCoworkHeadline, TokensBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
+import { observeTokensCoworkHeadline, TokensBrandMark, TokensSidebarBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
 import { observeTurnStatus } from "./shell/turn-status.ts";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
@@ -20,6 +20,7 @@ import { setSkillsRuntime, type SkillsRemote } from "./modules/skills/data.ts";
 import { observeStartupGate } from "./startup/StartupLoading.ts";
 import { observeDesktopSettingsSelect } from "./theme/desktop-select.ts";
 import { observeFocusModality } from "./theme/focus-modality.ts";
+import { DebugThemePreview } from "./theme/DebugThemePreview.tsx";
 import { LocalThemePreview } from "./theme/LocalThemePreview.tsx";
 import { setNativeScheduleLayout } from "./modules/automation/native-schedule.ts";
 
@@ -37,6 +38,10 @@ export interface TokensWorkspaceApi {
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => setNativeScheduleLayout(ctx.get("layout")), "tokens-core: native automation navigation");
 
+  ctx.slots.inject("settings.general.item", () => ctx.slots.register(
+    { name: "settings.general.item", id: "tokens-debug-theme-preview", order: 89 },
+    DebugThemePreview,
+  ));
   if (typeof __TOKENS_LOCAL_THEME_PREVIEW__ !== "undefined" && __TOKENS_LOCAL_THEME_PREVIEW__) {
     ctx.slots.inject("settings.general.item", () => ctx.slots.register(
       { name: "settings.general.item", id: "tokens-local-theme-preview", order: 90 },
@@ -67,7 +72,7 @@ export function apply(ctx: ClientContext): void {
   // animation and responsive replacement behavior stay entirely upstream.
   ctx.slots.inject("sidebar.brand.mark", () => {
     try {
-      return ctx.slots.register({ name: "sidebar.brand.mark" }, TokensBrandMark);
+      return ctx.slots.register({ name: "sidebar.brand.mark" }, TokensSidebarBrandMark);
     } catch {
       // A host-provided single occupant must never prevent the rest of this
       // plugin from mounting.

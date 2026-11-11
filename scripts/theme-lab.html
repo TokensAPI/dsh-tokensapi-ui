@@ -37,6 +37,7 @@
   <div class="card">
     <button data-id="partner">组织 3</button>
     <button data-id="partner2">另一个组织 3 Key</button>
+    <button data-id="unififi">组织 4 · UNIFIFI</button>
     <button data-id="other">其他组织</button>
     <button data-id="none">移除 Key</button>
     <button data-id="failure">组织查询失败</button>
@@ -61,7 +62,7 @@
   let history = [document.documentElement.dataset.theme];
   const theme = () => document.documentElement.dataset.theme;
   function render() {
-    $("brand").textContent = theme() === "electrox" ? "ELECTRO X / 粒刻" : "TokensAPI";
+    $("brand").textContent = theme() === "electrox" ? "ELECTRO X / 粒刻" : theme() === "unififi" ? "UNIFIFI 由你飞飞" : "TokensAPI";
     $("queries").textContent = queryCount;
     $("reads").textContent = reads;
     $("changes").textContent = history.length - 1;

@@ -17,7 +17,7 @@
 
 .darkMark {
   display: none !important;
-  filter: drop-shadow(0 3px 8px rgb(118 140 255 / 24%));
+  filter: invert(1);
 }
 
 :global(html:is([data-theme="clean"], [data-theme="electrox"]):not([data-color-scheme="light"])) .lightMark {
@@ -32,6 +32,7 @@
   display: block;
   overflow: hidden;
   color: inherit;
+  font-family: "Quicksand", system-ui, sans-serif;
   font-size: 16px;
   font-weight: 680;
   letter-spacing: -0.025em;
@@ -46,4 +47,63 @@
   background-clip: text;
   -webkit-background-clip: text;
   filter: saturate(1.08);
+}
+
+/* Balance the compact mark with the 24px wordmark while retaining the host slot. */
+.sidebarMark :is(.lightMark, .darkMark) {
+  width: 20px;
+  height: 20px;
+  inset: 2px 0 auto auto;
+}
+
+.tokensName {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.unififiMark, .unififiName { display: none !important; }
+:global(html[data-theme="unififi"]) .lightMark,
+:global(html[data-theme="unififi"]) .darkMark,
+:global(html[data-theme="unififi"]) .tokensName { display: none !important; }
+:global(html[data-theme="unififi"]) .unififiMark { display: block !important; }
+:global(html[data-theme="unififi"]) .unififiName {
+  display: block !important;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+/* Match the product-bar lockup inside the existing 60px sidebar header. */
+:global(html[data-theme="unififi"]) .name { line-height: normal; }
+.mark .unififiMark img { position: static; }
+
+/* Only the expanded brand identity is enlarged. Native caption, header row,
+ * sidebar overflow and collapsed toggle geometry remain host-owned. */
+:global(html[data-theme="unififi"] [class*="_brandIdentity"]):has(.unififiName),
+:global(html[data-theme="unififi"] [class*="_brandName"]):has(.unififiName) {
+  height: 44px;
+  line-height: normal;
+}
+:global(html[data-theme="unififi"] [class*="_brandIdentity"]):has(.unififiName) .sidebarMark {
+  width: 44px !important;
+  height: 44px !important;
+}
+:global(html[data-theme="unififi"] [class*="_brandIdentity"]):has(.unififiName) .unififiMark > span {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+/* Keep the whole shared lockup as one non-shrinking flex item. */
+:global(html[data-theme="unififi"]) .name,
+:global(html[data-theme="unififi"]) .unififiName {
+  flex: none;
+  height: 40px;
+  min-height: 40px;
+  overflow: visible;
+}
+:global(html[data-theme="unififi"] [class*="_brandIdentity"]):has([data-slot="sidebar.brand.name"]),
+:global(html[data-theme="unififi"] [class*="_brandName"]):has([data-slot="sidebar.brand.name"]) {
+  height: 44px !important;
+  min-height: 44px;
 }

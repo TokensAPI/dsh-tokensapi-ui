@@ -2,8 +2,10 @@ import { DEFAULT_THEME, type OrganizationTheme } from "./shared/organization-the
 
 const ORGANIZATION_URL = "https://tokensapi.ai/api/current/organization";
 const PARTNER_ORGANIZATION_ID = 3;
+const UNIFIFI_ORGANIZATION_ID = 4;
 const REQUEST_TIMEOUT_MS = 8_000;
 const FAILURE_COOLDOWN_MS = 30_000;
+const THEME_DEBUG_USER_IDS = new Set([3, 63]);
 
 /** One in-memory lookup per current Key, shared by all connected clients. */
 export class OrganizationThemeHost {
@@ -96,24 +98,29 @@ export class OrganizationThemeHost {
       }
       const body = await response.json() as {
         success?: unknown;
-        data?: { organization?: { id?: unknown; status?: unknown } | null };
+        data?: { organization?: { id?: unknown; status?: unknown } | null; user?: { id?: unknown } };
       } | null;
       if (this.disposed || controller.signal.aborted) return DEFAULT_THEME;
       if (body?.success !== true || body.data?.organization === undefined) {
         throw new Error("invalid organization response");
       }
+      const userId = body.data.user?.id;
+      const debug = typeof userId === "number" && THEME_DEBUG_USER_IDS.has(userId)
+        ? { themeDebugUserId: userId } : {};
       const organization = body.data.organization;
-      if (organization === null) return DEFAULT_THEME;
+      if (organization === null) return { ...DEFAULT_THEME, ...debug };
       if (typeof organization.status !== "number" || !Number.isInteger(organization.status)) {
         throw new Error("invalid organization status");
       }
-      if (organization.status !== 1) return DEFAULT_THEME;
+      if (organization.status !== 1) return { ...DEFAULT_THEME, ...debug };
       if (typeof organization.id !== "number" || !Number.isSafeInteger(organization.id) || organization.id <= 0) {
         throw new Error("invalid organization id");
       }
       return {
-        skin: organization.id === PARTNER_ORGANIZATION_ID ? "electrox" : "clean",
+        skin: organization.id === PARTNER_ORGANIZATION_ID ? "electrox"
+          : organization.id === UNIFIFI_ORGANIZATION_ID ? "unififi" : "clean",
         organizationId: organization.id,
+        ...debug,
       };
     } finally {
       clearTimeout(timeout);

@@ -6,8 +6,7 @@ import { useActiveCapability, workspace } from "./workspace-store.ts";
 import { useCapabilities } from "./capability-registry.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { BRAND_LOGO } from "./brand-logo.ts";
-import darkTokensApiLogo from "./assets/tokens-cowork-dark-mark-96.png";
-import lightTokensApiLogo from "./assets/tokensapi-mark-1024.png";
+import { PartnerBrandMark, PartnerBrandText } from "./PartnerBrand.tsx";
 import styles from "./CapabilityWorkspace.module.css";
 import type { Capability } from "./capability-registry.ts";
 
@@ -101,7 +100,7 @@ export function CapabilityWorkspace(): React.JSX.Element {
   useEffect(() => {
     const root = document.documentElement;
     const sync = (): void => {
-      if (root.dataset.theme === "clean") workspace.close();
+      if (root.dataset.theme !== "electrox") workspace.close();
     };
     sync();
     const observer = new MutationObserver(sync);
@@ -181,24 +180,8 @@ export function CapabilityWorkspace(): React.JSX.Element {
           data-collapsed={!wide || undefined}
           style={sidebarWidth > 0 ? { width: `${sidebarWidth}px` } : undefined}
         >
-          <span className={styles.markFrame}>
-            <img className={styles.mark} src={BRAND_LOGO} alt="ELECTRO X / 粒刻" />
-          </span>
-          {wide ? (
-            <div className={styles.brandText}>
-              <div className={styles.brandTitle}>
-                ELECTRO&nbsp;X <span className={styles.brandSlash}>/</span> 粒刻
-              </div>
-              <div className={styles.poweredBy}>
-                powered by
-                <span className={styles.poweredLogo} aria-hidden="true">
-                  <img className={styles.poweredLogoLight} src={lightTokensApiLogo} alt="" />
-                  <img className={styles.poweredLogoDark} src={darkTokensApiLogo} alt="" />
-                </span>
-                <span className={styles.poweredName}>TokensAPI</span>
-              </div>
-            </div>
-          ) : null}
+          <PartnerBrandMark logo={BRAND_LOGO} name="ELECTRO X / 粒刻" />
+          {wide ? <PartnerBrandText name="ELECTRO X" localName="粒刻" /> : null}
           {wide ? (
             <button
               type="button"

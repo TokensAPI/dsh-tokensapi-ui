@@ -2,9 +2,9 @@
 [data-theme="glass"] {
   color-scheme: dark;
 
-  --theme-font-sans: Inter, system-ui, sans-serif;
+  --theme-font-sans: "Quicksand", system-ui, sans-serif;
   --theme-font-cn: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --theme-font-display: Inter, system-ui, sans-serif;
+  --theme-font-display: "Quicksand", system-ui, sans-serif;
   --theme-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --theme-bg-canvas: transparent;

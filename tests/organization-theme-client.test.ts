@@ -10,6 +10,8 @@ vi.mock("../src/client/theme/themes/electrox.css", () => ({ default: "" }));
 vi.mock("../src/client/theme/dsh-bridge.css", () => ({ default: "" }));
 vi.mock("../src/client/theme/chrome.css", () => ({ default: "" }));
 
+import { getDebugThemeState, setDebugThemeMode } from "../src/client/theme/debug-preview.ts";
+
 const disposers: Array<() => void> = [];
 const partner = { skin: "electrox", organizationId: 3 };
 const clean = { skin: "clean", organizationId: null };
@@ -41,6 +43,36 @@ afterEach(() => {
 });
 
 describe("automatic organization theme", () => {
+  it("revokes debug access immediately on Key change and rejects stale authorization", async () => {
+    const stale = Promise.withResolvers<unknown>();
+    const app = harness(vi.fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({ ...clean, themeDebugUserId: 63 })
+      .mockReturnValueOnce(stale.promise).mockResolvedValueOnce(partner));
+    await settle();
+    expect(getDebugThemeState().userId).toBe(63);
+    setDebugThemeMode("unififi");
+    setActiveSkin("clean");
+    expect(document.documentElement.dataset.theme).toBe("unififi");
+    app.change();
+    expect(getDebugThemeState().userId).toBeNull();
+    expect(document.documentElement.dataset.theme).toBe("clean");
+    app.change();
+    await settle();
+    stale.resolve({ ...clean, themeDebugUserId: 63 });
+    await settle();
+    expect(getDebugThemeState().userId).toBeNull();
+    expect(document.documentElement.dataset.theme).toBe("electrox");
+  });
+
+  it("switches from UNIFIFI back to the base brand on key removal", async () => {
+    const app = harness(vi.fn<() => Promise<unknown>>()
+      .mockResolvedValueOnce({ skin: "unififi", organizationId: 4 }).mockResolvedValueOnce(clean));
+    await settle();
+    expect(document.documentElement.dataset.theme).toBe("unififi");
+    app.change();
+    await settle();
+    expect(document.documentElement.dataset.theme).toBe("clean");
+  });
   it("ignores a saved partner selection and never persists automatic choices", () => {
     localStorage.setItem("dsh-tokensapi-ui-skin", "electrox");
     disposers.push(injectTheme());
