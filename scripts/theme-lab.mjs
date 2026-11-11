@@ -35,6 +35,10 @@ const modules = new Set([
   "src/shared/organization-theme.ts",
   "src/client/theme/organization-theme.ts",
   "src/client/theme/inject.ts",
+  "src/client/theme/running-brand.ts",
+  "src/client/shell/brand-logo.ts",
+  "src/client/shell/assets/tokensapi-quicksand-mark.svg",
+  "src/client/shell/assets/unififi-mark.svg",
   "src/client/theme/theme-contract.css",
   "src/client/theme/themes/clean.css",
   "src/client/theme/themes/unififi.css",
@@ -72,7 +76,9 @@ const server = createServer(async (request, response) => {
         .end(await readFile(new URL("theme-lab.html", import.meta.url)));
     } else if (request.method === "GET" && modules.has(path)) {
       const file = new URL(path, root);
-      const source = path.endsWith(".css")
+      const source = path.endsWith(".svg")
+        ? `export default ${JSON.stringify("data:image/svg+xml;base64," + (await readFile(file)).toString("base64"))}`
+        : path.endsWith(".css")
         ? `export default ${JSON.stringify(readCss(fileURLToPath(file)))}`
         : ts.transpileModule(await readFile(file, "utf8"), {
           compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
