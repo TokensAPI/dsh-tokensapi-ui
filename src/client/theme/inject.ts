@@ -17,6 +17,7 @@ import { includeBaseSkins } from "./base-skins.ts";
 import bridge from "./dsh-bridge.css";
 import chrome from "./chrome.css";
 import { runningBrandCss } from "./running-brand.ts";
+import stateDot from "./state-dot.css";
 import { DEFAULT_SKIN, type SkinId } from "../../shared/organization-theme.ts";
 import { resolveDebugTheme, getDebugThemeState } from "./debug-preview.ts";
 import { resolveLocalTheme } from "./local-preview.ts";
@@ -68,7 +69,7 @@ export function injectTheme(): () => void {
   }
 
   const skinSheets = Object.values(SKINS).join("\n");
-  const cssText = `${contract}\n${skinSheets}\n${bridge}\n${includeBaseSkins(chrome)}\n${runningBrandCss}`;
+  const cssText = `${contract}\n${skinSheets}\n${bridge}\n${includeBaseSkins(chrome)}\n${runningBrandCss}\n${stateDot}`;
   const existing = document.head.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_TAG}"]`);
   if (existing !== null) {
     // Watch/HMR reloads the module while the previous style element remains in

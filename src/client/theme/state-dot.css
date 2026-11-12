@@ -1,0 +1,30 @@
+/* DSH StateDot: rasterize a fixed arc once, then rotate the outer SVG as a
+ * composited layer. Animating SVG descendants or stroke geometry repaints on
+ * every display frame. Keep the host's size, colour, track and accessible text.
+ * Match the component shape rather than a generated CSS-module hash. */
+svg[data-state="ongoing"]:has(> g[class*="_spinnerMotion"] > circle[class*="_spinnerArc"]) {
+  transform-origin: center;
+  animation: tokens-state-dot-rotate 1.5s linear infinite;
+  will-change: transform;
+}
+
+svg[data-state="ongoing"] > g[class*="_spinnerMotion"],
+svg[data-state="ongoing"] > g[class*="_spinnerMotion"] > circle[class*="_spinnerArc"] {
+  animation: none !important;
+}
+
+svg[data-state="ongoing"] > g[class*="_spinnerMotion"] > circle[class*="_spinnerArc"] {
+  stroke-dasharray: 18 150;
+  stroke-dashoffset: -3;
+}
+
+@keyframes tokens-state-dot-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  svg[data-state="ongoing"]:has(> g[class*="_spinnerMotion"] > circle[class*="_spinnerArc"]) {
+    animation: none;
+    will-change: auto;
+  }
+}
