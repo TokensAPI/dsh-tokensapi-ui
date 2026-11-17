@@ -41,12 +41,15 @@ describe("authorized theme debugging", () => {
       expect(container.querySelector("fieldset")).toBeNull();
       await act(async () => setThemeDebugUser(63));
       const radios = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
-      expect(radios.map((radio) => radio.value)).toEqual(["auto", "clean", "electrox", "unififi"]);
+      expect(radios.map((radio) => radio.value)).toEqual(["auto", "clean", "electrox", "runzhou", "unififi"]);
       expect(radios[0]!.checked).toBe(true);
-      await act(async () => radios[3]!.click());
-      expect(radios[3]!.checked).toBe(true);
+      await act(async () => radios[4]!.click());
+      expect(radios[4]!.checked).toBe(true);
       expect(localStorage.getItem("dsh-tokensapi-ui-debug-theme:63")).toBe("unififi");
       expect(document.documentElement.dataset.theme).toBe("unififi");
+      await act(async () => radios[3]!.click());
+      expect(document.documentElement.dataset.theme).toBe("runzhou");
+      expect(localStorage.getItem("dsh-tokensapi-ui-debug-theme:63")).toBe("runzhou");
       await act(async () => setThemeDebugUser(null));
       expect(container.querySelector("fieldset")).toBeNull();
     } finally {

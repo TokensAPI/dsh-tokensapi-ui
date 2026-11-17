@@ -33,6 +33,11 @@ describe("organization-selected theme Host", () => {
     expect(await host.snapshot()).toEqual(partner);
   });
 
+  it("selects Runzhou for organization 6", async () => {
+    const host = mount(async () => "sk-runzhou-test", vi.fn(async () => identity({ id: 6, status: 1 })));
+    expect(await host.snapshot()).toEqual({ skin: "runzhou", organizationId: 6 });
+  });
+
   it("selects UNIFIFI for organization 4 and falls back after key removal", async () => {
     let key = "sk-unififi-test";
     const host = mount(async () => key, vi.fn(async () => identity({ id: 4, status: 1 })));

@@ -6,7 +6,7 @@ let state: { userId: number | null; mode: DebugThemeMode } = { userId: null, mod
 let organizationSkin: SkinId = DEFAULT_SKIN;
 const storageKey = (id: number): string => `dsh-tokensapi-ui-debug-theme:${id}`;
 const validMode = (value: unknown): value is DebugThemeMode =>
-  value === "auto" || value === "clean" || value === "electrox" || value === "unififi";
+  value === "auto" || value === "clean" || value === "electrox" || value === "unififi" || value === "runzhou";
 const emit = (): void => { for (const listener of listeners) listener(); };
 
 export const getDebugThemeState = () => state;

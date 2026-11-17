@@ -64,11 +64,11 @@ describe("automatic organization theme", () => {
     expect(document.documentElement.dataset.theme).toBe("electrox");
   });
 
-  it("switches from UNIFIFI back to the base brand on key removal", async () => {
+  it.each([["unififi", 4], ["runzhou", 6]])("switches from %s back to the base brand on key removal", async (skin, organizationId) => {
     const app = harness(vi.fn<() => Promise<unknown>>()
-      .mockResolvedValueOnce({ skin: "unififi", organizationId: 4 }).mockResolvedValueOnce(clean));
+      .mockResolvedValueOnce({ skin, organizationId }).mockResolvedValueOnce(clean));
     await settle();
-    expect(document.documentElement.dataset.theme).toBe("unififi");
+    expect(document.documentElement.dataset.theme).toBe(skin);
     app.change();
     await settle();
     expect(document.documentElement.dataset.theme).toBe("clean");

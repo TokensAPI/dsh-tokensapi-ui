@@ -1,8 +1,9 @@
+import baseLogo from "../src/client/shell/assets/tokensapi-quicksand-mark.svg";
 import { fileURLToPath } from "node:url";
 import { readCss } from "../scripts/read-css.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { TokensBrandMark, TokensBrandName } from "../src/client/shell/BrandSlots.tsx";
+import { TokensBrandMark, TokensBrandName, TokensHeroBrandMark } from "../src/client/shell/BrandSlots.tsx";
 
 const brandStyles = readFileSync(
   new URL("../src/client/shell/BrandSlots.module.css", import.meta.url),
@@ -14,6 +15,15 @@ const workspaceStyles = readFileSync(
 );
 
 describe("sidebar branding contract", () => {
+  it("renders only the base logo in the conversation hero", () => {
+    const hero = TokensHeroBrandMark({ size: 32 });
+    expect(hero.type).toBe("img");
+    expect(hero.props["data-tokens-hero-brand"]).toBe("base");
+    expect(hero.props.src).toBe(baseLogo);
+    expect(hero.props.children).toBeUndefined();
+    const client = readFileSync(new URL("../src/client/index.tsx", import.meta.url), "utf8");
+    expect(client).toContain('name: "conversation.hero.brand.mark" }, TokensHeroBrandMark');
+  });
   it("uses declared brand slots and never takes ownership of the native toggle", () => {
     const client = readFileSync(new URL("../src/client/index.tsx", import.meta.url), "utf8");
     const workspace = readFileSync(new URL("../src/client/shell/CapabilityWorkspace.tsx", import.meta.url), "utf8");
@@ -46,10 +56,10 @@ describe("sidebar branding contract", () => {
     expect(mark.type).toBe("span");
     expect(mark.props.style).toEqual({ width: 24, height: 24 });
     expect(mark.props.className).toContain("host-mark");
-    expect(mark.props.children).toHaveLength(3);
+    expect(mark.props.children).toHaveLength(4);
     expect(mark.props.children[0].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
     expect(mark.props.children[1].props).toMatchObject({ width: 24, height: 24, "aria-hidden": "true" });
-    expect(TokensBrandName().props.children).toHaveLength(2);
+    expect(TokensBrandName().props.children).toHaveLength(3);
   });
 
   it("keeps the capability header seam aligned and strengthens light branding", () => {

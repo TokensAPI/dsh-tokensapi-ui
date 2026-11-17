@@ -155,7 +155,7 @@
 /* The neutral product skin uses the upstream shell as one continuous surface.
  * Partner branding, capability navigation and the extra collapse affordance are
  * intentionally scoped to the partner theme only. */
-:global(:is([data-theme="clean"], [data-theme="unififi"])) .topbar {
+:global(:is([data-theme="clean"], [data-theme="unififi"], [data-theme="runzhou"])) .topbar {
   display: none;
 }
 

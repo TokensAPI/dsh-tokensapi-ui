@@ -13,6 +13,7 @@ import contract from "./theme-contract.css";
 import clean from "./themes/clean.css";
 import electrox from "./themes/electrox.css";
 import unififi from "./themes/unififi.css";
+import runzhou from "./themes/runzhou.css";
 import { includeBaseSkins } from "./base-skins.ts";
 import bridge from "./dsh-bridge.css";
 import chrome from "./chrome.css";
@@ -26,6 +27,7 @@ import { resolveLocalTheme } from "./local-preview.ts";
 const SKINS: Record<SkinId, string> = {
   clean: includeBaseSkins(clean),
   unififi,
+  runzhou,
   electrox,
 };
 

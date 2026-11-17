@@ -1,0 +1,43 @@
+/* 润洲私募基金 — clean foundation with warm gold from the official website.
+ * Source: http://www.hzrunzhou.com/css/main.css (#C7A083, #BD9A7F), 2026-11-16.
+ * Layout remains inherited from clean. */
+[data-theme="runzhou"] {
+  --lake-primary: #c7a083;
+  --lake-secondary: #bd9a7f;
+  --theme-bg-canvas: #1d1b18;
+  --theme-bg-shell: #211e1a;
+  --theme-bg-surface: #29241f;
+  --theme-bg-surface-raised: #342d26;
+  --theme-accent-primary: #d8b797;
+  --theme-accent-primary-hover: #ead1b8;
+  --theme-accent-fill: #c7a083;
+  --theme-accent-fill-hover: #d8b797;
+  --theme-fg-on-accent: #261b12;
+  --theme-accent-soft: rgb(199 160 131 / 16%);
+  --theme-border-subtle: rgb(199 173 146 / 15%);
+  --theme-border-default: rgb(199 173 146 / 24%);
+  --theme-border-strong: rgb(199 173 146 / 36%);
+  --theme-border-focus: #d8b797;
+  --clean-open-ring: rgb(199 160 131 / 20%);
+}
+
+[data-theme="runzhou"][data-color-scheme="light"] {
+  --theme-bg-canvas: #fbf9f6;
+  --theme-bg-shell: #f4eee7;
+  --theme-bg-surface: #ffffff;
+  --theme-bg-surface-raised: #ffffff;
+  --theme-fg-secondary: #615247;
+  --theme-fg-muted: #756354;
+  --theme-accent-primary: #875c3a;
+  --theme-accent-primary-hover: #6e482c;
+  --theme-accent-fill: #875c3a;
+  --theme-accent-fill-hover: #6e482c;
+  --theme-fg-on-accent: #ffffff;
+  --theme-accent-soft: rgb(199 160 131 / 9%);
+  --theme-border-subtle: rgb(125 91 61 / 14%);
+  --theme-border-default: rgb(125 91 61 / 21%);
+  --theme-border-strong: rgb(125 91 61 / 32%);
+  --theme-border-focus: #875c3a;
+  --theme-shadow-card-hover: inset 0 1px 0 rgb(255 255 255 / 82%), 0 18px 44px -24px rgb(86 65 35 / 26%);
+  --theme-surface-shadow: rgb(68 53 29 / 16%);
+}

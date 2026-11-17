@@ -12,7 +12,7 @@ import { THEME_CHANNEL } from "../shared/organization-theme.ts";
 import { CapabilityPanel, CapabilityWorkspace, setCapabilityWorkspaceLayout } from "./shell/CapabilityWorkspace.tsx";
 import { installCapabilityNavigation } from "./shell/native-capability-navigation.ts";
 import type { ILayout } from "@deepseek-ai/dsh-client-ui-layout/client";
-import { observeTokensCoworkHeadline, TokensBrandMark, TokensSidebarBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
+import { observeTokensCoworkHeadline, TokensHeroBrandMark, TokensSidebarBrandMark, TokensBrandName } from "./shell/BrandSlots.tsx";
 import { observeTurnStatus } from "./shell/turn-status.ts";
 import { registerBuiltinCapabilities } from "./shell/register-builtins.tsx";
 import { registerCapability, listCapabilities } from "./shell/capability-registry.ts";
@@ -88,7 +88,7 @@ export function apply(ctx: ClientContext): void {
   });
   ctx.slots.inject("conversation.hero.brand.mark", () => {
     try {
-      return ctx.slots.register({ name: "conversation.hero.brand.mark" }, TokensBrandMark);
+      return ctx.slots.register({ name: "conversation.hero.brand.mark" }, TokensHeroBrandMark);
     } catch {
       return () => {};
     }

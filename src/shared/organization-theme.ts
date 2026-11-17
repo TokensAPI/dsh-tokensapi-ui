@@ -1,5 +1,5 @@
 /** Public theme state; credential values never cross this channel. */
-export type SkinId = "clean" | "electrox" | "unififi";
+export type SkinId = "clean" | "electrox" | "unififi" | "runzhou";
 
 export interface OrganizationTheme {
   readonly skin: SkinId;

@@ -3,6 +3,7 @@ import { DEFAULT_THEME, type OrganizationTheme } from "./shared/organization-the
 const ORGANIZATION_URL = "https://tokensapi.ai/api/current/organization";
 const PARTNER_ORGANIZATION_ID = 3;
 const UNIFIFI_ORGANIZATION_ID = 4;
+const RUNZHOU_ORGANIZATION_ID = 6;
 const REQUEST_TIMEOUT_MS = 8_000;
 const FAILURE_COOLDOWN_MS = 30_000;
 const THEME_DEBUG_USER_IDS = new Set([3, 63]);
@@ -118,7 +119,7 @@ export class OrganizationThemeHost {
       }
       return {
         skin: organization.id === PARTNER_ORGANIZATION_ID ? "electrox"
-          : organization.id === UNIFIFI_ORGANIZATION_ID ? "unififi" : "clean",
+          : organization.id === UNIFIFI_ORGANIZATION_ID ? "unififi" : organization.id === RUNZHOU_ORGANIZATION_ID ? "runzhou" : "clean",
         organizationId: organization.id,
         ...debug,
       };

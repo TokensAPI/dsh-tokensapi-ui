@@ -6,6 +6,7 @@ const choices = [
   ["auto", "自动", "跟随账号所属组织"],
   ["clean", "TokensAPI", "基础主题"],
   ["electrox", "ELECTRO X / 粒刻", "合作方主题"],
+  ["runzhou", "润洲", "合作方主题"],
   ["unififi", "UNIFIFI 由你飞飞", "合作方主题"],
 ] as const;
 

@@ -29,7 +29,7 @@ export function observeOrganizationTheme(
     void runtime.read().then((value) => {
       if (!current() || request !== revision) return;
       const skin = (value as { skin?: unknown } | null)?.skin;
-      organizationSkin = skin === "electrox" || skin === "unififi" ? skin : DEFAULT_SKIN;
+      organizationSkin = skin === "electrox" || skin === "unififi" || skin === "runzhou" ? skin : DEFAULT_SKIN;
       setThemeDebugUser((value as { themeDebugUserId?: unknown } | null)?.themeDebugUserId);
       applySkin(organizationSkin);
     }).catch(() => {

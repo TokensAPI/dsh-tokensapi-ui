@@ -1,5 +1,6 @@
 import darkLogoUrl from "./assets/tokensapi-quicksand-mark.svg";
 import lightLogoUrl from "./assets/tokensapi-quicksand-mark.svg";
+import runzhouLogo from "./assets/runzhou-mark.svg";
 import unififiLogo from "./assets/unififi-mark.svg";
 import { PartnerBrandMark, PartnerBrandText } from "./PartnerBrand.tsx";
 import css from "./BrandSlots.module.css";
@@ -26,9 +27,16 @@ export function TokensBrandMark({ size, className }: TokensBrandMarkProps): Reac
         height={size}
       />
       <img aria-hidden="true" className={css.darkMark} src={darkLogoUrl} width={size} height={size} />
+      <span className={css.runzhouMark}><PartnerBrandMark logo={runzhouLogo} name="润洲" size={size} contained /></span>
       <span className={css.unififiMark}><PartnerBrandMark logo={unififiLogo} name="UNIFIFI / 由你飞飞" size={size} contained /></span>
     </span>
   );
+}
+
+/** Conversation branding is always the base mark, independent of tenant branding. */
+export function TokensHeroBrandMark({ size, className }: TokensBrandMarkProps): React.JSX.Element {
+  return <img data-tokens-hero-brand="base" aria-hidden="true" src={lightLogoUrl}
+    className={[css.heroMark, className].filter(Boolean).join(" ")} width={size} height={size} />;
 }
 
 /** Expanded-sidebar wordmark occupant. */
@@ -36,6 +44,7 @@ export function TokensBrandName(): React.JSX.Element {
   return (
     <span className={css.name}>
       <span className={css.tokensName}><span>Tokens</span> <span className={css.cowork}>Cowork</span></span>
+      <span className={css.runzhouName}><PartnerBrandText name="润洲" /></span>
       <span className={css.unififiName}>
         <PartnerBrandText name="UNIFIFI" />
       </span>
